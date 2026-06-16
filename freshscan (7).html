@@ -1,0 +1,2472 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FreshScan</title>
+<style>
+  :root{
+    --green:#1b7a3d; --green-d:#155c2e; --red:#d0413a; --yellow:#e0a526;
+    --bg:#f4f6f5; --card:#ffffff; --text:#1c2620; --muted:#6b7a72; --border:#e1e6e3;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--text); padding-bottom:90px;
+  }
+  header{
+    background:var(--green); color:#fff; padding:14px 16px 12px;
+    position:sticky; top:0; z-index:50;
+  }
+  header .top-row{display:flex; align-items:flex-start; justify-content:space-between;}
+  header h1{font-size:20px; margin:0; font-weight:700;}
+  header .tagline{font-size:11px; opacity:.85; margin-top:2px;}
+  header .brandby{font-size:10px; opacity:.7; margin-top:1px;}
+  header .sub{font-size:12px; opacity:.85;}
+  .date-row{
+    margin-top:10px; display:flex; align-items:center; gap:8px; cursor:pointer;
+  }
+  .date-row .date-text{font-size:14px; font-weight:600;}
+  .date-row .today-pill{
+    font-size:11px; font-weight:700; background:rgba(255,255,255,.18); padding:3px 10px; border-radius:999px;
+  }
+  #datePicker{
+    position:absolute; opacity:0; width:1px; height:1px; pointer-events:none;
+  }
+  .save-indicator{
+    font-size:11px; opacity:.9; text-align:right; min-height:14px;
+  }
+  footer{
+    text-align:center; padding:18px 14px 8px; font-size:11px; color:var(--muted);
+  }
+  footer .v{font-weight:700; color:var(--text); margin-bottom:2px;}
+  .container{padding:14px;}
+  .card{
+    background:var(--card); border-radius:14px; padding:16px; margin-bottom:14px;
+    box-shadow:0 1px 3px rgba(0,0,0,.06); border:1px solid var(--border);
+  }
+  .card h2{margin:0 0 10px; font-size:17px; font-weight:700;}
+  .card h3{margin:14px 0 8px; font-size:14px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em;}
+  .row{display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);}
+  .row:last-child{border-bottom:none;}
+  .row .name{font-weight:600; font-size:15px;}
+  .row .sub{font-size:12px; color:var(--muted);}
+  input[type=number]{
+    width:80px; font-size:22px; text-align:center; padding:10px 4px; border-radius:10px;
+    border:1px solid var(--border); background:#f9faf9; font-weight:700;
+  }
+  input[type=text]{
+    width:100%; font-size:15px; padding:10px; border-radius:10px; border:1px solid var(--border);
+    background:#f9faf9; margin-bottom:8px;
+  }
+  select{
+    width:100%; font-size:15px; padding:10px; border-radius:10px; border:1px solid var(--border);
+    background:#f9faf9; margin-bottom:8px;
+  }
+  label{font-size:13px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px;}
+  button{
+    border:none; border-radius:12px; padding:14px; font-size:16px; font-weight:700;
+    cursor:pointer; width:100%;
+  }
+  .btn-primary{background:var(--green); color:#fff;}
+  .btn-secondary{background:#eef2ef; color:var(--text); margin-top:8px;}
+  .btn-danger{background:#fbeceb; color:var(--red); margin-top:8px;}
+  .btn-toggle{padding:10px 16px; border-radius:999px; font-size:13px; width:auto;}
+  .toggle-row{display:flex; gap:8px; margin-bottom:8px;}
+  .toggle-row button{flex:1;}
+  .active-toggle{background:var(--green); color:#fff;}
+  .inactive-toggle{background:#eef2ef; color:var(--muted);}
+  .topcards{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;}
+  .topcard{background:var(--card); border-radius:14px; padding:14px; border:1px solid var(--border); text-align:center;}
+  .topcard .num{font-size:26px; font-weight:800; color:var(--green-d);}
+  .topcard .lbl{font-size:12px; color:var(--muted); margin-top:2px;}
+  .light{
+    display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:8px;
+  }
+  .light-red{background:var(--red);}
+  .light-yellow{background:var(--yellow);}
+  .light-green{background:var(--green);}
+  .suggestion{
+    font-size:14px; padding:10px; border-radius:10px; margin-top:6px; background:#f9faf9;
+  }
+  .suggestion.red{background:#fbeceb; color:#9c3a35;}
+  .suggestion.yellow{background:#fdf6e3; color:#8a6213;}
+  nav{
+    position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--border);
+    display:flex; z-index:50;
+  }
+  nav button{
+    flex:1; background:none; border-radius:0; padding:10px 4px 14px; font-size:12px;
+    color:var(--muted); font-weight:600; display:flex; flex-direction:column; align-items:center; gap:4px;
+  }
+  nav button.active{color:var(--green);}
+  nav .ico{font-size:20px;}
+  .empty{color:var(--muted); font-size:14px; text-align:center; padding:20px 0;}
+  .small-muted{font-size:12px; color:var(--muted);}
+  .badge{
+    font-size:11px; padding:2px 8px; border-radius:999px; font-weight:700;
+  }
+  .badge-normal{background:#eef2ef; color:var(--muted);}
+  .badge-tilbud{background:#fdf6e3; color:#8a6213;}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th,td{text-align:left; padding:6px 4px; border-bottom:1px solid var(--border);}
+  th{color:var(--muted); font-weight:600; font-size:12px;}
+  .step-pill{display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;}
+  .step-pill span{
+    background:#eef2ef; border-radius:999px; padding:4px 10px; font-size:12px; color:var(--muted); font-weight:600;
+  }
+  .step-pill span.done{background:var(--green); color:#fff;}
+  .top-actions{display:flex; gap:8px; margin-bottom:10px;}
+  .top-actions button{padding:10px;}
+  .subtabs{display:flex; gap:6px; margin-bottom:14px;}
+  .subtabs button{
+    flex:1; padding:12px 4px; border-radius:12px; font-size:14px;
+    background:#eef2ef; color:var(--muted);
+  }
+  .subtabs button.active{background:var(--green); color:#fff;}
+  .tag-grid{display:flex; flex-wrap:wrap; gap:8px;}
+  .tag-chip{
+    padding:8px 14px; border-radius:999px; font-size:13px; font-weight:600;
+    background:#eef2ef; color:var(--muted); cursor:pointer; width:auto;
+  }
+  .tag-chip.active{background:#fdf6e3; color:#8a6213; border:1px solid #e0a526;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="top-row">
+    <div>
+      <h1>FreshScan</h1>
+      <div class="tagline">Intelligent styring af friskvarer</div>
+      <div class="brandby">by Nordic Operations</div>
+    </div>
+    <div class="save-indicator" id="saveIndicator"></div>
+  </div>
+  <div class="date-row" id="dateRow">
+    <span class="date-text" id="dateLabel">–</span>
+    <span class="today-pill" id="todayPill">I dag</span>
+  </div>
+  <input type="date" id="datePicker">
+</header>
+
+<div class="container" id="app"></div>
+
+<footer>
+  <div class="v" id="versionLabel">FreshScan v1.8.5</div>
+  <div>Powered by Nordic Operations</div>
+</footer>
+
+<nav>
+  <button data-tab="reg"><span class="ico">📝</span>Registrer</button>
+  <button data-tab="dash" class="active"><span class="ico">📊</span>Dashboard</button>
+  <button data-tab="monstre"><span class="ico">📅</span>Mønstre</button>
+  <button data-tab="historik"><span class="ico">📈</span>Historik</button>
+  <button data-tab="stamdata"><span class="ico">⚙️</span>Varer</button>
+</nav>
+
+<script>
+/* ---------- Helpers ---------- */
+const $ = sel => document.querySelector(sel);
+const app = $('#app');
+
+const TIMEZONE = 'Europe/Copenhagen';
+// Returner dagens dato (YYYY-MM-DD) i dansk tid, uanset enhedens egen tidszone.
+function todayISO(){
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: TIMEZONE, year:'numeric', month:'2-digit', day:'2-digit'
+  }).format(new Date());
+}
+const DAY_NAMES = ["Søndag","Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag"];
+const MONTH_NAMES = ["januar","februar","marts","april","maj","juni","juli","august","september","oktober","november","december"];
+// Al datoaritmetik foregår på kalenderdatoer (YYYY-MM-DD) via UTC-baserede
+// Date-objekter, så vi aldrig påvirkes af enhedens lokale tidszone eller sommertid.
+function isoToUTCDate(iso){
+  const [y,m,d] = iso.split('-').map(Number);
+  return new Date(Date.UTC(y, m-1, d));
+}
+function utcDateToISO(d){ return d.toISOString().slice(0,10); }
+function fmtDateDK(iso){
+  const d = isoToUTCDate(iso);
+  return DAY_NAMES[d.getUTCDay()] + " " + d.getUTCDate() + ". " + MONTH_NAMES[d.getUTCMonth()];
+}
+function weekdayName(iso){
+  return DAY_NAMES[isoToUTCDate(iso).getUTCDay()];
+}
+function isoDaysAgo(n){
+  const d = isoToUTCDate(todayISO());
+  d.setUTCDate(d.getUTCDate()-n);
+  return utcDateToISO(d);
+}
+function avg(arr){ if(!arr.length) return 0; return arr.reduce((a,b)=>a+b,0)/arr.length; }
+function round1(n){ return Math.round(n*10)/10; }
+
+/* ---------- Storage ---------- */
+const memStore = {};
+function storageGet(key){
+  try{
+    const v = localStorage.getItem('freshscan_'+key);
+    return v===null ? undefined : v;
+  }catch(e){
+    return memStore[key];
+  }
+}
+function storageSet(key, val){
+  try{
+    localStorage.setItem('freshscan_'+key, val);
+  }catch(e){
+    memStore[key] = val;
+  }
+}
+
+// Returnerer altid en streng, uanset om "error" er et Error/DOMException-objekt,
+// en streng, eller noget helt andet. Bruges i ALLE catch-blokke, så vi aldrig
+// gemmer eller logger rå Error-/Response-/AbortController-objekter, som kan
+// udløse "DataCloneError: The object can not be cloned" i Safari/iPad.
+function errMsg(error){
+  try{
+    if(error == null) return 'Ukendt fejl';
+    if(typeof error === 'string') return error;
+    if(error.message) return String(error.message);
+    return String(error);
+  }catch(e){ return 'Ukendt fejl'; }
+}
+// Konverterer en værdi til en JSON-sikker struktur, der kun indeholder
+// strings, numbers, booleans, null, arrays og almindelige {}-objekter.
+// Funktioner, Error-/DOMException-/Response-/AbortController-objekter, Dates,
+// osv. konverteres til tekst (eller fjernes), så JSON.stringify/localStorage
+// aldrig kan ramme et ikke-serialiserbart objekt (root cause for DataCloneError).
+function safePlainObject(obj, seen){
+  seen = seen || new Set();
+  if(obj === null || obj === undefined) return null;
+  const t = typeof obj;
+  if(t === 'string' || t === 'number' || t === 'boolean') return obj;
+  if(t === 'function') return undefined;
+  if(t !== 'object'){
+    try{ return String(obj); }catch(e){ return null; }
+  }
+  if(Array.isArray(obj)){
+    return obj.map(item => safePlainObject(item, seen));
+  }
+  if(obj instanceof Error){
+    return errMsg(obj);
+  }
+  if(seen.has(obj)) return null; // bryd cirkulære referencer
+  seen.add(obj);
+  const proto = Object.getPrototypeOf(obj);
+  if(proto !== Object.prototype && proto !== null){
+    // Ikke et "almindeligt" objekt (Date, DOMException, Response, AbortController, ...)
+    try{ return String(obj); }catch(e){ return null; }
+  }
+  const out = {};
+  for(const key of Object.keys(obj)){
+    const val = safePlainObject(obj[key], seen);
+    if(val !== undefined) out[key] = val;
+  }
+  return out;
+}
+function safeStringify(obj){
+  try{ return JSON.stringify(safePlainObject(obj)); }
+  catch(e){ return 'null'; }
+}
+
+let VARER = [];       // master data
+let REGS = {};        // date -> { varEan: {modtaget, kl13, luk, status} }
+const DEFAULT_SETTINGS = {butiksnavn:'Føtex Ebeltoft', by:'Ebeltoft', postnr:'8400', land:'Danmark', lat:null, lon:null, turistMonths:[6,7,8]};
+let SETTINGS = {...DEFAULT_SETTINGS};
+let EVENTS = [];       // lokale arrangementer: {id, navn, start, slut, impact, kommentar}
+
+async function loadAll(){
+  try{
+    const v = storageGet('varer');
+    VARER = v ? JSON.parse(v) : [];
+  }catch(e){ console.error('loadAll varer error:', errMsg(e)); VARER = []; }
+  try{
+    const r = storageGet('registreringer');
+    REGS = r ? JSON.parse(r) : {};
+  }catch(e){ console.error('loadAll regs error:', errMsg(e)); REGS = {}; }
+  try{
+    const s = storageGet('settings');
+    if(s){
+      SETTINGS = Object.assign({...DEFAULT_SETTINGS}, JSON.parse(s));
+      if(!Array.isArray(SETTINGS.turistMonths) || SETTINGS.turistMonths.length===0) SETTINGS.turistMonths=[6,7,8];
+    } else {
+      // Første opstart – ingen settings i localStorage endnu: brug og gem standardværdier
+      SETTINGS = {...DEFAULT_SETTINGS};
+      await saveSettings();
+    }
+  }catch(e){ console.error('loadAll settings error:', errMsg(e)); }
+  try{
+    const ev = storageGet('events');
+    EVENTS = ev ? JSON.parse(ev) : [];
+  }catch(e){ console.error('loadAll events error:', errMsg(e)); EVENTS = []; }
+  if(!Array.isArray(EVENTS)) EVENTS = [];
+  try{
+    const lw = storageGet('lastweather');
+    LAST_GOOD_WEATHER = lw ? JSON.parse(lw) : null;
+  }catch(e){ console.error('loadAll lastweather error:', errMsg(e)); LAST_GOOD_WEATHER = null; }
+
+  if(!Array.isArray(VARER)) VARER = [];
+  if(!REGS || typeof REGS !== 'object') REGS = {};
+
+  if(VARER.length === 0){
+    VARER = [
+      {ean:"5701234500011", navn:"Solsikkerugbrød", leverandor:"Kohberg", normalpris:24.95, tilbudspris:19.95, aktiv:true},
+      {ean:"5701234500028", navn:"Kernerugbrød", leverandor:"Schulstad", normalpris:22.95, tilbudspris:17.95, aktiv:true},
+      {ean:"5701234500035", navn:"Fuldkorn", leverandor:"Kohberg", normalpris:23.95, tilbudspris:18.95, aktiv:true},
+    ];
+    await saveVarer();
+  }
+  // migration: ensure tilbudspris and placering exist on all varer
+  let migrated=false;
+  VARER.forEach(v=>{
+    if(v.tilbudspris===undefined){ v.tilbudspris=null; migrated=true; }
+    if(v.hylde===undefined){ v.hylde=''; migrated=true; }
+    if(v.sektion===undefined){ v.sektion=''; migrated=true; }
+    if(v.omraade===undefined){ v.omraade=''; migrated=true; }
+  });
+  if(migrated) await saveVarer();
+}
+async function saveVarer(){
+  try{ storageSet('varer', safeStringify(VARER)); }
+  catch(e){ console.error('saveVarer error:', errMsg(e)); }
+}
+async function saveRegs(){
+  try{ storageSet('registreringer', safeStringify(REGS)); }
+  catch(e){ console.error('saveRegs error:', errMsg(e)); }
+}
+async function saveSettings(){
+  try{ storageSet('settings', safeStringify(SETTINGS)); }
+  catch(e){ console.error('saveSettings error:', errMsg(e)); }
+}
+async function saveEvents(){
+  try{ storageSet('events', safeStringify(EVENTS)); }
+  catch(e){ console.error('saveEvents error:', errMsg(e)); }
+}
+let LAST_GOOD_WEATHER = null; // {date, temp, sol, regn, vind, vindHard, sne, weathercode, savedAt}
+async function saveLastGoodWeather(date, w, includeCurrent){
+  const prevCurrentTemp = LAST_GOOD_WEATHER ? LAST_GOOD_WEATHER.currentTemp : null;
+  LAST_GOOD_WEATHER = {
+    date, temp:w.temp, currentTemp: includeCurrent ? w.currentTemp : prevCurrentTemp, sol:w.sol, regn:w.regn, vind:w.vind, vindHard:w.vindHard, sne:w.sne,
+    weathercode:w.weathercode, savedAt: new Date().toISOString()
+  };
+  try{ storageSet('lastweather', safeStringify(LAST_GOOD_WEATHER)); }
+  catch(e){ console.error('saveLastGoodWeather error:', errMsg(e)); }
+}
+
+function getReg(date, ean){
+  if(!REGS[date]) REGS[date] = {};
+  if(!REGS[date][ean]) REGS[date][ean] = {modtaget:null, kl13:null, luk:null, status:"normal"};
+  return REGS[date][ean];
+}
+
+/* ---------- State ---------- */
+let currentTab = 'dash';
+let currentDate = todayISO();
+let currentDateIsAuto = true; // true, indtil brugeren selv vælger en anden dato
+let DEV_MODE = storageGet('devmode') === '1';
+
+/* ---------- Save indicator ---------- */
+let saveTimer = null;
+function showSaved(){
+  const el = $('#saveIndicator');
+  if(!el) return;
+  el.textContent = '✅ Gemt';
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{ el.textContent = '🟢 Alle ændringer gemt'; }, 1200);
+}
+async function saveRegsAuto(){ await saveRegs(); showSaved(); }
+async function saveVarerAuto(){ await saveVarer(); showSaved(); }
+async function saveSettingsAuto(){ await saveSettings(); showSaved(); }
+async function saveEventsAuto(){ await saveEvents(); showSaved(); }
+
+/* ---------- Render dispatcher ---------- */
+let regSubTab = 'morgen';
+let calDate = todayISO();
+
+function render(){
+  $('#dateLabel').textContent = fmtDateDK(currentDate);
+  $('#todayPill').style.display = (currentDate===todayISO()) ? 'none' : '';
+  $('#datePicker').value = currentDate;
+  document.querySelectorAll('nav button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.tab === currentTab);
+  });
+  if(currentTab==='reg') renderReg();
+  else if(currentTab==='dash') safeRender('renderDashboard', renderDash);
+  else if(currentTab==='monstre') safeRender('renderMønstre', renderMonstre);
+  else if(currentTab==='historik') safeRender('renderHistorik', renderHistorik);
+  else if(currentTab==='stamdata') renderStamdata();
+}
+
+function safeRender(name, fn){
+  try{
+    fn();
+  }catch(err){
+    console.error(name+'() error:', errMsg(err));
+    app.innerHTML = `<div class="card empty">Der opstod en fejl under indlæsning af denne side.<br>Prøv at skifte fane og tilbage igen.</div>`;
+  }
+}
+
+$('#dateRow').addEventListener('click', (e)=>{
+  if(e.target.id==='todayPill'){
+    currentDate = todayISO();
+    currentDateIsAuto = true;
+    render();
+    return;
+  }
+  $('#datePicker').showPicker ? $('#datePicker').showPicker() : $('#datePicker').click();
+});
+$('#datePicker').addEventListener('change', (e)=>{
+  if(e.target.value){
+    currentDate = e.target.value;
+    currentDateIsAuto = (currentDate === todayISO());
+    render();
+  }
+});
+
+// Skift automatisk til ny dato, hvis midnat (dansk tid) passeres,
+// så længe brugeren ikke selv har navigeret til en anden dato.
+setInterval(()=>{
+  if(!currentDateIsAuto) return;
+  const t = todayISO();
+  if(t !== currentDate){
+    currentDate = t;
+    render();
+  }
+}, 60000);
+
+// Udviklertilstand: tryk 5 gange på versionsnummeret for at vise/skjule
+// teknisk debugdata om automatisk vejrhentning. Skjult for almindelige brugere.
+let _verTapCount = 0, _verTapTimer = null;
+const verLabel = $('#versionLabel');
+if(verLabel){
+  verLabel.addEventListener('click', ()=>{
+    _verTapCount++;
+    clearTimeout(_verTapTimer);
+    _verTapTimer = setTimeout(()=>{ _verTapCount = 0; }, 1500);
+    if(_verTapCount>=5){
+      _verTapCount = 0;
+      DEV_MODE = !DEV_MODE;
+      storageSet('devmode', DEV_MODE ? '1' : '0');
+      alert(DEV_MODE ? 'Udviklertilstand aktiveret (vejr-debug vises).' : 'Udviklertilstand slået fra.');
+      render();
+    }
+  });
+}
+
+
+/* ---------- REGISTRERING TAB ---------- */
+const CAL_TAGS = [
+  {key:'tilbudsavis', label:'Tilbudsavis'},
+  {key:'lonweekend', label:'Lønweekend'},
+  {key:'vinterferie', label:'Vinterferie'},
+  {key:'paaskeferie', label:'Påskeferie'},
+  {key:'sommerferie', label:'Sommerferie'},
+  {key:'efterarsferie', label:'Efterårsferie'},
+  {key:'juleferie', label:'Juleferie'},
+  {key:'helligdag', label:'Helligdag'},
+  {key:'turistsaeson', label:'Turistsæson'},
+  {key:'lokalt', label:'Lokalt arrangement'},
+];
+const FERIE_KEYS = ['vinterferie','paaskeferie','sommerferie','efterarsferie','juleferie'];
+
+function getDayTags(date){
+  if(!REGS[date]) REGS[date] = {};
+  if(!REGS[date]._tags) REGS[date]._tags = {};
+  return REGS[date]._tags;
+}
+function getDayWeather(date){
+  if(!REGS[date]) REGS[date] = {};
+  if(!REGS[date]._weather) REGS[date]._weather = {temp:null, currentTemp:null, sol:false, regn:false, vind:false, vindHard:false, sne:false, weathercode:null, auto:null, manualOverride:false};
+  const w = REGS[date]._weather;
+  if(w.vindHard===undefined) w.vindHard = false;
+  if(w.manualOverride===undefined) w.manualOverride = false;
+  if(w.weathercode===undefined) w.weathercode = null;
+  if(w.currentTemp===undefined) w.currentTemp = null;
+  return w;
+}
+function hasAnyTag(tags){
+  return tags && Object.values(tags).some(v=>v);
+}
+
+/* ---------- AUTOMATISK HANDELSKALENDER ---------- */
+function easterSunday(year){
+  // Anonymous Gregorian algorithm
+  const a=year%19, b=Math.floor(year/100), c=year%100;
+  const d=Math.floor(b/4), e=b%4, f=Math.floor((b+8)/25);
+  const g=Math.floor((b-f+1)/3), h=(19*a+b-d-g+15)%30;
+  const i=Math.floor(c/4), k=c%4;
+  const l=(32+2*e+2*i-h-k)%7;
+  const m=Math.floor((a+11*h+22*l)/451);
+  const month=Math.floor((h+l-7*m+114)/31);
+  const day=((h+l-7*m+114)%31)+1;
+  return new Date(Date.UTC(year, month-1, day));
+}
+function addDays(date, n){
+  const d = new Date(date); d.setUTCDate(d.getUTCDate()+n); return d;
+}
+function dISO(d){ return d.toISOString().slice(0,10); }
+
+// Cache: year -> {holidays: {iso: label}, ferieRanges: {key:[start,end]}}
+const _autoCalCache = {};
+function getAutoCalendarYear(year){
+  if(_autoCalCache[year]) return _autoCalCache[year];
+  const easter = easterSunday(year);
+  const holidays = {};
+  holidays[dISO(new Date(Date.UTC(year,0,1)))] = 'Nytårsdag';
+  holidays[dISO(addDays(easter,-3))] = 'Skærtorsdag';
+  holidays[dISO(addDays(easter,-2))] = 'Langfredag';
+  holidays[dISO(easter)] = 'Påskedag';
+  holidays[dISO(addDays(easter,1))] = '2. påskedag';
+  holidays[dISO(addDays(easter,39))] = 'Kristi Himmelfartsdag';
+  holidays[dISO(addDays(easter,49))] = 'Pinsedag';
+  holidays[dISO(addDays(easter,50))] = '2. pinsedag';
+  holidays[dISO(new Date(Date.UTC(year,11,25)))] = 'Juledag';
+  holidays[dISO(new Date(Date.UTC(year,11,26)))] = '2. juledag';
+
+  // Ferieperioder (vejledende, danske skoleferier)
+  const paaskeferieStart = addDays(easter,-10); // ca. palmesøndag-ugen
+  const paaskeferieEnd = addDays(easter,1);
+  const ferieRanges = {
+    vinterferie: [dISO(new Date(Date.UTC(year,1,10))), dISO(new Date(Date.UTC(year,1,18)))], // uge 7, ca.
+    paaskeferie: [dISO(paaskeferieStart), dISO(paaskeferieEnd)],
+    sommerferie: [dISO(new Date(Date.UTC(year,5,24))), dISO(new Date(Date.UTC(year,7,9)))], // ca. uge 26-31
+    efterarsferie: [dISO(new Date(Date.UTC(year,9,14))), dISO(new Date(Date.UTC(year,9,22)))], // uge 42
+    juleferie: [dISO(new Date(Date.UTC(year,11,21))), dISO(new Date(Date.UTC(year+1,0,2)))],
+  };
+  const result = {holidays, ferieRanges};
+  _autoCalCache[year] = result;
+  return result;
+}
+function inRange(iso, range){
+  return iso >= range[0] && iso <= range[1];
+}
+function getAutoTags(date){
+  const d = isoToUTCDate(date);
+  const year = d.getUTCFullYear();
+  const cal = getAutoCalendarYear(year);
+  // juleferie may span into next year; also check previous year's juleferie range
+  const calPrev = getAutoCalendarYear(year-1);
+
+  const tags = {};
+  const reasons = [];
+
+  // Helligdag
+  let holidayName = cal.holidays[date];
+  if(!holidayName && calPrev.holidays[date]) holidayName = calPrev.holidays[date];
+  if(holidayName){
+    tags.helligdag = true;
+    reasons.push(holidayName);
+  }
+
+  // Ferieperioder
+  FERIE_KEYS.forEach(key=>{
+    if(inRange(date, cal.ferieRanges[key]) || inRange(date, calPrev.ferieRanges[key])){
+      tags[key] = true;
+      const labels = {vinterferie:'vinterferie', paaskeferie:'påskeferie', sommerferie:'sommerferie', efterarsferie:'efterårsferie', juleferie:'juleferie'};
+      reasons.push(labels[key]);
+    }
+  });
+
+  // Lønweekend: fredag-søndag i de sidste 7 dage af måneden
+  const dow = d.getUTCDay(); // 0=søn..6=lør
+  const lastDayOfMonth = new Date(Date.UTC(year, d.getUTCMonth()+1, 0)).getUTCDate();
+  if((dow===5||dow===6||dow===0) && d.getUTCDate() >= lastDayOfMonth-6){
+    tags.lonweekend = true;
+    reasons.push('lønweekend');
+  }
+
+  // Turistsæson: konfigurerbare måneder (standard juni-august)
+  const month = d.getUTCMonth()+1;
+  const turistMonths = (SETTINGS.turistMonths && SETTINGS.turistMonths.length) ? SETTINGS.turistMonths : [6,7,8];
+  if(turistMonths.includes(month)){
+    tags.turistsaeson = true;
+    reasons.push('turistsæson');
+  }
+
+  return {tags, reasons};
+}
+function getEffectiveTags(date){
+  const auto = getAutoTags(date);
+  const manual = getDayTags(date);
+  const effective = {};
+  const reasons = {auto: [], manual: []};
+  const autoActiveKeys = [];
+  CAL_TAGS.forEach(t=>{
+    const autoVal = !!auto.tags[t.key];
+    if(autoVal) autoActiveKeys.push(t.key);
+    if(Object.prototype.hasOwnProperty.call(manual, t.key)){
+      effective[t.key] = !!manual[t.key];
+      if(manual[t.key]) reasons.manual.push(t.label);
+    } else {
+      effective[t.key] = autoVal;
+    }
+  });
+  if(auto.reasons.length) reasons.autoText = auto.reasons.join(', ');
+  return {tags: effective, reasons, autoActiveKeys};
+}
+
+/* ---------- LOKALE ARRANGEMENTER ---------- */
+const IMPACT_PCT = {lav:0.05, middel:0.10, hoj:0.20};
+const IMPACT_LABEL = {lav:'Lav', middel:'Middel', hoj:'Høj'};
+function getActiveEvents(date){
+  return EVENTS.filter(e=>{
+    if(e.aktiv===false) return false;
+    if(e.gentagAarligt){
+      const md = date.slice(5); // MM-DD
+      const startMd = e.start.slice(5), slutMd = e.slut.slice(5);
+      if(startMd<=slutMd){
+        return md>=startMd && md<=slutMd;
+      } else {
+        // spænder over årsskifte
+        return md>=startMd || md<=slutMd;
+      }
+    }
+    return date>=e.start && date<=e.slut;
+  });
+}
+function eventFactor(date){
+  const evs = getActiveEvents(date);
+  if(evs.length===0) return null;
+  let maxPct=0, maxEv=null;
+  evs.forEach(e=>{
+    const pct = IMPACT_PCT[e.impact] || 0;
+    if(pct>maxPct){ maxPct=pct; maxEv=e; }
+  });
+  return {pct:maxPct, events:evs, top:maxEv};
+}
+
+/* ---------- AUTOMATISK VEJR (Open-Meteo, ingen API-nøgle) ---------- */
+const COUNTRY_CODES = {
+  'danmark':'DK','denmark':'DK','sverige':'SE','sweden':'SE','norge':'NO','norway':'NO',
+  'tyskland':'DE','germany':'DE','finland':'FI','island':'IS','iceland':'IS'
+};
+// WEATHER_DEBUG må KUN indeholde simple JSON-værdier (strings, numbers,
+// booleans, null) - aldrig Error-/Response-/AbortController-objekter.
+// Bruges kun til DEV_MODE debugkort og er ikke afhængig af nogen
+// browser-objekter, så den altid kan JSON.stringify'es uden DataCloneError.
+let WEATHER_DEBUG = {
+  city:'', postcode:'', country:'', query:'',
+  latitude:null, longitude:null,
+  apiStatus:null, apiUrl:'', errorMessage:'', timestamp:null,
+  // Yderligere simple felter (alle primitiver) til vejr-debug:
+  temp:null, currentTemp:null, weathercode:null, auto:null
+};
+function resetWeatherDebugLocation(){
+  WEATHER_DEBUG.city = SETTINGS.by || '';
+  WEATHER_DEBUG.postcode = SETTINGS.postnr || '';
+  WEATHER_DEBUG.country = SETTINGS.land || '';
+  WEATHER_DEBUG.query = '';
+  WEATHER_DEBUG.latitude = null;
+  WEATHER_DEBUG.longitude = null;
+}
+function setWeatherDebugApi(status, url, error){
+  WEATHER_DEBUG.apiStatus = status;
+  WEATHER_DEBUG.apiUrl = url || '';
+  WEATHER_DEBUG.errorMessage = error ? errMsg(error) : '';
+  WEATHER_DEBUG.timestamp = new Date().toISOString();
+}
+// Safari/iPad afgiver ofte en generisk "Load failed"-fejl ved det første
+// cross-origin fetch (fx efter at appen har ligget i baggrunden, eller pga.
+// aggressiv caching). Vi undgår caching, undgår at sende referrer/credentials
+// cross-origin (som kan udløse ekstra CORS-tjek i Safari), sætter en timeout
+// så et hængende kald ikke blokerer appen, og prøver en gang til ved fejl.
+async function fetchJSON(url, timeoutMs){
+  timeoutMs = timeoutMs || 8000;
+  for(let attempt=1; attempt<=2; attempt++){
+    const controller = new AbortController();
+    const timer = setTimeout(()=>controller.abort(), timeoutMs);
+    try{
+      const res = await fetch(url, {
+        method:'GET',
+        cache:'no-store',
+        mode:'cors',
+        credentials:'omit',
+        referrerPolicy:'no-referrer',
+        signal: controller.signal
+      });
+      clearTimeout(timer);
+      return await res.json();
+    }catch(e){
+      clearTimeout(timer);
+      if(attempt===2) throw e;
+      await new Promise(r=>setTimeout(r, 400)); // kort pause før nyt forsøg
+    }
+  }
+}
+function weatherCodeFlags(code, precip, snow){
+  // WMO weather codes (Open-Meteo)
+  const res = {sol:false, regn:false, sne:false};
+  if(code===0 || code===1) res.sol = true;
+  if([51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].includes(code) || (precip!=null && precip>0.2)) res.regn = true;
+  if([71,73,75,77,85,86].includes(code) || (snow!=null && snow>0)) res.sne = true;
+  if(res.sne) res.regn = false; // sne og regn er gensidigt udelukkende i visningen
+  return res;
+}
+async function geocodeStore(){
+  if(SETTINGS.lat!=null && SETTINGS.lon!=null){
+    resetWeatherDebugLocation();
+    WEATHER_DEBUG.query = SETTINGS.by + (SETTINGS.postnr ? ` (${SETTINGS.postnr})` : '') + (SETTINGS.land ? `, ${SETTINGS.land}` : '');
+    WEATHER_DEBUG.latitude = SETTINGS.lat;
+    WEATHER_DEBUG.longitude = SETTINGS.lon;
+    setWeatherDebugApi('OK', '', '');
+    return true;
+  }
+  resetWeatherDebugLocation();
+  if(!SETTINGS.by){
+    WEATHER_DEBUG.query = '';
+    setWeatherDebugApi('FAILED', '', 'Ingen by angivet under Varer → Butiksplacering.');
+    return false;
+  }
+  const countryCode = COUNTRY_CODES[(SETTINGS.land||'Danmark').trim().toLowerCase()] || '';
+  // NB: Open-Meteo geocoding API understøtter ikke et "country"-filter-parameter.
+  // Søgning sker derfor kun på bynavn, og bedste match vælges efterfølgende.
+  const searchTerm = SETTINGS.by;
+  WEATHER_DEBUG.query = searchTerm + (SETTINGS.postnr ? ` (${SETTINGS.postnr})` : '') + (SETTINGS.land ? `, ${SETTINGS.land}` : '');
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(searchTerm)}&count=10&language=da&format=json`;
+  try{
+    const data = await fetchJSON(url);
+    if(data && data.error){
+      setWeatherDebugApi('FAILED', url, data.reason || 'Geokodning afviste forespørgslen.');
+      return false;
+    }
+    const results = data && data.results;
+    if(!results || !results.length){
+      setWeatherDebugApi('FAILED', url, 'Ingen resultater fundet for byen.');
+      return false;
+    }
+    // Find bedste match: foretræk postnummer-match, derefter landekode-match, ellers første resultat
+    let best = results[0];
+    if(SETTINGS.postnr){
+      const pcMatch = results.find(r=> Array.isArray(r.postcodes) && r.postcodes.includes(String(SETTINGS.postnr)));
+      if(pcMatch) best = pcMatch;
+    }
+    if(best===results[0] && countryCode){
+      const ccMatch = results.find(r=> r.country_code===countryCode);
+      if(ccMatch) best = ccMatch;
+    }
+    SETTINGS.lat = best.latitude;
+    SETTINGS.lon = best.longitude;
+    await saveSettings();
+    WEATHER_DEBUG.latitude = best.latitude;
+    WEATHER_DEBUG.longitude = best.longitude;
+    setWeatherDebugApi('OK', url, '');
+    return true;
+  }catch(e){
+    setWeatherDebugApi('FAILED', url, e);
+  }
+  return false;
+}
+
+// To daglige variabel-navngivninger har eksisteret i Open-Meteo's API over tid.
+// Vi prøver den klassiske navngivning først og falder tilbage til den nyere,
+// så vejrhentning ikke fejler permanent pga. et enkelt ukendt parameternavn.
+const WEATHER_VAR_SETS = [
+  'temperature_2m_max,precipitation_sum,wind_speed_10m_max,snowfall_sum,weather_code',
+  'temperature_2m_max,precipitation_sum,windspeed_10m_max,snowfall_sum,weathercode'
+];
+
+async function fetchAutoWeather(date){
+  WEATHER_DEBUG.temp = null;
+  WEATHER_DEBUG.currentTemp = null;
+  WEATHER_DEBUG.weathercode = null;
+  WEATHER_DEBUG.auto = null;
+
+  const ok = await geocodeStore();
+  if(!ok){
+    WEATHER_DEBUG.auto = false;
+    // geocodeStore har allerede sat apiStatus/apiUrl/errorMessage
+    return false;
+  }
+
+  // Open-Meteo's /v1/forecast dækker ca. 92 dage tilbage og 16 dage frem.
+  // Ældre datoer hentes fra arkiv-API'et (ERA5).
+  const daysFromToday = Math.round((new Date(date+"T00:00:00Z") - new Date(todayISO()+"T00:00:00Z")) / 86400000);
+  const useArchive = daysFromToday < -92;
+  const base = useArchive ? 'https://archive-api.open-meteo.com/v1/archive' : 'https://api.open-meteo.com/v1/forecast';
+  // "Aktuel temperatur" (lige nu) giver kun mening for i dag, og kun forecast-API'et
+  // understøtter "current"-parametre.
+  const includeCurrent = !useArchive && date===todayISO();
+
+  let lastError = '', lastUrl = '';
+  for(const vars of WEATHER_VAR_SETS){
+    let url = `${base}?latitude=${SETTINGS.lat}&longitude=${SETTINGS.lon}&start_date=${date}&end_date=${date}&daily=${vars}&timezone=auto`;
+    if(includeCurrent) url += `&current=temperature_2m`;
+    lastUrl = url;
+    try{
+      const data = await fetchJSON(url);
+      if(data && data.error){
+        lastError = data.reason || 'Vejr-API afviste forespørgslen.';
+        continue; // prøv næste variabelnavngivning
+      }
+      if(!data || !data.daily || !data.daily.time || data.daily.time.length===0){
+        lastError = 'Vejr-API returnerede ingen data for datoen.';
+        continue;
+      }
+      const idx = data.daily.time.indexOf(date);
+      if(idx===-1){
+        lastError = `Datoen findes ikke i vejr-API'ets svar (modtog: ${data.daily.time.join(', ')}).`;
+        continue;
+      }
+      const d = data.daily;
+      const temp = d.temperature_2m_max ? d.temperature_2m_max[idx] : null;
+      const precip = d.precipitation_sum ? d.precipitation_sum[idx] : null;
+      const snow = d.snowfall_sum ? d.snowfall_sum[idx] : null;
+      const wind = d.windspeed_10m_max ? d.windspeed_10m_max[idx] : (d.wind_speed_10m_max ? d.wind_speed_10m_max[idx] : null);
+      const code = d.weathercode ? d.weathercode[idx] : (d.weather_code ? d.weather_code[idx] : null);
+      const flags = weatherCodeFlags(code, precip, snow);
+      const currentTemp = (data.current && data.current.temperature_2m!=null) ? data.current.temperature_2m : null;
+
+      const w = getDayWeather(date);
+      w.temp = temp!=null ? Math.round(temp*10)/10 : w.temp;
+      w.currentTemp = currentTemp!=null ? Math.round(currentTemp*10)/10 : w.currentTemp;
+      w.sol = flags.sol;
+      w.regn = flags.regn;
+      w.sne = flags.sne;
+      w.vind = wind!=null ? wind>=25 : w.vind;
+      w.vindHard = wind!=null ? wind>=40 : false;
+      w.weathercode = code!=null ? code : w.weathercode;
+      w.auto = true;
+
+      setWeatherDebugApi('OK', url, '');
+      WEATHER_DEBUG.temp = w.temp;
+      WEATHER_DEBUG.currentTemp = w.currentTemp;
+      WEATHER_DEBUG.weathercode = w.weathercode;
+      WEATHER_DEBUG.auto = true;
+
+      await saveRegs();
+      await saveLastGoodWeather(date, w, includeCurrent);
+      return true;
+    }catch(e){
+      lastError = errMsg(e);
+    }
+  }
+  setWeatherDebugApi('FAILED', lastUrl, lastError || 'Ukendt fejl ved vejrhentning.');
+  WEATHER_DEBUG.auto = false;
+  return false;
+}
+async function ensureWeatherAuto(date, isStillRelevant){
+  const w = getDayWeather(date);
+  if(w.auto === true) return; // allerede hentet automatisk med succes for denne dato
+  if(w.manualOverride) return; // brugeren har rettet manuelt – overskriv ikke
+  const before = w.auto;
+  const ok = await fetchAutoWeather(date);
+  if(!ok){
+    getDayWeather(date).auto = false;
+    await saveRegs();
+  }
+  const after = getDayWeather(date).auto;
+  if(before !== after && isStillRelevant()) render();
+}
+function autoChecklistHTML(date){
+  const eff = getEffectiveTags(date);
+  const weather = getDayWeather(date);
+  const items = [];
+  CAL_TAGS.forEach(t=>{
+    if(eff.tags[t.key]) items.push(t.label);
+  });
+  if(weather.sol) items.push('☀️ Sol');
+  if(weather.regn) items.push('🌧️ Regn');
+  if(weather.vind) items.push('💨 Vind');
+  if(weather.sne) items.push('❄️ Sne');
+  if(items.length===0){
+    return `<div class="small-muted">Automatisk registreret: normal dag – ingen særlige forhold.</div>`;
+  }
+  return `<div class="small-muted" style="margin-bottom:6px;">Automatisk registreret:</div>` +
+    items.map(i=>`<div style="padding:3px 0; font-size:14px;">☑ ${i}</div>`).join('');
+}
+
+// Statuslinje for vejr, vist til almindelige brugere (ingen tekniske detaljer).
+function weatherStatusMessage(weather){
+  if(weather.auto===true) return '✅ Automatisk vejr hentet';
+  if(weather.manualOverride) return '✅ Manuelt indtastet vejr';
+  if(weather.auto===false){
+    if(LAST_GOOD_WEATHER) return '⚠️ Automatisk vejr kunne ikke hentes. Seneste kendte vejr anvendes.';
+    return '⚠️ Automatisk vejr ikke tilgængeligt – indtast manuelt';
+  }
+  return 'Henter automatisk vejr...';
+}
+// Returnerer vejrdata til visning: falder tilbage til seneste kendte vejr,
+// hvis dagens automatiske hentning er fejlet og intet andet er registreret.
+function weatherForDisplay(date){
+  const w = getDayWeather(date);
+  const hasData = w.temp!=null || w.sol || w.regn || w.vind || w.sne;
+  if(!hasData && w.auto===false && !w.manualOverride && LAST_GOOD_WEATHER){
+    return {w: LAST_GOOD_WEATHER, fromFallback:true};
+  }
+  return {w, fromFallback:false};
+}
+
+function weatherDebugCardHTML(){
+  try{
+  const d = WEATHER_DEBUG || {};
+  const safe = (v, fallback)=> (v===null || v===undefined || v==='') ? (fallback ?? '–') : v;
+  return `<div class="card">
+    <h3 style="margin-top:0;">Debug: Automatisk vejr (DEV_MODE)</h3>
+    <table>
+      <tr><td>By</td><td>${safe(d.city)}</td></tr>
+      <tr><td>Postnr</td><td>${safe(d.postcode)}</td></tr>
+      <tr><td>Land</td><td>${safe(d.country)}</td></tr>
+      <tr><td>Søgestreng</td><td>${safe(d.query)}</td></tr>
+      <tr><td>Latitude</td><td>${safe(d.latitude)}</td></tr>
+      <tr><td>Longitude</td><td>${safe(d.longitude)}</td></tr>
+      <tr><td>API status</td><td>${safe(d.apiStatus)}</td></tr>
+      <tr><td>API URL</td><td style="font-size:11px; word-break:break-all;">${safe(d.apiUrl)}</td></tr>
+      <tr><td>Fejlbesked</td><td style="font-size:12px;">${safe(d.errorMessage)}</td></tr>
+      <tr><td>Tidspunkt</td><td style="font-size:12px;">${safe(d.timestamp)}</td></tr>
+      <tr><td>Max. temperatur (forecast)</td><td>${safe(d.temp)}</td></tr>
+      <tr><td>Aktuel temperatur (i dag)</td><td>${safe(d.currentTemp)}</td></tr>
+      <tr><td>Weather code</td><td>${safe(d.weathercode)}</td></tr>
+      <tr><td>Auto</td><td>${d.auto === true ? 'true' : (d.auto === false ? 'false' : '–')}</td></tr>
+    </table>
+    <div class="small-muted" style="margin-top:8px;">Kun synlig i udviklertilstand (5 tryk på versionsnummeret).</div>
+  </div>`;
+  }catch(e){
+    return `<div class="card"><h3 style="margin-top:0;">Debug: Automatisk vejr (DEV_MODE)</h3>
+      <div class="small-muted">Debugdata kunne ikke vises (${errMsg(e)}).</div></div>`;
+  }
+}
+
+function renderReg(){
+  const aktive = VARER.filter(v=>v.aktiv);
+  if(aktive.length===0){
+    app.innerHTML = `<div class="card empty">Ingen aktive varer endnu.<br>Tilføj varer under "Varer" fanen.</div>`;
+    return;
+  }
+
+  let html = `<div class="subtabs">
+    <button data-sub="morgen" class="${regSubTab==='morgen'?'active':''}">🌅 Morgen</button>
+    <button data-sub="kl13" class="${regSubTab==='kl13'?'active':''}">☀️ Kl.13</button>
+    <button data-sub="luk" class="${regSubTab==='luk'?'active':''}">🌙 Luk</button>
+  </div>`;
+
+  if(regSubTab==='morgen'){
+    html += `<div class="card"><h3>Morgen – Modtaget antal</h3>`;
+    aktive.forEach(v=>{
+      const r = getReg(currentDate, v.ean);
+      html += `
+        <div class="row">
+          <div>
+            <div class="name">${v.navn}</div>
+            <div class="sub">${v.leverandor}</div>
+          </div>
+          <input type="number" min="0" inputmode="numeric" data-ean="${v.ean}" data-field="modtaget" value="${r.modtaget ?? ''}" placeholder="0">
+        </div>`;
+    });
+    html += `</div>`;
+  } else if(regSubTab==='kl13'){
+    html += `<div class="card"><h3>Kl. 13 – Antal tilbage på hylden</h3>`;
+    aktive.forEach(v=>{
+      const r = getReg(currentDate, v.ean);
+      html += `
+        <div class="row">
+          <div class="name">${v.navn}</div>
+          <input type="number" min="0" inputmode="numeric" data-ean="${v.ean}" data-field="kl13" value="${r.kl13 ?? ''}" placeholder="0">
+        </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div class="card"><h3>Ved lukketid – Antal tilbage på hylden</h3>`;
+    aktive.forEach(v=>{
+      const r = getReg(currentDate, v.ean);
+      html += `
+        <div class="row">
+          <div class="name">${v.navn}</div>
+          <input type="number" min="0" inputmode="numeric" data-ean="${v.ean}" data-field="luk" value="${r.luk ?? ''}" placeholder="0">
+        </div>`;
+    });
+    html += `</div>`;
+
+    html += `<div class="card"><h3>Prisstatus i dag</h3>`;
+    aktive.forEach(v=>{
+      const r = getReg(currentDate, v.ean);
+      html += `
+        <div class="row">
+          <div class="name">${v.navn} <span class="badge ${r.status==='tilbud'?'badge-tilbud':'badge-normal'}">${r.status==='tilbud'?'Tilbud':'Normal'}</span></div>
+          <button class="btn-toggle ${r.status==='tilbud'?'active-toggle':'inactive-toggle'}" data-ean="${v.ean}" data-toggle="status">
+            ${r.status==='tilbud' ? 'På tilbud' : 'Sæt på tilbud'}
+          </button>
+        </div>`;
+    });
+    html += `</div>`;
+
+    const eff = getEffectiveTags(currentDate);
+    html += `<div class="card"><h3>Handelskalender – i dag</h3>
+      ${autoChecklistHTML(currentDate)}
+      <div class="tag-grid" style="margin-top:10px;">`;
+    CAL_TAGS.forEach(t=>{
+      html += `<button class="tag-chip ${eff.tags[t.key]?'active':''}" data-tag="${t.key}">${eff.tags[t.key]?'✓ ':''}${t.label}</button>`;
+    });
+    html += `</div>
+      <div class="small-muted" style="margin-top:8px;">Tryk for at tilføje eller fjerne en markering manuelt. Manuel markering har altid forrang.</div>
+    </div>`;
+
+    const weather = getDayWeather(currentDate);
+    html += `<div class="card"><h3>Vejr – i dag</h3>
+      <div id="weatherStatus" class="small-muted" style="margin-bottom:8px;">${weatherStatusMessage(weather)}</div>
+      <label>Maks. temperatur for dagen (°C)</label>
+      <input type="text" id="wTemp" inputmode="decimal" placeholder="f.eks. 18" value="${weather.temp ?? ''}">
+      <div class="tag-grid" style="margin-top:8px;">
+        <button class="tag-chip ${weather.sol?'active':''}" data-weather="sol">${weather.sol?'✓ ':''}☀️ Sol</button>
+        <button class="tag-chip ${weather.regn?'active':''}" data-weather="regn">${weather.regn?'✓ ':''}🌧️ Regn</button>
+        <button class="tag-chip ${weather.vind?'active':''}" data-weather="vind">${weather.vind?'✓ ':''}💨 Vind</button>
+        <button class="tag-chip ${weather.sne?'active':''}" data-weather="sne">${weather.sne?'✓ ':''}❄️ Sne</button>
+      </div>
+    </div>`;
+    if(weather.auto===false && DEV_MODE){
+      html += weatherDebugCardHTML();
+    }
+  }
+
+  app.innerHTML = html;
+
+  app.querySelectorAll('.subtabs button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      regSubTab = btn.dataset.sub;
+      renderReg();
+    });
+  });
+  app.querySelectorAll('input[type=number]').forEach(inp=>{
+    inp.addEventListener('change', async ()=>{
+      const ean = inp.dataset.ean, field = inp.dataset.field;
+      const r = getReg(currentDate, ean);
+      r[field] = inp.value === '' ? null : Math.max(0, parseInt(inp.value,10));
+      await saveRegsAuto();
+    });
+  });
+  app.querySelectorAll('[data-toggle=status]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const ean = btn.dataset.ean;
+      const r = getReg(currentDate, ean);
+      r.status = r.status === 'tilbud' ? 'normal' : 'tilbud';
+      await saveRegsAuto();
+      renderReg();
+    });
+  });
+  app.querySelectorAll('[data-tag]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const eff = getEffectiveTags(currentDate);
+      const tags = getDayTags(currentDate);
+      const key = btn.dataset.tag;
+      tags[key] = !eff.tags[key];
+      await saveRegsAuto();
+      renderReg();
+    });
+  });
+  const wTemp = $('#wTemp');
+  if(wTemp){
+    wTemp.addEventListener('change', async ()=>{
+      const weather = getDayWeather(currentDate);
+      const raw = wTemp.value.trim();
+      if(raw===''){ weather.temp = null; }
+      else {
+        const num = parseFloat(raw.replace(',','.'));
+        weather.temp = isNaN(num) ? null : num;
+      }
+      weather.auto = false; weather.manualOverride = true;
+      await saveRegsAuto();
+    });
+  }
+  app.querySelectorAll('[data-weather]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const weather = getDayWeather(currentDate);
+      const key = btn.dataset.weather;
+      weather[key] = !weather[key];
+      weather.auto = false; weather.manualOverride = true;
+      await saveRegsAuto();
+      renderReg();
+    });
+  });
+  if(regSubTab==='luk'){
+    const _d = currentDate;
+    ensureWeatherAuto(_d, ()=> currentTab==='reg' && regSubTab==='luk' && currentDate===_d);
+  }
+}
+
+/* ---------- DASHBOARD TAB ---------- */
+function vareTrend(ean, dates14){
+  // dates14 sorted nyeste->ældste. Split i to halvdele af 7 dage.
+  const recent = dates14.slice(0,7), older = dates14.slice(7,14);
+  function gnsSalg(ds){
+    let sold=[];
+    ds.forEach(date=>{
+      const r = REGS[date] && REGS[date][ean];
+      if(r && r.modtaget!=null && r.luk!=null) sold.push(r.modtaget-r.luk);
+    });
+    return avg(sold);
+  }
+  const a = gnsSalg(recent), b = gnsSalg(older);
+  if(b===0 && a===0) return {arrow:'→', label:'stabil'};
+  if(b===0) return {arrow:'↑', label:'stigende efterspørgsel'};
+  const pct = (a-b)/b;
+  if(pct>0.1) return {arrow:'↑', label:'stigende efterspørgsel'};
+  if(pct<-0.1) return {arrow:'↓', label:'faldende efterspørgsel'};
+  return {arrow:'→', label:'stabil'};
+}
+
+/* ---------- FORECAST ENGINE (Fase 2) ---------- */
+function soldOn(date, ean){
+  const r = REGS[date] && REGS[date][ean];
+  if(r && r.modtaget!=null && r.luk!=null) return Math.max(0, r.modtaget - r.luk);
+  return null;
+}
+function tomorrowISO(){
+  const d = isoToUTCDate(todayISO());
+  d.setUTCDate(d.getUTCDate()+1);
+  return utcDateToISO(d);
+}
+function computeForecastRaw(ean, targetDate, dates56){
+  const weekday = weekdayName(targetDate);
+  const sameWeekday = dates56.filter(d=>weekdayName(d)===weekday)
+    .map(d=>soldOn(d,ean)).filter(x=>x!=null);
+
+  let basis, quality;
+  if(sameWeekday.length>=2){
+    basis = avg(sameWeekday);
+    quality = 'ok';
+  } else {
+    const allSold = dates56.map(d=>soldOn(d,ean)).filter(x=>x!=null);
+    if(allSold.length>0){
+      basis = avg(allSold);
+      quality = 'low';
+    } else {
+      // fallback: seneste registrerede modtaget-antal
+      let lastMod = null;
+      for(const d of dates56){
+        const r = REGS[d] && REGS[d][ean];
+        if(r && r.modtaget!=null){ lastMod = r.modtaget; break; }
+      }
+      basis = lastMod!=null ? lastMod : 0;
+      quality = 'none';
+    }
+  }
+
+  const {tags, reasons} = getEffectiveTags(targetDate);
+  const weather = weatherForDisplay(targetDate).w;
+  const factors = [];
+
+  const willBeTilbud = REGS[targetDate] && REGS[targetDate][ean] && REGS[targetDate][ean].status==='tilbud';
+  if(willBeTilbud) factors.push({label:'Tilbud', pct:0.20});
+  if(tags.lonweekend) factors.push({label:'Lønweekend', pct:0.10});
+  if(FERIE_KEYS.some(k=>tags[k])) factors.push({label:'Ferieperiode', pct:0.10});
+  if(tags.turistsaeson) factors.push({label:'Turistsæson', pct:0.15});
+  if(tags.helligdag) factors.push({label:'Helligdag', pct:0.10});
+  if(tags.lokalt) factors.push({label:'Lokalt arrangement', pct:0.10});
+  if(weather.regn) factors.push({label:'Regn', pct:0.05});
+  if(weather.sol && weather.temp!=null && weather.temp>20) factors.push({label:'Sol og temperatur >20°', pct:0.05});
+  if(weather.sne) factors.push({label:'Sne', pct:0.05});
+  if(weather.vind && weather.vindHard) factors.push({label:'Kraftig vind', pct:-0.05});
+
+  const ev = eventFactor(targetDate);
+  if(ev && !tags.lokalt){
+    factors.push({label:`${ev.top.navn} (${IMPACT_LABEL[ev.top.impact]})`, pct:ev.pct});
+  }
+
+  const totalPct = factors.reduce((s,f)=>s+f.pct, 0);
+  const forecast = Math.round(basis * (1+totalPct));
+
+  return {weekday, basis: round1(basis), factors, totalPct, forecast, quality, calReasons:reasons};
+}
+
+/* ---------- FORECAST LÆRING (statistisk, ingen AI) ---------- */
+function getLearningFactor(ean, dates56){
+  const sampleDates = dates56.slice(7); // ekskluder de seneste 7 dage
+  const ratios = [];
+  sampleDates.forEach(d=>{
+    const actual = soldOn(d, ean);
+    if(actual==null) return;
+    const priorDates = dates56.filter(dd=>dd<d);
+    if(priorDates.length<2) return;
+    const raw = computeForecastRaw(ean, d, priorDates);
+    if(raw.forecast>0) ratios.push(actual/raw.forecast);
+  });
+  if(ratios.length<5) return {factor:1, samples:ratios.length};
+  let factor = avg(ratios);
+  factor = Math.max(0.8, Math.min(1.2, factor));
+  return {factor: Math.round(factor*100)/100, samples:ratios.length};
+}
+
+/* ---------- FORECAST SIKKERHED ---------- */
+function forecastConfidence(ean, quality){
+  const historyDays = Object.keys(REGS).filter(d=>soldOn(d,ean)!=null).length;
+  let label;
+  if(historyDays<=30) label='Lav';
+  else if(historyDays<=90) label='Mellem';
+  else label='Høj';
+  let pct = Math.min(95, Math.round(45 + historyDays*0.55));
+  if(quality==='low') pct = Math.max(30, pct-15);
+  if(quality==='none') pct = Math.max(20, pct-30);
+  return {pct, label, historyDays};
+}
+
+/* ---------- UDSOLGT-RISIKO ---------- */
+function stockoutRisk(ean, dates56){
+  const days28 = dates56.slice(0,28);
+  let zero=0, total=0;
+  days28.forEach(d=>{
+    const r = REGS[d] && REGS[d][ean];
+    if(r && r.kl13!=null){ total++; if(r.kl13===0) zero++; }
+  });
+  if(total===0) return {level:'Lav', sharePct:0};
+  const share = zero/total;
+  const level = share>=0.4 ? 'Høj' : (share>=0.15 ? 'Mellem' : 'Lav');
+  return {level, sharePct: Math.round(share*100)};
+}
+
+function computeForecast(ean, targetDate, dates56){
+  const raw = computeForecastRaw(ean, targetDate, dates56);
+  const learning = getLearningFactor(ean, dates56);
+  const forecast = Math.max(0, Math.round(raw.basis * (1+raw.totalPct) * learning.factor));
+
+  // sikkerhedsbuffer hvis varen ofte er udsolgt kl.13
+  const last7 = dates56.slice(0,7);
+  const kl13zero = last7.filter(d=>{
+    const r = REGS[d] && REGS[d][ean];
+    return r && r.kl13===0;
+  }).length;
+  const buffer = kl13zero>=2 ? 1 : 0;
+  const anbefalet = forecast + buffer;
+
+  const confidence = forecastConfidence(ean, raw.quality);
+  const risk = stockoutRisk(ean, dates56);
+
+  return {...raw, forecast, anbefalet, buffer, kl13zero, learning, confidence, risk};
+}
+function forecastExplanation(v, f){
+  if(f.quality==='none'){
+    return `Ingen historik for ${v.navn} – forslaget er baseret på seneste registrering.`;
+  }
+  const parts = [];
+  if(f.factors.length===0){
+    parts.push(`historikken for ${f.weekday.toLowerCase()} viser et gennemsnitligt salg på ${f.basis} stk.`);
+  } else {
+    const factorTxt = f.factors.map(fa=>{
+      const p = Math.round(fa.pct*100);
+      return `${fa.label} ${p>=0?'+':''}${p}%`;
+    }).join(', ');
+    parts.push(`varen er forventet påvirket af ${factorTxt}, og historikken for ${f.weekday.toLowerCase()} viser i gennemsnit ${f.basis} stk.`);
+  }
+  if(f.buffer>0){
+    parts.push(`Der lægges +1 stk. til som buffer, fordi varen har været udsolgt kl.13 ${f.kl13zero} gange på de sidste 7 dage.`);
+  }
+  if(f.learning && f.learning.factor!==1){
+    const pct = Math.round((f.learning.factor-1)*100);
+    parts.push(`Forecastet er ${pct>=0?'justeret op':'justeret ned'} ${Math.abs(pct)}% baseret på, hvordan tidligere forecasts har holdt sammenlignet med det faktiske salg.`);
+  }
+  let prefix = `Anbefalet ${f.anbefalet} stk., fordi `;
+  let text = prefix + parts.join(' ');
+  if(f.quality==='low'){
+    text += ' (Begrænset historik for denne ugedag – forslaget bygger på det generelle gennemsnit.)';
+  }
+  return text;
+}
+
+function renderDash(){
+  const aktive = VARER.filter(v=>v.aktiv);
+  if(aktive.length===0){
+    app.innerHTML = `<div class="card empty">Ingen aktive varer endnu.</div>`;
+    return;
+  }
+
+  const hasAnyData = Object.keys(REGS).some(date=>
+    REGS[date] && Object.values(REGS[date]).some(r=>
+      r.modtaget!=null || r.kl13!=null || r.luk!=null));
+
+  if(!hasAnyData){
+    app.innerHTML = `<div class="card" style="text-align:center;">
+      <h2>Ingen registreringer endnu</h2>
+      <p class="small-muted">Der er endnu ingen registreringer.</p>
+      <button class="btn-primary" id="goToReg">Start dagens registrering</button>
+    </div>`;
+    $('#goToReg').addEventListener('click', ()=>{
+      currentTab = 'reg';
+      render();
+    });
+    return;
+  }
+  const dates14 = Array.from({length:14}, (_,i)=>isoDaysAgo(i));
+  const dates7 = dates14.slice(0,7);
+  const today = REGS[currentDate] || {};
+
+  // ---- Forecast for i morgen (bruges af "Dagens Forecast" og "Smart Forecast") ----
+  const dates56 = periodDates(56);
+  const tDate = tomorrowISO();
+  const tWeekday = weekdayName(tDate);
+  const tEffective = getEffectiveTags(tDate);
+  const tWeatherDisp = weatherForDisplay(tDate);
+  const tWeather = tWeatherDisp.w;
+  const tEvents = getActiveEvents(tDate);
+  const forecasts = {};
+  let anyLowQuality = false;
+  aktive.forEach(v=>{
+    const f = computeForecast(v.ean, tDate, dates56);
+    forecasts[v.ean] = f;
+    if(f.quality!=='ok') anyLowQuality = true;
+  });
+
+  // ---- Dagens Forecast (topkort) ----
+  const TAG_EMOJI = {
+    tilbudsavis:'📰', lonweekend:'💰', vinterferie:'🏖', paaskeferie:'🏖',
+    sommerferie:'🏖', efterarsferie:'🏖', juleferie:'🎄', helligdag:'🎉', turistsaeson:'🧳'
+  };
+  const fcChips = [];
+  if(tWeather.sne) fcChips.push('❄️ Sne');
+  else if(tWeather.regn) fcChips.push('🌧️ Regn');
+  else if(tWeather.sol) fcChips.push('☀️ Sol');
+  if(tWeather.temp!=null) fcChips.push('maks. '+tWeather.temp+'°C');
+  if(tWeather.vind) fcChips.push(tWeather.vindHard ? '💨 Kraftig vind' : '💨 Vind');
+  CAL_TAGS.forEach(t=>{
+    if(t.key!=='lokalt' && tEffective.tags[t.key]){
+      fcChips.push(`${TAG_EMOJI[t.key]||''} ${t.label}`.trim());
+    }
+  });
+  tEvents.forEach(e=> fcChips.push(`🎪 ${e.navn}`));
+  if(fcChips.length===0) fcChips.push('Normal dag');
+
+  const avgTotalPct = avg(aktive.map(v=>forecasts[v.ean].totalPct*100));
+  const avgConfidence = Math.round(avg(aktive.map(v=>forecasts[v.ean].confidence.pct)));
+
+  let html = `<div class="card">
+    <h2>Dagens Forecast</h2>
+    <div class="small-muted" style="margin-bottom:8px;">Forventet i morgen (${tWeekday} d. ${fmtDateDK(tDate).split(' ').slice(1).join(' ')}):</div>
+    <div class="name" style="margin-bottom:10px;">${fcChips.join(' · ')}</div>
+    <div class="topcards">
+      <div class="topcard">
+        <div class="num">${avgTotalPct>=0?'+':''}${Math.round(avgTotalPct)}%</div>
+        <div class="lbl">Anbefalet produktion</div>
+      </div>
+      <div class="topcard">
+        <div class="num">${avgConfidence}%</div>
+        <div class="lbl">Forecast sikkerhed</div>
+      </div>
+    </div>
+  </div>`;
+
+  let withStock=0, withReg=0, udsolgte=0, lavRest=0, hojRestCnt=0, lukReg=0;
+  aktive.forEach(v=>{
+    const r = today[v.ean];
+    if(r && r.kl13!=null){
+      withReg++;
+      if(r.kl13>0) withStock++;
+      else udsolgte++;
+    }
+    if(r && r.luk!=null){
+      lukReg++;
+      if(r.luk>=1 && r.luk<=2) lavRest++;
+      else if(r.luk>4) hojRestCnt++;
+    }
+  });
+  let servicegrad = withReg? Math.round((withStock/withReg)*100) : null;
+  let sgEmoji='🟢';
+  if(servicegrad!=null){
+    if(servicegrad<80){ sgEmoji='🔴'; }
+    else if(servicegrad<90){ sgEmoji='🟡'; }
+  }
+
+  html += `<div class="topcards">
+    <div class="topcard">
+      <div class="num">${sgEmoji} ${servicegrad!=null? servicegrad : 0}%</div>
+      <div class="lbl">Servicegrad kl.13</div>
+    </div>
+    <div class="topcard">
+      <div class="num">🔴 ${udsolgte||0}</div>
+      <div class="lbl">Udsolgte varer kl.13</div>
+    </div>
+    <div class="topcard">
+      <div class="num">🟡 ${lavRest||0}</div>
+      <div class="lbl">Lav rest ved luk</div>
+    </div>
+    <div class="topcard">
+      <div class="num">🔵 ${hojRestCnt||0}</div>
+      <div class="lbl">Høj rest ved luk</div>
+    </div>
+  </div>
+  <div class="card small-muted" style="text-align:center; margin-top:-4px;">
+    ${withReg? withStock+' af '+withReg+' varer har beholdning kl.13 i dag' : 'Ingen kl.13-registrering for i dag endnu'}
+  </div>`;
+
+  // ---- Per-vare stats (14 dage) ----
+  const stats = {};
+  aktive.forEach(v=>{
+    const s14 = summarize(v.ean, dates14);
+    const s7 = summarize(v.ean, dates7);
+    const trend = vareTrend(v.ean, dates14);
+    stats[v.ean] = {v, s14, s7, trend};
+  });
+
+  // ---- Kritiske varer (udsolgt kl.13 / lav rest) ----
+  const kritiske = aktive.filter(v=> stats[v.ean].s7.kl13zero >= 2);
+  const lavRestVarer = aktive.filter(v=> !kritiske.includes(v) && stats[v.ean].s14.gnsKl13>0 && stats[v.ean].s14.gnsKl13<=1);
+  // ---- Høj rest ----
+  const hojRest = aktive.filter(v=> stats[v.ean].s14.gnsLuk > 4);
+
+  if(kritiske.length || lavRestVarer.length || hojRest.length){
+    html += `<div class="card"><h2>Kritiske varer</h2>`;
+    kritiske.forEach(v=>{
+      const s7 = stats[v.ean].s7;
+      const forslag = s7.kl13zero>=5 ? '+2' : '+1';
+      html += `<div class="suggestion red">🔴 <b>${v.navn}</b><br>
+        Udsolgt kl.13 på ${s7.kl13zero} af de sidste 7 dage.<br>
+        Forslag: Bestil ${forslag} stk.</div>`;
+    });
+    lavRestVarer.forEach(v=>{
+      const s14 = stats[v.ean].s14;
+      html += `<div class="suggestion yellow">🟡 <b>${v.navn}</b><br>
+        Kun ${s14.gnsKl13} stk. tilbage kl.13 i gennemsnit – lav buffer.<br>
+        Forslag: Bestil +1 stk.</div>`;
+    });
+    hojRest.forEach(v=>{
+      const s14 = stats[v.ean].s14;
+      const forslag = s14.gnsLuk>=6 ? '-2' : '-1';
+      html += `<div class="suggestion" style="background:#e8f1fb; color:#2c5d8c;">🔵 <b>${v.navn}</b><br>
+        ${s14.gnsLuk} stk. tilbage ved luk i gennemsnit.<br>
+        Forslag: Bestil ${forslag} stk.</div>`;
+    });
+    html += `</div>`;
+  }
+
+  // ---- Tendens ----
+  html += `<div class="card"><h2>Tendens – seneste 14 dage</h2>`;
+  aktive.forEach(v=>{
+    const t = stats[v.ean].trend;
+    html += `<div class="row"><div class="name">${v.navn}</div>
+      <div class="sub">${t.arrow} ${t.label}</div></div>`;
+  });
+  html += `</div>`;
+
+  // ---- Bestillingsforslag ----
+  html += `<div class="card"><h2>Anbefalet bestilling næste uge</h2>
+    <table><tr><th>Vare</th><th>Nuværende</th><th>Forslag</th><th>Udsolgt-risiko</th></tr>`;
+  aktive.forEach(v=>{
+    const s14 = stats[v.ean].s14, s7 = stats[v.ean].s7;
+    const nuvarende = s14.gnsModtaget ? Math.round(s14.gnsModtaget) : 0;
+    let forslag = nuvarende;
+    const kl13ZeroShare = s7.regDays>0 ? s7.kl13zero/s7.regDays : 0;
+    if(kl13ZeroShare > 0.25){
+      forslag = nuvarende + (s7.kl13zero>=5 ? 2 : 1);
+    } else if(s14.gnsLuk > 3){
+      forslag = Math.max(0, nuvarende - (s14.gnsLuk>=6 ? 2 : 1));
+    }
+    const risk = forecasts[v.ean].risk;
+    const riskColor = risk.level==='Høj' ? 'var(--red)' : (risk.level==='Mellem' ? '#8a6213' : 'var(--muted)');
+    html += `<tr><td>${v.navn}</td><td>${nuvarende}</td><td><b>${forslag}</b></td><td style="color:${riskColor};">${risk.level}</td></tr>`;
+  });
+  html += `</table></div>`;
+
+  // ---- Smart Forecast – næste dag ----
+  html += `<div class="card"><h2>Smart Forecast – næste dag</h2>
+    <div class="small-muted" style="margin-bottom:10px;">Forventet for ${tWeekday} d. ${fmtDateDK(tDate).split(' ').slice(1).join(' ')}.</div>`;
+  aktive.forEach((v,i)=>{
+    const f = forecasts[v.ean];
+    const factorTxt = f.factors.length ? f.factors.map(fa=>{
+      const p = Math.round(fa.pct*100);
+      return `${p>=0?'+':''}${p}% ${fa.label.toLowerCase()}`;
+    }).join(', ') : 'ingen særlige påvirkninger';
+    const riskColor = f.risk.level==='Høj' ? 'var(--red)' : (f.risk.level==='Mellem' ? '#8a6213' : 'var(--muted)');
+    html += `<div class="row" style="display:block; ${i>0?'border-top:1px solid var(--border); padding-top:10px;':''}">
+      <div class="name" style="margin-bottom:4px;">${v.navn}</div>
+      <table style="margin-bottom:6px;">
+        <tr><th>Basis</th><th>Påvirkninger</th><th>Anbefaling</th></tr>
+        <tr><td>${f.basis} stk.</td><td style="font-size:12px;">${factorTxt}</td><td><b>${f.anbefalet} stk.</b></td></tr>
+      </table>
+      <div class="small-muted">${forecastExplanation(v, f)}</div>
+      <div style="display:flex; gap:14px; margin-top:6px; font-size:12px;">
+        <div>Forecast sikkerhed: <b>${f.confidence.pct}%</b> (${f.confidence.label})</div>
+        <div style="color:${riskColor};">Udsolgt-risiko: <b>${f.risk.level}</b></div>
+      </div>
+    </div>`;
+  });
+  if(anyLowQuality){
+    html += `<div class="suggestion yellow" style="margin-top:10px;">🟡 Der er endnu ikke nok historik til præcis forecast for alle varer. Forslag vises stadig, baseret på seneste registreringer.</div>`;
+  }
+  html += `</div>`;
+
+  // ---- Dagens vejrstatus (i dag) ----
+  const todayDisp = weatherForDisplay(todayISO());
+  const todayW = todayDisp.w;
+  const todayCurTemp = todayW.currentTemp!=null ? todayW.currentTemp : todayW.temp;
+  html += `<div class="card"><h2>Dagens vejrstatus</h2>
+    <div class="small-muted" style="margin-bottom:6px;">I dag (${fmtDateDK(todayISO())}) – aktuelt vejr:</div>`;
+  if(todayCurTemp==null && !todayW.sol && !todayW.regn && !todayW.vind && !todayW.sne){
+    html += `<div class="name">Intet vejr registreret endnu.</div>
+      <div class="small-muted" style="margin-top:4px;">Automatisk vejr ikke tilgængeligt – indtast manuelt under Registrer → Luk.</div>`;
+  } else {
+    const wp = [];
+    if(todayCurTemp!=null) wp.push(todayCurTemp+'°C');
+    if(todayW.sol) wp.push('sol');
+    if(todayW.regn) wp.push('regn');
+    if(todayW.vind) wp.push(todayW.vindHard ? 'kraftig vind' : 'blæst');
+    if(todayW.sne) wp.push('sne');
+    html += `<div class="name">${wp.join(', ')}.</div>`;
+    if(todayW.currentTemp==null && todayW.temp!=null){
+      html += `<div class="small-muted" style="margin-top:2px;">Aktuel temperatur ikke tilgængelig – viser dagens maks. temperatur i stedet.</div>`;
+    }
+    if(todayDisp.fromFallback){
+      html += `<div class="small-muted" style="margin-top:4px;">⚠️ Seneste kendte vejr anvendes${todayDisp.w.date ? ' (fra '+fmtDateDK(todayDisp.w.date)+')' : ''}.</div>`;
+    } else {
+      html += `<div class="small-muted" style="margin-top:4px;">${weatherStatusMessage(todayW)}</div>`;
+    }
+  }
+  html += `</div>`;
+
+  // ---- I morgen forecast (kalenderstatus + vejr for næste salgsdag) ----
+  const activeLabels = CAL_TAGS.filter(t=>tEffective.tags[t.key]).map(t=>t.label);
+
+  html += `<div class="card"><h2>I morgen forecast</h2>
+    <div class="small-muted" style="margin-bottom:6px;">Næste salgsdag: ${tWeekday} d. ${fmtDateDK(tDate).split(' ').slice(1).join(' ')}.</div>`;
+  if(activeLabels.length===0 && tEvents.length===0){
+    html += `<div class="name">Normal dag – ingen særlige markeringer.</div>`;
+  } else {
+    let summary = activeLabels.join(' + ');
+    if(tEvents.length){
+      const evNames = tEvents.map(e=>`${e.navn} (${IMPACT_LABEL[e.impact]})`).join(', ');
+      summary = summary ? summary + ' + ' + evNames : evNames;
+    }
+    html += `<div class="name">${summary}.</div>`;
+  }
+  if(tEffective.reasons.autoText){
+    html += `<div class="small-muted" style="margin-top:4px;">Automatisk markeret: ${tEffective.reasons.autoText}.</div>`;
+  }
+  if(tEffective.reasons.manual.length){
+    html += `<div class="small-muted" style="margin-top:4px;">Manuelt markeret: ${tEffective.reasons.manual.join(', ')}.</div>`;
+  }
+  if(tWeather.temp==null && !tWeather.sol && !tWeather.regn && !tWeather.vind && !tWeather.sne){
+    html += `<div class="name" style="margin-top:8px;">Intet vejr registreret endnu.</div>
+      <div class="small-muted" style="margin-top:4px;">Automatisk vejr ikke tilgængeligt – indtast manuelt under Mønstre → Handelskalender.</div>`;
+  } else {
+    const wparts = [];
+    if(tWeather.temp!=null) wparts.push('maks. '+tWeather.temp+'°C');
+    if(tWeather.sol) wparts.push('sol');
+    if(tWeather.regn) wparts.push('regn');
+    if(tWeather.vind) wparts.push(tWeather.vindHard ? 'kraftig vind' : 'blæst');
+    if(tWeather.sne) wparts.push('sne');
+    html += `<div class="name" style="margin-top:8px;">${wparts.join(', ')}.</div>`;
+    if(tWeatherDisp.fromFallback){
+      html += `<div class="small-muted" style="margin-top:4px;">⚠️ Automatisk vejr kunne ikke hentes. Seneste kendte vejr anvendes${tWeatherDisp.w.date ? ' (fra '+fmtDateDK(tWeatherDisp.w.date)+')' : ''}.</div>`;
+    } else {
+      html += `<div class="small-muted" style="margin-top:4px;">${weatherStatusMessage(tWeather)}</div>`;
+    }
+  }
+  html += `</div>`;
+
+  const scored = aktive.map(v=>{
+    const s14=stats[v.ean].s14, s7=stats[v.ean].s7;
+    let score = 0, reason = [];
+    if(s7.kl13zero>0){ score += s7.kl13zero*100; reason.push(`Udsolgt kl.13 på ${s7.kl13zero}/7 dage`); }
+    if(s14.gnsKl13>0 && s14.gnsKl13<=1){ score += 30; reason.push(`Lav rest kl.13 (${s14.gnsKl13})`); }
+    if(s14.gnsLuk>4){ score += (s14.gnsLuk-4)*5; reason.push(`Høj rest ved luk (${s14.gnsLuk})`); }
+    const t = stats[v.ean].trend;
+    if(t.arrow!=='→'){ score += 3; reason.push(t.arrow+' '+t.label); }
+    return {v, score, reason};
+  }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,5);
+
+  html += `<div class="card"><h2>Top 5 fokusvarer</h2>`;
+  if(scored.length===0){
+    html += `<div class="empty">Ingen varer kræver handling lige nu.</div>`;
+  } else {
+    scored.forEach(s=>{
+      html += `<div class="row"><div>
+        <div class="name">${s.v.navn}</div>
+        <div class="sub">${s.reason.join(' · ')}</div>
+      </div></div>`;
+    });
+  }
+  html += `</div>`;
+
+  // ---- Top 10 varer (mest solgte sidste 30 dage) ----
+  const dates30 = periodDates(30);
+  const top10 = aktive.map(v=>{
+    let total=0;
+    dates30.forEach(d=>{
+      const s = soldOn(d, v.ean);
+      if(s!=null) total += s;
+    });
+    return {v, total};
+  }).sort((a,b)=>b.total-a.total).slice(0,10);
+
+  html += `<div class="card"><h2>Top ${Math.min(10, top10.length)} varer – sidste 30 dage</h2>`;
+  if(top10.every(x=>x.total===0)){
+    html += `<div class="empty">Ingen salgsdata for de seneste 30 dage endnu.</div>`;
+  } else {
+    html += `<table><tr><th>#</th><th>Vare</th><th>Solgt (30 dage)</th></tr>`;
+    top10.forEach((x,i)=>{
+      html += `<tr><td>${i+1}</td><td>${x.v.navn}</td><td>${x.total}</td></tr>`;
+    });
+    html += `</table>`;
+  }
+  html += `</div>`;
+
+  // ---- Hurtig status ----
+  let spildfriDage = 0;
+  dates14.forEach(date=>{
+    const day = REGS[date];
+    if(!day) return;
+    let allReg=true, sumLuk=0;
+    aktive.forEach(v=>{
+      const r = day[v.ean];
+      if(!r || r.luk==null){ allReg=false; return; }
+      sumLuk += r.luk;
+    });
+    if(allReg && sumLuk===0) spildfriDage++;
+  });
+
+  let topUdsolgt = aktive
+    .map(v=>({v, n:stats[v.ean].s7.kl13zero}))
+    .filter(x=>x.n>0)
+    .sort((a,b)=>b.n-a.n)[0];
+
+  let bedstTilbud = null;
+  aktive.forEach(v=>{
+    const s = stats[v.ean].s14;
+    if(s.hasNorm && s.hasTilbud && s.gnsNorm>0){
+      const pct = Math.round(((s.gnsTilbud-s.gnsNorm)/s.gnsNorm)*100);
+      if(!bedstTilbud || pct>bedstTilbud.pct) bedstTilbud = {v, pct};
+    }
+  });
+
+  html += `<div class="card"><h2>Hurtig status</h2>`;
+  html += `<div class="row"><div class="name">✅ ${spildfriDage} af 14 dage uden spild</div></div>`;
+  if(topUdsolgt){
+    html += `<div class="row"><div class="name">⚠️ ${topUdsolgt.v.navn} udsolgt ${topUdsolgt.n} gange (seneste 7 dage)</div></div>`;
+  }
+  if(bedstTilbud){
+    html += `<div class="row"><div class="name">📈 Tilbud på ${bedstTilbud.v.navn} gav ${(bedstTilbud.pct>=0?'+':'')+bedstTilbud.pct}% salg</div></div>`;
+  }
+  html += `</div>`;
+
+  app.innerHTML = html;
+
+  ensureWeatherAuto(todayISO(), ()=> currentTab==='dash');
+  ensureWeatherAuto(tDate, ()=> currentTab==='dash');
+}
+
+/* ---------- MØNSTRE TAB ---------- */
+function renderMonstre(){
+  const aktive = VARER.filter(v=>v.aktiv);
+  if(aktive.length===0){
+    app.innerHTML = `<div class="card empty">Ingen aktive varer endnu.</div>`;
+    return;
+  }
+  const dates = periodDates(56); // 8 uger
+  const dayNames = ["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","Søndag"];
+  const dayIdx = [1,2,3,4,5,6,0]; // getDay() values, Monday first
+
+  let html = `<div class="card"><h2>Ugedagsmønster</h2>
+    <div class="small-muted" style="margin-bottom:8px;">Gennemsnit pr. ugedag, baseret på seneste 8 uger.</div>`;
+
+  aktive.forEach(v=>{
+    html += `<h3>${v.navn}</h3><table>
+      <tr><th>Dag</th><th>Gns. modtaget</th><th>Gns. kl.13</th><th>Gns. luk</th></tr>`;
+    dayIdx.forEach((dn,i)=>{
+      const dDates = dates.filter(date=> isoToUTCDate(date).getUTCDay()===dn);
+      const s = summarize(v.ean, dDates);
+      html += `<tr><td>${dayNames[i]}</td><td>${s.gnsModtaget||'–'}</td><td>${s.gnsKl13||'–'}</td><td>${s.gnsLuk||'–'}</td></tr>`;
+    });
+    html += `</table>`;
+  });
+  html += `</div>`;
+
+  // Tilbudseffekt
+  html += `<div class="card"><h2>Tilbudseffekt</h2>
+    <div class="small-muted" style="margin-bottom:8px;">Gennemsnitligt salg pr. dag, seneste 8 uger.</div>
+    <table><tr><th>Vare</th><th>Normal</th><th>Tilbud</th></tr>`;
+  aktive.forEach(v=>{
+    const s = summarize(v.ean, dates);
+    html += `<tr><td>${v.navn}</td><td>${s.hasNorm? s.gnsNorm : '–'}</td><td>${s.hasTilbud? s.gnsTilbud : '–'}</td></tr>`;
+  });
+  html += `</table>`;
+  aktive.forEach(v=>{
+    const s = summarize(v.ean, dates);
+    if(s.hasNorm && s.hasTilbud && s.gnsNorm>0){
+      const pct = Math.round(((s.gnsTilbud-s.gnsNorm)/s.gnsNorm)*100);
+      html += `<div class="suggestion">${v.navn}: Tilbud giver ${(pct>=0?'+':'')+pct}% ${pct>=0?'højere':'lavere'} salg.</div>`;
+    }
+  });
+  html += `</div>`;
+
+  // Tendens
+  const dates14 = periodDates(14);
+  html += `<div class="card"><h2>Tendens – seneste 14 dage</h2>`;
+  aktive.forEach(v=>{
+    const t = vareTrend(v.ean, dates14);
+    html += `<div class="row"><div class="name">${v.navn}</div>
+      <div class="sub">${t.arrow} ${t.label}</div></div>`;
+  });
+  html += `</div>`;
+
+  // ---- Effekter: Ferie, Lønweekend, Vejr ----
+  function totalSoldOnDate(date){
+    let total=0, any=false;
+    aktive.forEach(v=>{
+      const s = soldOn(date, v.ean);
+      if(s!=null){ total+=s; any=true; }
+    });
+    return any ? total : null;
+  }
+  function tagEffect(predicate){
+    const withTag=[], withoutTag=[];
+    dates.forEach(date=>{
+      const t = totalSoldOnDate(date);
+      if(t==null) return;
+      if(predicate(date)) withTag.push(t); else withoutTag.push(t);
+    });
+    if(withTag.length<2 || withoutTag.length<2) return null;
+    const a=avg(withTag), b=avg(withoutTag);
+    if(b===0) return null;
+    return Math.round(((a-b)/b)*100);
+  }
+
+  html += `<div class="card"><h2>Ferieeffekt</h2>`;
+  const ferieEffekt = tagEffect(date=>{
+    const tags = getEffectiveTags(date).tags;
+    return FERIE_KEYS.some(k=>tags[k]);
+  });
+  html += ferieEffekt!=null
+    ? `<div class="suggestion">Salg på feriedage er ${(ferieEffekt>=0?'+':'')+ferieEffekt}% sammenlignet med normale dage.</div>`
+    : `<div class="small-muted">Kræver flere registreringer.</div>`;
+  html += `</div>`;
+
+  html += `<div class="card"><h2>Lønweekend-effekt</h2>`;
+  const lonEffekt = tagEffect(date=>getEffectiveTags(date).tags.lonweekend);
+  html += lonEffekt!=null
+    ? `<div class="suggestion">Salg i lønweekender er ${(lonEffekt>=0?'+':'')+lonEffekt}% sammenlignet med andre dage.</div>`
+    : `<div class="small-muted">Kræver flere registreringer.</div>`;
+  html += `</div>`;
+
+  html += `<div class="card"><h2>Vejreffekt</h2>`;
+  const solEffekt = tagEffect(date=>{
+    const w = getDayWeather(date);
+    return w.sol && w.temp!=null && w.temp>20;
+  });
+  const regnEffekt = tagEffect(date=>getDayWeather(date).regn);
+  if(solEffekt==null && regnEffekt==null){
+    html += `<div class="small-muted">Kræver flere registreringer.</div>`;
+  } else {
+    if(solEffekt!=null) html += `<div class="suggestion">Salg ved sol og temperatur over 20° er ${(solEffekt>=0?'+':'')+solEffekt}% sammenlignet med andre dage.</div>`;
+    if(regnEffekt!=null) html += `<div class="suggestion" style="margin-top:6px;">Salg på regnvejrsdage er ${(regnEffekt>=0?'+':'')+regnEffekt}% sammenlignet med andre dage.</div>`;
+  }
+  html += `</div>`;
+
+  html += `<div class="card"><h2>Lokale arrangementers effekt</h2>`;
+  const eventEffekt = tagEffect(date=>getActiveEvents(date).length>0);
+  html += eventEffekt!=null
+    ? `<div class="suggestion">Salg på dage med lokale arrangementer er ${(eventEffekt>=0?'+':'')+eventEffekt}% sammenlignet med andre dage.</div>`
+    : `<div class="small-muted">Kræver flere registreringer.</div>`;
+  html += `</div>`;
+
+  // ---- Handelskalender ----
+  html += `<div class="card"><h2>Handelskalender</h2>
+    <div class="small-muted" style="margin-bottom:8px;">Beregnes automatisk. Bruges af Smart Forecast – kan overstyres manuelt pr. dato.</div>
+    <div class="date-row" id="calDateRow" style="cursor:pointer; color:var(--green-d); margin-bottom:10px;">
+      <span class="date-text" id="calDateLabel">${fmtDateDK(calDate)}</span>
+    </div>
+    <input type="date" id="calDatePicker" style="position:absolute; opacity:0; width:1px; height:1px;">`;
+
+  html += autoChecklistHTML(calDate);
+
+  const calEff = getEffectiveTags(calDate);
+  html += `<div class="tag-grid" style="margin-top:10px;">`;
+  CAL_TAGS.forEach(t=>{
+    html += `<button class="tag-chip ${calEff.tags[t.key]?'active':''}" data-caltag="${t.key}">${calEff.tags[t.key]?'✓ ':''}${t.label}</button>`;
+  });
+  html += `</div>
+    <div class="small-muted" style="margin-top:8px;">Tryk for at tilføje eller fjerne en markering manuelt. Manuel markering har altid forrang.</div>`;
+
+  const calWeather = getDayWeather(calDate);
+  html += `<h3 style="margin-top:14px;">Vejr</h3>
+    <div id="calWeatherStatus" class="small-muted" style="margin-bottom:8px;">${weatherStatusMessage(calWeather)}</div>
+    <label>Maks. temperatur for dagen (°C)</label>
+    <input type="text" id="calTemp" inputmode="decimal" placeholder="f.eks. 18" value="${calWeather.temp ?? ''}">
+    <div class="tag-grid" style="margin-top:8px;">
+      <button class="tag-chip ${calWeather.sol?'active':''}" data-calweather="sol">${calWeather.sol?'✓ ':''}☀️ Sol</button>
+      <button class="tag-chip ${calWeather.regn?'active':''}" data-calweather="regn">${calWeather.regn?'✓ ':''}🌧️ Regn</button>
+      <button class="tag-chip ${calWeather.vind?'active':''}" data-calweather="vind">${calWeather.vind?'✓ ':''}💨 Vind</button>
+      <button class="tag-chip ${calWeather.sne?'active':''}" data-calweather="sne">${calWeather.sne?'✓ ':''}❄️ Sne</button>
+    </div>
+  </div>`;
+  if(calWeather.auto===false && DEV_MODE){
+    html += weatherDebugCardHTML();
+  }
+
+  // ---- Lokale arrangementer ----
+  html += `<div class="card">
+    <h2>Lokale arrangementer</h2>
+    <label>Navn på arrangement</label>
+    <input type="text" id="evNavn" placeholder="f.eks. Havnefest, Festival, Byfest, Marked">
+    <label>Startdato</label>
+    <input type="date" id="evStart">
+    <label>Slutdato</label>
+    <input type="date" id="evSlut">
+    <label>Forventet påvirkning</label>
+    <select id="evImpact">
+      <option value="lav">Lav</option>
+      <option value="middel" selected>Middel</option>
+      <option value="hoj">Høj</option>
+    </select>
+    <label>Kommentar</label>
+    <input type="text" id="evKommentar" placeholder="valgfri">
+    <div class="row" style="padding:8px 0;">
+      <div class="name" style="font-size:14px;">Gentag årligt</div>
+      <input type="checkbox" id="evGentag" style="width:22px; height:22px;">
+    </div>
+    <button class="btn-primary" id="addEvent">Tilføj lokalt arrangement</button>
+    <div id="evErr" class="small-muted" style="color:var(--red); margin-top:6px;"></div>
+  </div>`;
+
+  html += `<div class="card"><h2>Planlagte arrangementer</h2>`;
+  if(EVENTS.length===0){
+    html += `<div class="empty">Ingen lokale arrangementer endnu.</div>`;
+  } else {
+    EVENTS.slice().sort((a,b)=>a.start.localeCompare(b.start)).forEach(ev=>{
+      const aktiv = ev.aktiv!==false;
+      html += `<div class="row" style="display:block;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <div class="name">${ev.navn}</div>
+            <div class="sub">${fmtDateDK(ev.start)} – ${fmtDateDK(ev.slut)} · Påvirkning: ${IMPACT_LABEL[ev.impact]}${ev.gentagAarligt?' · Gentages årligt':''}</div>
+            ${ev.kommentar ? `<div class="sub">${ev.kommentar}</div>` : ''}
+          </div>
+        </div>
+        <div style="display:flex; gap:6px; margin-top:8px;">
+          <button class="btn-toggle ${aktiv?'active-toggle':'inactive-toggle'}" data-toggleevent="${ev.id}" style="flex:1;">${aktiv?'Aktiv':'Inaktiv'}</button>
+          <button class="btn-toggle inactive-toggle" data-copyevent="${ev.id}" style="flex:1;">Kopiér</button>
+          <button class="btn-toggle inactive-toggle" data-delevent="${ev.id}" style="flex:1;">Slet</button>
+        </div>
+      </div>`;
+    });
+  }
+  html += `</div>`;
+
+  app.innerHTML = html;
+
+  $('#calDateRow').addEventListener('click', ()=>{
+    const dp = $('#calDatePicker');
+    dp.value = calDate;
+    dp.showPicker ? dp.showPicker() : dp.click();
+  });
+  $('#calDatePicker').addEventListener('change', e=>{
+    if(e.target.value){ calDate = e.target.value; renderMonstre(); }
+  });
+  app.querySelectorAll('[data-caltag]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const eff = getEffectiveTags(calDate);
+      const tags = getDayTags(calDate);
+      const key = btn.dataset.caltag;
+      tags[key] = !eff.tags[key];
+      await saveRegsAuto();
+      renderMonstre();
+    });
+  });
+  const calTempInp = $('#calTemp');
+  if(calTempInp){
+    calTempInp.addEventListener('change', async ()=>{
+      const w = getDayWeather(calDate);
+      const raw = calTempInp.value.trim();
+      if(raw===''){ w.temp = null; }
+      else {
+        const num = parseFloat(raw.replace(',','.'));
+        w.temp = isNaN(num) ? null : num;
+      }
+      w.auto = false; w.manualOverride = true;
+      await saveRegsAuto();
+    });
+  }
+  app.querySelectorAll('[data-calweather]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const w = getDayWeather(calDate);
+      w[btn.dataset.calweather] = !w[btn.dataset.calweather];
+      w.auto = false; w.manualOverride = true;
+      await saveRegsAuto();
+      renderMonstre();
+    });
+  });
+  $('#addEvent').addEventListener('click', async ()=>{
+    const navn = $('#evNavn').value.trim();
+    const start = $('#evStart').value;
+    const slut = $('#evSlut').value;
+    const impact = $('#evImpact').value;
+    const kommentar = $('#evKommentar').value.trim();
+    const gentag = $('#evGentag').checked;
+    const err = $('#evErr');
+    err.textContent='';
+    if(!navn || !start || !slut){
+      err.textContent='Udfyld navn, startdato og slutdato.'; return;
+    }
+    if(slut<start){
+      err.textContent='Slutdato skal være efter startdato.'; return;
+    }
+    EVENTS.push({id:'ev'+Date.now(), navn, start, slut, impact, kommentar, gentagAarligt:gentag, aktiv:true});
+    await saveEventsAuto();
+    renderMonstre();
+  });
+  app.querySelectorAll('[data-delevent]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.dataset.delevent;
+      EVENTS = EVENTS.filter(e=>e.id!==id);
+      await saveEventsAuto();
+      renderMonstre();
+    });
+  });
+  app.querySelectorAll('[data-toggleevent]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.dataset.toggleevent;
+      const ev = EVENTS.find(e=>e.id===id);
+      if(ev){ ev.aktiv = !ev.aktiv; }
+      await saveEventsAuto();
+      renderMonstre();
+    });
+  });
+  app.querySelectorAll('[data-copyevent]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.dataset.copyevent;
+      const ev = EVENTS.find(e=>e.id===id);
+      if(ev){
+        EVENTS.push({...ev, id:'ev'+Date.now(), navn:ev.navn+' (kopi)'});
+      }
+      await saveEventsAuto();
+      renderMonstre();
+    });
+  });
+
+  const _cd = calDate;
+  ensureWeatherAuto(_cd, ()=> currentTab==='monstre' && calDate===_cd);
+}
+
+
+/* ---------- STAMDATA TAB ---------- */
+function renderStamdata(){
+  let html = `<div class="card">
+    <h2>Butiksplacering</h2>
+    <div class="small-muted" style="margin-bottom:8px;">Bruges til at hente vejr automatisk for Smart Forecast.</div>
+    <label>Butiksnavn</label>
+    <input type="text" id="setNavn" placeholder="f.eks. Føtex Ebeltoft" value="${SETTINGS.butiksnavn||''}">
+    <label>By</label>
+    <input type="text" id="setBy" placeholder="f.eks. Ebeltoft" value="${SETTINGS.by||''}">
+    <label>Postnummer</label>
+    <input type="text" id="setPostnr" inputmode="numeric" placeholder="f.eks. 8400" value="${SETTINGS.postnr||''}">
+    <label>Land</label>
+    <input type="text" id="setLand" placeholder="f.eks. Danmark" value="${SETTINGS.land||'Danmark'}">
+    <div class="small-muted" style="margin-top:6px;">${SETTINGS.lat!=null ? '✅ Placering fundet – automatisk vejr er aktivt.' : 'Indtast by og land for at aktivere automatisk vejr.'}</div>
+    <button class="btn-secondary" id="resetButik" style="margin-top:10px;">Nulstil butik</button>
+    <div class="small-muted" style="margin-top:6px;">Gendanner standardbutikken: Føtex Ebeltoft, Ebeltoft, 8400, Danmark.</div>
+    <h3 style="margin-top:14px;">Turistsæson</h3>
+    <div class="small-muted" style="margin-bottom:8px;">Vælg hvilke måneder der regnes som turistsæson (standard: juni, juli, august).</div>
+    <div class="tag-grid">
+      ${['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'].map((m,i)=>{
+        const num=i+1;
+        const active = (SETTINGS.turistMonths||[6,7,8]).includes(num);
+        return `<button class="tag-chip ${active?'active':''}" data-turistmonth="${num}">${active?'✓ ':''}${m}</button>`;
+      }).join('')}
+    </div>
+  </div>`;
+
+  html += `<div class="card">
+    <h2>Tilføj vare</h2>
+    <label>EAN-nummer</label>
+    <input type="text" id="newEan" inputmode="numeric" placeholder="f.eks. 5701234500042">
+    <label>Varenavn</label>
+    <input type="text" id="newNavn" placeholder="f.eks. Lyst rugbrød">
+    <label>Leverandør</label>
+    <select id="newLev">
+      <option>Kohberg</option>
+      <option>Schulstad</option>
+      <option>Anden</option>
+    </select>
+    <label>Normalpris (kr.)</label>
+    <input type="text" id="newPris" inputmode="decimal" placeholder="f.eks. 24.95">
+    <label>Tilbudspris (kr.) – valgfri</label>
+    <input type="text" id="newTilbudPris" inputmode="decimal" placeholder="f.eks. 19.95">
+    <label>Hylde – valgfri</label>
+    <input type="text" id="newHylde" placeholder="f.eks. Hylde 3">
+    <label>Sektion – valgfri</label>
+    <input type="text" id="newSektion" placeholder="f.eks. Brødvæg A">
+    <label>Butiksområde – valgfri</label>
+    <select id="newOmraade">
+      <option value="">– vælg –</option>
+      <option>Brødvæg A</option>
+      <option>Brødvæg B</option>
+      <option>Indgang</option>
+      <option>Kampagneområde</option>
+    </select>
+    <button class="btn-primary" id="addVare">Tilføj vare</button>
+    <div id="addErr" class="small-muted" style="color:var(--red); margin-top:6px;"></div>
+  </div>`;
+
+  html += `<div class="card"><h2>Varer (${VARER.length})</h2>`;
+  if(VARER.length===0) html += `<div class="empty">Ingen varer endnu.</div>`;
+  VARER.forEach(v=>{
+    html += `
+      <div class="row" style="display:block;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div>
+            <div class="name">${v.navn}</div>
+            <div class="sub">${v.leverandor} · EAN ${v.ean}</div>
+          </div>
+          <button class="btn-toggle ${v.aktiv?'active-toggle':'inactive-toggle'}" data-ean="${v.ean}" data-toggle="aktiv">
+            ${v.aktiv?'Aktiv':'Inaktiv'}
+          </button>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <div style="flex:1;">
+            <label>Normalpris (kr.)</label>
+            <input type="text" inputmode="decimal" data-ean="${v.ean}" data-pricefield="normalpris" value="${v.normalpris ?? ''}">
+          </div>
+          <div style="flex:1;">
+            <label>Tilbudspris (kr.)</label>
+            <input type="text" inputmode="decimal" data-ean="${v.ean}" data-pricefield="tilbudspris" value="${v.tilbudspris ?? ''}" placeholder="–">
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <div style="flex:1;">
+            <label>Hylde</label>
+            <input type="text" data-ean="${v.ean}" data-placering="hylde" value="${v.hylde||''}" placeholder="f.eks. Hylde 3">
+          </div>
+          <div style="flex:1;">
+            <label>Sektion</label>
+            <input type="text" data-ean="${v.ean}" data-placering="sektion" value="${v.sektion||''}" placeholder="f.eks. Brødvæg A">
+          </div>
+        </div>
+        <label>Butiksområde</label>
+        <select data-ean="${v.ean}" data-placering="omraade">
+          <option value="" ${!v.omraade?'selected':''}>– vælg –</option>
+          ${['Brødvæg A','Brødvæg B','Indgang','Kampagneområde'].map(o=>`<option ${v.omraade===o?'selected':''}>${o}</option>`).join('')}
+        </select>
+      </div>`;
+  });
+  html += `</div>`;
+
+  // ---- Fase 2: Smart Forecast ----
+  html += `<div class="card">
+    <h3 style="margin-top:0;">Fase 2 – Smart Forecast</h3>
+    <div class="small-muted">
+      FreshScan bruger nu historik, ugedag, tilbud, automatisk handelskalender (helligdage, ferier, lønweekender),
+      lokale arrangementer og vejr (manuel eller automatisk) til at beregne et bestillingsforslag for næste dag.
+      Se "Smart Forecast – næste dag" på Dashboard.
+    </div>
+    <div class="small-muted" style="margin-top:8px;">Status: aktiv.</div>
+  </div>`;
+
+  // ---- Fase 3: ShelfScan AI ----
+  html += `<div class="card">
+    <h3 style="margin-top:0;">Fase 3 – ShelfScan AI</h3>
+    <div class="small-muted" style="margin-bottom:10px;">
+      Tag et foto af brødhylden, og lad AI tælle antal stk. pr. vare – kun produktområdet, ingen personer
+      eller ansigtsgenkendelse. Forslaget skal altid kunne godkendes eller rettes manuelt. Vareplaceringerne
+      angivet ovenfor (hylde, sektion, område) vil blive brugt til at koble ShelfScan-billeder til de rigtige varer.
+    </div>
+    <div class="suggestion" style="text-align:center; font-weight:700;">🚧 Kommer i næste version</div>
+  </div>`;
+
+  app.innerHTML = html;
+
+  ['setNavn','setBy','setPostnr','setLand'].forEach(id=>{
+    const inp = $('#'+id);
+    inp.addEventListener('change', async ()=>{
+      const map = {setNavn:'butiksnavn', setBy:'by', setPostnr:'postnr', setLand:'land'};
+      const field = map[id];
+      const newVal = inp.value.trim();
+      if(field==='by' || field==='land' || field==='postnr'){
+        if(SETTINGS[field] !== newVal){
+          SETTINGS.lat = null; SETTINGS.lon = null; // genberegn placering
+        }
+      }
+      SETTINGS[field] = newVal;
+      await saveSettingsAuto();
+      if(field==='by' || field==='land' || field==='postnr'){
+        await geocodeStore();
+        renderStamdata();
+      }
+    });
+  });
+
+  $('#resetButik').addEventListener('click', async ()=>{
+    SETTINGS = {...DEFAULT_SETTINGS, turistMonths: SETTINGS.turistMonths};
+    await saveSettingsAuto();
+    await geocodeStore();
+    renderStamdata();
+  });
+
+  app.querySelectorAll('[data-turistmonth]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const num = parseInt(btn.dataset.turistmonth,10);
+      if(!Array.isArray(SETTINGS.turistMonths)) SETTINGS.turistMonths=[6,7,8];
+      const idx = SETTINGS.turistMonths.indexOf(num);
+      if(idx>=0) SETTINGS.turistMonths.splice(idx,1);
+      else SETTINGS.turistMonths.push(num);
+      await saveSettingsAuto();
+      renderStamdata();
+    });
+  });
+
+  $('#addVare').addEventListener('click', async ()=>{
+    const ean = $('#newEan').value.trim();
+    const navn = $('#newNavn').value.trim();
+    const lev = $('#newLev').value;
+    const pris = parseFloat($('#newPris').value.replace(',','.'));
+    const tilbudRaw = $('#newTilbudPris').value.trim();
+    const tilbudPris = tilbudRaw ? parseFloat(tilbudRaw.replace(',','.')) : null;
+    const err = $('#addErr');
+    err.textContent='';
+    if(!ean || !navn || isNaN(pris)){
+      err.textContent='Udfyld EAN, varenavn og normalpris.'; return;
+    }
+    if(tilbudRaw && isNaN(tilbudPris)){
+      err.textContent='Tilbudspris er ikke et gyldigt tal.'; return;
+    }
+    if(VARER.some(v=>v.ean===ean)){
+      err.textContent='EAN findes allerede – EAN skal være unik.'; return;
+    }
+    VARER.push({ean, navn, leverandor:lev, normalpris:pris, tilbudspris: (tilbudPris==null||isNaN(tilbudPris))?null:tilbudPris, aktiv:true,
+      hylde: $('#newHylde').value.trim(), sektion: $('#newSektion').value.trim(), omraade: $('#newOmraade').value});
+    await saveVarerAuto();
+    renderStamdata();
+  });
+
+  app.querySelectorAll('[data-toggle=aktiv]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const ean = btn.dataset.ean;
+      const v = VARER.find(x=>x.ean===ean);
+      v.aktiv = !v.aktiv;
+      await saveVarerAuto();
+      renderStamdata();
+    });
+  });
+
+  app.querySelectorAll('[data-pricefield]').forEach(inp=>{
+    inp.addEventListener('change', async ()=>{
+      const ean = inp.dataset.ean, field = inp.dataset.pricefield;
+      const v = VARER.find(x=>x.ean===ean);
+      const raw = inp.value.trim();
+      if(raw===''){
+        v[field] = field==='tilbudspris' ? null : v[field];
+      } else {
+        const num = parseFloat(raw.replace(',','.'));
+        v[field] = isNaN(num) ? v[field] : num;
+      }
+      await saveVarerAuto();
+    });
+  });
+
+  app.querySelectorAll('[data-placering]').forEach(inp=>{
+    inp.addEventListener('change', async ()=>{
+      const ean = inp.dataset.ean, field = inp.dataset.placering;
+      const v = VARER.find(x=>x.ean===ean);
+      v[field] = inp.value.trim ? inp.value.trim() : inp.value;
+      await saveVarerAuto();
+    });
+  });
+}
+
+/* ---------- HISTORIK TAB ---------- */
+let histPeriod = 14; // dage
+let histVareEan = 'alle';
+let histLev = 'alle';
+let histUgedag = 'alle';
+let histPris = 'alle';
+let histDate = isoDaysAgo(1);
+
+function isoWeek(date){
+  const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  const dayNum = (d.getUTCDay()+6)%7;
+  d.setUTCDate(d.getUTCDate()-dayNum+3);
+  const firstThursday = new Date(Date.UTC(d.getUTCFullYear(),0,4));
+  const diff = (d - firstThursday)/86400000;
+  return 1 + Math.round(diff/7);
+}
+function periodDates(days){
+  return Array.from({length:days},(_,i)=>isoDaysAgo(i));
+}
+function summarize(ean, dates, statusFilter){
+  statusFilter = statusFilter || 'alle';
+  let mod=[],k13=[],luk=[],kl13zero=0,restDays=0,normSales=[],tilbudSales=[],tilbudDays=0;
+  dates.forEach(date=>{
+    const r = REGS[date] && REGS[date][ean];
+    if(!r) return;
+    if(statusFilter!=='alle' && r.status!==statusFilter) return;
+    if(r.modtaget!=null) mod.push(r.modtaget);
+    if(r.kl13!=null){ k13.push(r.kl13); if(r.kl13===0) kl13zero++; }
+    if(r.luk!=null){ luk.push(r.luk); if(r.luk>0) restDays++; }
+    if(r.modtaget!=null && r.luk!=null){
+      const sold=r.modtaget-r.luk;
+      if(r.status==='tilbud'){ tilbudSales.push(sold); tilbudDays++; }
+      else normSales.push(sold);
+    }
+  });
+  return {
+    gnsModtaget: round1(avg(mod)),
+    gnsKl13: round1(avg(k13)),
+    gnsLuk: round1(avg(luk)),
+    kl13zero, restDays, tilbudDays,
+    regDays: dates.filter(d=>REGS[d] && REGS[d][ean]).length,
+    gnsNorm: round1(avg(normSales)),
+    gnsTilbud: round1(avg(tilbudSales)),
+    hasNorm: normSales.length>0, hasTilbud: tilbudSales.length>0
+  };
+}
+
+function renderHistorik(){
+  const aktive = VARER.filter(v=>v.aktiv);
+  if(aktive.length===0){
+    app.innerHTML = `<div class="card empty">Ingen aktive varer endnu.</div>`;
+    return;
+  }
+  const periods = [
+    {label:'2 uger', val:14}, {label:'4 uger', val:28},
+    {label:'8 uger', val:56}, {label:'År til dato', val:'ytd'}
+  ];
+  let days;
+  if(histPeriod==='ytd'){
+    const start = isoToUTCDate(todayISO().slice(0,4)+'-01-01');
+    days = Math.floor((isoToUTCDate(todayISO()) - start)/86400000)+1;
+  } else days = histPeriod;
+  const dates = periodDates(days);
+
+  let html = `<div class="card">
+    <h2>Historik</h2>
+    <div class="step-pill">`;
+  periods.forEach(p=>{
+    html += `<span class="${histPeriod===p.val?'done':''}" data-period="${p.val}" style="cursor:pointer;">${p.label}</span>`;
+  });
+  html += `</div>
+    <label>Vis vare</label>
+    <select id="histVare">
+      <option value="alle" ${histVareEan==='alle'?'selected':''}>Alle varer</option>`;
+  aktive.forEach(v=>{
+    html += `<option value="${v.ean}" ${histVareEan===v.ean?'selected':''}>${v.navn}</option>`;
+  });
+  html += `</select>
+    <label>Leverandør</label>
+    <select id="histLev">
+      <option value="alle" ${histLev==='alle'?'selected':''}>Alle leverandører</option>`;
+  [...new Set(aktive.map(v=>v.leverandor))].forEach(lev=>{
+    html += `<option value="${lev}" ${histLev===lev?'selected':''}>${lev}</option>`;
+  });
+  html += `</select>
+    <label>Ugedag</label>
+    <select id="histUgedag">
+      <option value="alle" ${histUgedag==='alle'?'selected':''}>Alle ugedage</option>
+      ${["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","Søndag"].map(d=>
+        `<option value="${d}" ${histUgedag===d?'selected':''}>${d}</option>`).join('')}
+    </select>
+    <label>Prisstatus</label>
+    <select id="histPris">
+      <option value="alle" ${histPris==='alle'?'selected':''}>Normal og tilbud</option>
+      <option value="normal" ${histPris==='normal'?'selected':''}>Kun normalpris</option>
+      <option value="tilbud" ${histPris==='tilbud'?'selected':''}>Kun tilbud</option>
+    </select>
+    <div class="small-muted">Periode: ${fmtDateDK(dates[dates.length-1])} – ${fmtDateDK(dates[0])}</div>
+    <button class="btn-secondary" disabled style="opacity:.5; cursor:default;">Eksport til Excel (kommer senere)</button>
+  </div>`;
+
+  let filteredDates = dates;
+  if(histUgedag!=='alle'){
+    filteredDates = dates.filter(date=> weekdayName(date)===histUgedag);
+  }
+
+  const showVarer = (histVareEan==='alle' ? aktive : aktive.filter(v=>v.ean===histVareEan))
+    .filter(v=> histLev==='alle' || v.leverandor===histLev);
+
+  if(showVarer.length===0){
+    html += `<div class="card empty">Ingen varer matcher de valgte filtre.</div>`;
+    app.innerHTML = html;
+    return;
+  }
+
+  showVarer.forEach(v=>{
+    const s = summarize(v.ean, filteredDates, histPris);
+    let diffText = '–';
+    if(s.hasNorm && s.hasTilbud && s.gnsNorm>0){
+      const pct = Math.round(((s.gnsTilbud-s.gnsNorm)/s.gnsNorm)*100);
+      diffText = (pct>=0?'+':'')+pct+'% ved tilbud';
+    }
+    html += `<div class="card">
+      <h2>${v.navn}</h2>
+      <div class="topcards">
+        <div class="topcard"><div class="num">${s.regDays}</div><div class="lbl">Registreringsdage</div></div>
+        <div class="topcard"><div class="num">${s.gnsModtaget}</div><div class="lbl">Gns. modtaget</div></div>
+        <div class="topcard"><div class="num">${s.gnsKl13}</div><div class="lbl">Gns. rest kl.13</div></div>
+        <div class="topcard"><div class="num">${s.gnsLuk}</div><div class="lbl">Gns. rest ved luk</div></div>
+        <div class="topcard"><div class="num">${s.kl13zero}</div><div class="lbl">Dage med 0 stk. kl.13</div></div>
+        <div class="topcard"><div class="num">${s.restDays}</div><div class="lbl">Dage med rest ved luk</div></div>
+      </div>
+      <div class="small-muted">Normal vs. tilbud: ${diffText}</div>
+    </div>`;
+  });
+
+  // Uge for uge udvikling
+  const numWeeks = histPeriod==='ytd' ? Math.ceil(days/7) : Math.ceil(days/7);
+  let weekBuckets = {};
+  filteredDates.forEach(date=>{
+    const d = isoToUTCDate(date);
+    const key = d.getUTCFullYear()+"-U"+String(isoWeek(d)).padStart(2,'0');
+    if(!weekBuckets[key]) weekBuckets[key]=[];
+    weekBuckets[key].push(date);
+  });
+  const weekKeys = Object.keys(weekBuckets).sort();
+
+  html += `<div class="card"><h2>Udvikling uge for uge</h2><table>
+    <tr><th>Uge</th><th>Vare</th><th>Gns. modtaget</th><th>Gns. kl.13</th><th>Gns. ved luk</th></tr>`;
+  weekKeys.forEach(wk=>{
+    showVarer.forEach(v=>{
+      const s = summarize(v.ean, weekBuckets[wk], histPris);
+      if(s.regDays===0) return;
+      html += `<tr><td>${wk}</td><td>${v.navn}</td><td>${s.gnsModtaget}</td><td>${s.gnsKl13}</td><td>${s.gnsLuk}</td></tr>`;
+    });
+  });
+  html += `</table></div>`;
+
+  // ---- Dagsoversigt ----
+  html += `<div class="card"><h2>Dagsoversigt</h2>
+    <div class="small-muted" style="margin-bottom:8px;">Se hvad der blev registreret, og hvad systemet ville have foreslået.</div>
+    <div class="date-row" id="histDateRow" style="cursor:pointer; color:var(--green-d); margin-bottom:10px;">
+      <span class="date-text">${fmtDateDK(histDate)}</span>
+    </div>
+    <input type="date" id="histDatePicker" style="position:absolute; opacity:0; width:1px; height:1px;">`;
+
+  const histEff = getEffectiveTags(histDate);
+  const histWeather = getDayWeather(histDate);
+  const histActiveLabels = CAL_TAGS.filter(t=>histEff.tags[t.key]).map(t=>t.label);
+  const histEvents = getActiveEvents(histDate);
+
+  html += `<table><tr><th>Vare</th><th>Modtaget</th><th>Kl.13</th><th>Luk</th><th>Solgt</th><th>Pris</th><th>Forecast</th><th>Afvigelse</th></tr>`;
+  const histDates56 = periodDates(56).filter(d=>d<histDate);
+  showVarer.forEach(v=>{
+    const r = REGS[histDate] && REGS[histDate][v.ean];
+    const sold = soldOn(histDate, v.ean);
+    let forecastVal = '–', afvigelseTxt = '–';
+    if(histDates56.length>=2){
+      const f = computeForecast(v.ean, histDate, histDates56);
+      forecastVal = ''+f.anbefalet;
+      if(sold!=null){
+        const diff = sold - f.anbefalet;
+        afvigelseTxt = (diff===0) ? 'Præcist' : ((diff>0?'+':'')+diff+' stk.');
+      }
+    }
+    html += `<tr>
+      <td>${v.navn}</td>
+      <td>${r&&r.modtaget!=null?r.modtaget:'–'}</td>
+      <td>${r&&r.kl13!=null?r.kl13:'–'}</td>
+      <td>${r&&r.luk!=null?r.luk:'–'}</td>
+      <td>${sold!=null?sold:'–'}</td>
+      <td>${r? (r.status==='tilbud'?'Tilbud':'Normal') : '–'}</td>
+      <td>${forecastVal}</td>
+      <td style="font-size:12px;">${afvigelseTxt}</td>
+    </tr>`;
+  });
+  html += `</table>`;
+
+  html += `<h3 style="margin-top:14px;">Vejr og kalenderstatus denne dag</h3>`;
+  const histWparts = [];
+  if(histWeather.temp!=null) histWparts.push('maks. '+histWeather.temp+'°C');
+  if(histWeather.sol) histWparts.push('sol');
+  if(histWeather.regn) histWparts.push('regn');
+  if(histWeather.vind) histWparts.push('blæst');
+  if(histWeather.sne) histWparts.push('sne');
+  html += `<div class="small-muted">Vejr: ${histWparts.length? histWparts.join(', ') : 'ikke registreret'}</div>`;
+  html += `<div class="small-muted" style="margin-top:4px;">Kalenderstatus: ${histActiveLabels.length? histActiveLabels.join(', ') : 'normal dag'}${histEff.reasons.autoText ? ' ('+histEff.reasons.autoText+')' : ''}</div>`;
+  if(histEvents.length){
+    html += `<div class="small-muted" style="margin-top:4px;">Lokale arrangementer: ${histEvents.map(e=>`${e.navn} (${IMPACT_LABEL[e.impact]})`).join(', ')}</div>`;
+  }
+  html += `</div>`;
+
+  // ---- Sammenligninger ----
+  function sumSalg(ds, statusFilter){
+    let total=0;
+    showVarer.forEach(v=>{
+      ds.forEach(date=>{
+        const r = REGS[date]&&REGS[date][v.ean];
+        if(!r) return;
+        if(statusFilter && statusFilter!=='alle' && r.status!==statusFilter) return;
+        if(r.modtaget!=null && r.luk!=null) total += (r.modtaget-r.luk);
+      });
+    });
+    return total;
+  }
+  function pctDiff(a,b){
+    if(b===0) return a===0? '0%' : '–';
+    const p = Math.round(((a-b)/b)*100);
+    return (p>=0?'+':'')+p+'%';
+  }
+  const last7 = periodDates(7), prev7 = periodDates(14).slice(7,14);
+  const last30 = periodDates(30), prev30 = periodDates(60).slice(30,60);
+  const salgUge = sumSalg(last7), salgUgeForrige = sumSalg(prev7);
+  const salgMaaned = sumSalg(last30), salgMaanedForrige = sumSalg(prev30);
+  const tilbudSalg = sumSalg(dates,'tilbud'), normalSalg = sumSalg(dates,'normal');
+
+  html += `<div class="card"><h2>Sammenligninger</h2>
+    <table>
+      <tr><th></th><th>Periode</th><th>Forrige</th><th>Ændring</th></tr>
+      <tr><td>Denne uge vs sidste uge</td><td>${salgUge}</td><td>${salgUgeForrige}</td><td>${pctDiff(salgUge,salgUgeForrige)}</td></tr>
+      <tr><td>Sidste 30 dage vs forrige 30 dage</td><td>${salgMaaned}</td><td>${salgMaanedForrige}</td><td>${pctDiff(salgMaaned,salgMaanedForrige)}</td></tr>
+      <tr><td>Tilbud vs normalpris (valgt periode)</td><td>${tilbudSalg}</td><td>${normalSalg}</td><td>${pctDiff(tilbudSalg,normalSalg)}</td></tr>
+    </table>
+    <div class="small-muted" style="margin-top:8px;">Tal viser samlet antal solgte (modtaget − rest ved luk). Ugedag-for-ugedag sammenligning findes under Mønstre.</div>
+  </div>`;
+
+  app.innerHTML = html;
+
+  app.querySelectorAll('[data-period]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const val = el.dataset.period;
+      histPeriod = (val==='ytd') ? 'ytd' : parseInt(val,10);
+      renderHistorik();
+    });
+  });
+  $('#histVare').addEventListener('change', e=>{
+    histVareEan = e.target.value;
+    renderHistorik();
+  });
+  $('#histLev').addEventListener('change', e=>{
+    histLev = e.target.value;
+    renderHistorik();
+  });
+  $('#histUgedag').addEventListener('change', e=>{
+    histUgedag = e.target.value;
+    renderHistorik();
+  });
+  $('#histPris').addEventListener('change', e=>{
+    histPris = e.target.value;
+    renderHistorik();
+  });
+  $('#histDateRow').addEventListener('click', ()=>{
+    const dp = $('#histDatePicker');
+    dp.value = histDate;
+    dp.showPicker ? dp.showPicker() : dp.click();
+  });
+  $('#histDatePicker').addEventListener('change', e=>{
+    if(e.target.value){ histDate = e.target.value; renderHistorik(); }
+  });
+}
+
+/* ---------- Nav ---------- */
+document.querySelectorAll('nav button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    currentTab = btn.dataset.tab;
+    render();
+  });
+});
+
+/* ---------- Init ---------- */
+(async ()=>{
+  try{
+    await loadAll();
+  }catch(e){
+    console.error('loadAll() crashed:', errMsg(e));
+    VARER = VARER && VARER.length ? VARER : [
+      {ean:"5701234500011", navn:"Solsikkerugbrød", leverandor:"Kohberg", normalpris:24.95, aktiv:true},
+      {ean:"5701234500028", navn:"Kernerugbrød", leverandor:"Schulstad", normalpris:22.95, aktiv:true},
+      {ean:"5701234500035", navn:"Fuldkorn", leverandor:"Kohberg", normalpris:23.95, aktiv:true},
+    ];
+    REGS = REGS || {};
+  }
+  $('#saveIndicator').textContent = '🟢 Alle ændringer gemt';
+  try{
+    render();
+  }catch(e){
+    console.error('render() crashed:', errMsg(e));
+    app.innerHTML = `<div class="card empty">Der opstod en fejl ved indlæsning af FreshScan.<br>Genindlæs siden for at forsøge igen.</div>`;
+  }
+})();
+</script>
+</body>
+</html>

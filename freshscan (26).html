@@ -1,0 +1,3728 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FreshScan AI</title>
+<meta name="theme-color" content="#1b7a3d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FreshScan AI">
+<link rel="manifest" href="data:application/json,{%22name%22:%22FreshScan%20AI%22,%22short_name%22:%22FreshScan%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f4f6f5%22,%22theme_color%22:%22%231b7a3d%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20100%20100%27%3E%3Ctext%20y=%27.9em%27%20font-size=%2790%27%3E%F0%9F%8D%9E%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22any%22,%22type%22:%22image/svg+xml%22}]}">
+
+<style>
+  :root{
+    --green:#1b7a3d; --green-d:#155c2e; --red:#d0413a; --yellow:#e0a526;
+    --bg:#f4f6f5; --card:#ffffff; --text:#1c2620; --muted:#6b7a72; --border:#e1e6e3;
+    --accent:#1b7a3d; --ai:#7c3aed; --ai-light:#f5f3ff;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--text); padding-bottom:24px;
+    -webkit-user-select:none; user-select:none;
+  }
+  input,textarea{ -webkit-user-select:text; user-select:text; }
+  header{
+    background:var(--accent); color:#fff; padding:14px 16px;
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  header .brand{display:flex; align-items:center; gap:10px;}
+  header .logo{
+    width:34px; height:34px; border-radius:9px; background:rgba(255,255,255,.18);
+    display:flex; align-items:center; justify-content:center; font-size:18px;
+  }
+  header h1{font-size:18px; margin:0; font-weight:800; letter-spacing:-.01em;}
+  header .customer{font-size:11px; opacity:.85; margin-top:1px;}
+  #menuBtn{
+    background:rgba(255,255,255,.15); border:none; border-radius:10px; font-size:20px;
+    padding:6px 12px; width:auto; color:#fff; cursor:pointer;
+  }
+  .save-indicator{
+    position:fixed; top:64px; right:14px; font-size:12px; font-weight:700;
+    background:#fff; color:var(--green-d); padding:5px 12px; border-radius:999px;
+    box-shadow:0 2px 8px rgba(0,0,0,.12); z-index:60; opacity:0; pointer-events:none;
+    transition:opacity .25s;
+  }
+  .save-indicator.show{opacity:1;}
+  .container{padding:16px; max-width:520px; margin:0 auto;}
+  .card{
+    background:var(--card); border-radius:16px; padding:18px; margin-bottom:14px;
+    box-shadow:0 1px 3px rgba(0,0,0,.06); border:1px solid var(--border);
+  }
+  .card h2{margin:0 0 10px; font-size:17px; font-weight:700;}
+  .card h3{margin:14px 0 8px; font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em;}
+  .row{display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border);}
+  .row:last-child{border-bottom:none;}
+  .row .name{font-weight:600; font-size:16px;}
+  .row .sub{font-size:12px; color:var(--muted);}
+  .small-muted{font-size:12px; color:var(--muted);}
+  .empty{color:var(--muted); font-size:14px; text-align:center; padding:30px 0;}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th,td{text-align:left; padding:6px 4px; border-bottom:1px solid var(--border);}
+  th{color:var(--muted); font-weight:600; font-size:12px;}
+  input[type=number]{
+    width:120px; font-size:30px; text-align:center; padding:14px 4px; border-radius:14px;
+    border:2px solid var(--border); background:#f9faf9; font-weight:800; color:var(--green-d);
+  }
+  input[type=number]:focus{border-color:var(--green); outline:none;}
+  input[type=text],input[type=password],input[type=time],input[type=file]{
+    width:100%; font-size:16px; padding:13px; border-radius:12px; border:1px solid var(--border);
+    background:#f9faf9; margin-bottom:10px;
+  }
+  select{
+    width:100%; font-size:16px; padding:13px; border-radius:12px; border:1px solid var(--border);
+    background:#f9faf9; margin-bottom:10px;
+  }
+  label{font-size:13px; font-weight:600; color:var(--muted); display:block; margin-bottom:5px;}
+  textarea{
+    width:100%; font-size:16px; padding:13px; border-radius:12px; border:1px solid var(--border);
+    background:#f9faf9; margin-bottom:10px; font-family:inherit; resize:vertical; min-height:70px;
+  }
+  button{
+    border:none; border-radius:14px; padding:18px; font-size:17px; font-weight:700;
+    cursor:pointer; width:100%;
+  }
+  .btn-primary{background:var(--green); color:#fff;}
+  .btn-primary:active{background:var(--green-d);}
+  .btn-secondary{background:#eef2ef; color:var(--text); margin-top:10px;}
+  .btn-ai{background:var(--ai); color:#fff; margin-top:10px;}
+  .btn-toggle{padding:10px 16px; border-radius:999px; font-size:13px; width:auto;}
+  .active-toggle{background:var(--green); color:#fff;}
+  .inactive-toggle{background:#eef2ef; color:var(--muted);}
+  .home-tiles{display:flex; flex-direction:column; gap:14px; margin-top:6px;}
+  .home-tile{
+    background:var(--card); border:1px solid var(--border); border-radius:18px;
+    padding:26px 20px; display:flex; align-items:center; gap:18px;
+    box-shadow:0 1px 3px rgba(0,0,0,.06); cursor:pointer; text-align:left;
+  }
+  .home-tile:active{background:#f3f6f4;}
+  .home-tile .ico{font-size:34px; flex-shrink:0;}
+  .home-tile .label{font-size:19px; font-weight:800;}
+  .home-tile .desc{font-size:13px; color:var(--muted); margin-top:2px;}
+  .home-tile.primary{background:var(--green); border-color:var(--green);}
+  .home-tile.primary .label,.home-tile.primary .desc{color:#fff;}
+  .home-tile.primary .desc{opacity:.85;}
+  .home-tile.ai-tile{background:var(--ai-light); border-color:#c4b5fd;}
+  .home-tile.ai-tile .label{color:var(--ai);}
+  .suggestion-banner{
+    margin-top:16px; background:#fff8e8; border:1px solid #f0d896; border-radius:14px;
+    padding:14px 16px; font-size:15px; font-weight:600; color:#7a5b14;
+    display:flex; align-items:center; gap:10px;
+  }
+  .ai-banner{
+    margin-top:12px; background:var(--ai-light); border:1px solid #c4b5fd; border-radius:14px;
+    padding:14px 16px; font-size:14px; color:#5b21b6;
+    display:flex; align-items:center; gap:10px;
+  }
+  .confidence-badge{
+    display:inline-flex; align-items:center; gap:5px;
+    padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700;
+  }
+  .conf-hoj{background:#dcfce7; color:#166534;}
+  .conf-middel{background:#fef9c3; color:#854d0e;}
+  .conf-lav{background:#fee2e2; color:#991b1b;}
+  .progress-dots{display:flex; justify-content:center; gap:6px; margin-bottom:16px;}
+  .progress-dots span{width:8px; height:8px; border-radius:50%; background:var(--border);}
+  .progress-dots span.done{background:var(--green);}
+  .progress-dots span.current{background:var(--green); width:20px; border-radius:4px;}
+  .camera-tile{
+    width:100%; aspect-ratio:4/3; border-radius:18px; background:#eef2ef;
+    border:2px dashed var(--border); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:8px; cursor:pointer; margin-bottom:14px;
+    overflow:hidden; position:relative;
+  }
+  .camera-tile img{width:100%; height:100%; object-fit:cover;}
+  .camera-tile .ico{font-size:46px;}
+  .camera-tile .lbl{font-size:15px; font-weight:700; color:var(--muted);}
+  .camera-tile .retake{
+    position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,.6); color:#fff;
+    font-size:12px; padding:6px 12px; border-radius:999px; width:auto;
+  }
+  .stepper{display:flex; align-items:center; justify-content:center; gap:18px; margin:14px 0;}
+  .stepper button{
+    width:64px; height:64px; border-radius:50%; font-size:30px; font-weight:800;
+    background:#eef2ef; color:var(--text); flex-shrink:0;
+  }
+  .stepper .val{font-size:44px; font-weight:800; min-width:90px; text-align:center; color:var(--green-d);}
+  .sheet-overlay{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:300;
+  }
+  .sheet{
+    background:#fff; max-width:480px; margin:0 auto; border-radius:18px 18px 0 0;
+    padding:20px; position:absolute; bottom:0; left:0; right:0;
+    max-height:85vh; overflow-y:auto;
+  }
+  .sheet-handle{width:40px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 16px;}
+  .sheet h2{margin:0 0 14px;}
+  .menu-item{
+    display:flex; align-items:center; gap:14px; padding:16px 4px; border-bottom:1px solid var(--border);
+    font-size:16px; font-weight:600; cursor:pointer;
+  }
+  .menu-item:last-child{border-bottom:none;}
+  .menu-item .ico{font-size:22px; width:28px; text-align:center;}
+  .admin-badge{
+    display:inline-block; background:#eef2ef; color:var(--muted); font-size:11px;
+    font-weight:700; padding:3px 10px; border-radius:999px; margin-bottom:10px;
+  }
+  .ai-badge{
+    display:inline-block; background:var(--ai-light); color:var(--ai); font-size:11px;
+    font-weight:700; padding:3px 10px; border-radius:999px; margin-bottom:10px;
+  }
+  .pin-pad{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; max-width:280px; margin:18px auto 0;}
+  .pin-pad button{
+    aspect-ratio:1; border-radius:50%; font-size:24px; font-weight:700;
+    background:#eef2ef; color:var(--text);
+  }
+  .pin-dots{display:flex; justify-content:center; gap:12px; margin:20px 0;}
+  .pin-dots span{width:14px; height:14px; border-radius:50%; background:var(--border);}
+  .pin-dots span.filled{background:var(--green);}
+  .back-row{display:flex; align-items:center; gap:10px; margin-bottom:14px; cursor:pointer;}
+  .back-row .ico{font-size:20px;}
+  .back-row .lbl{font-size:15px; font-weight:700; color:var(--muted);}
+  .tag-grid{display:flex; flex-wrap:wrap; gap:8px;}
+  .tag-chip{
+    padding:9px 15px; border-radius:999px; font-size:13px; font-weight:600;
+    background:#eef2ef; color:var(--muted); cursor:pointer; width:auto;
+  }
+  .tag-chip.active{background:#fdf6e3; color:#8a6213; border:1px solid #e0a526;}
+  .badge{font-size:11px; padding:2px 8px; border-radius:999px; font-weight:700;}
+  .topcards{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;}
+  .topcard{background:var(--card); border-radius:14px; padding:14px; border:1px solid var(--border); text-align:center;}
+  .topcard .num{font-size:26px; font-weight:800; color:var(--green-d);}
+  .topcard .lbl{font-size:12px; color:var(--muted); margin-top:2px;}
+  .ai-topcard{background:var(--ai-light); border-color:#c4b5fd;}
+  .ai-topcard .num{color:var(--ai);}
+  .suggestion{font-size:14px; padding:10px; border-radius:10px; margin-top:6px; background:#f9faf9;}
+  .suggestion.red{background:#fbeceb; color:#9c3a35;}
+  .suggestion.yellow{background:#fdf6e3; color:#8a6213;}
+  .suggestion.ai{background:var(--ai-light); color:#5b21b6;}
+  .step-pill{display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;}
+  .step-pill span{background:#eef2ef; border-radius:999px; padding:4px 10px; font-size:12px; color:var(--muted); font-weight:600;}
+  .step-pill span.done{background:var(--green); color:#fff;}
+  .date-row{display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:10px;}
+  .date-row .date-text{font-size:14px; font-weight:600;}
+  /* AI learning pulse animation */
+  @keyframes aipulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+  .ai-thinking{animation:aipulse 1.2s infinite; color:var(--ai); font-size:13px; text-align:center; padding:8px;}
+  /* Progress bar */
+  .progress-bar{height:8px; border-radius:4px; background:#e5e7eb; overflow:hidden; margin:6px 0;}
+  .progress-fill{height:100%; border-radius:4px; background:var(--green); transition:width .4s;}
+  .progress-fill.ai{background:var(--ai);}
+  /* Factor bar */
+  .factor-row{display:flex; align-items:center; gap:8px; margin:4px 0; font-size:13px;}
+  .factor-bar{flex:1; height:6px; border-radius:3px; background:#e5e7eb; overflow:hidden;}
+  .factor-fill{height:100%; border-radius:3px; background:var(--ai);}
+  .factor-fill.neg{background:var(--red);}
+</style>
+
+<script type="text/javascript" id="freshscan-sw">
+// Service Worker registrering for offline PWA support
+if('serviceWorker' in navigator){
+  const swCode = `
+    const CACHE='freshscan-ai-v2';
+    self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./',location.pathname]))));
+    self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('./')))));
+    self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));
+  `;
+  const blob=new Blob([swCode],{type:'application/javascript'});
+  const url=URL.createObjectURL(blob);
+  navigator.serviceWorker.register(url).catch(()=>{});
+}
+</script>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo" id="brandLogo">🍞</div>
+    <div>
+      <h1 id="brandName">FreshScan AI</h1>
+      <div class="customer" id="brandCustomer">–</div>
+    </div>
+  </div>
+  <button id="menuBtn" aria-label="Menu">☰</button>
+</header>
+
+<div class="save-indicator" id="saveIndicator">✅ Gemt</div>
+<div class="container" id="app"></div>
+
+<!-- ☰ Menu -->
+<div class="sheet-overlay" id="mainMenuOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2>Menu</h2>
+    <div id="menuUserInfo" style="padding:10px 4px 14px; border-bottom:1px solid var(--border); margin-bottom:8px; display:none;">
+      <div style="font-size:13px; font-weight:700;" id="menuUserName">–</div>
+      <div style="font-size:12px; color:var(--muted);" id="menuUserRole">–</div>
+    </div>
+    <div class="menu-item" id="menuHome"><span class="ico">🏠</span>Forside</div>
+    <div class="menu-item" id="menuAdmin"><span class="ico">🔐</span>Administrator</div>
+    <div class="menu-item" id="menuLogout" style="display:none;"><span class="ico">🚪</span>Log ud</div>
+  </div>
+</div>
+
+<!-- Vare-vælger sheet -->
+<div class="sheet-overlay" id="vareSheetOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2>Vælg vare</h2>
+    <div id="vareSheetList"></div>
+  </div>
+</div>
+
+<!-- Barcode scanner modal -->
+<div id="scanModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:9999; flex-direction:column; align-items:center; justify-content:center;">
+  <div style="color:#fff; font-size:17px; font-weight:700; margin-bottom:14px;">Hold kameraet hen mod stregkoden</div>
+  <div style="position:relative; width:min(340px,90vw); aspect-ratio:1;">
+    <video id="scanVideo" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover; border-radius:12px;"></video>
+    <div style="position:absolute; inset:0; border:3px solid #00e676; border-radius:12px; pointer-events:none;"></div>
+    <div id="scanLine" style="position:absolute; left:5%; right:5%; top:50%; height:2px; background:#00e676; opacity:0.8; box-shadow:0 0 8px #00e676;"></div>
+  </div>
+  <div id="scanStatus" style="color:#aaa; font-size:14px; margin-top:12px;">Søger efter stregkode...</div>
+  <button id="scanClose" onclick="FreshScanScanner.stop();" style="margin-top:18px; padding:10px 28px; background:#fff; color:#000; border:none; border-radius:24px; font-size:15px; font-weight:700; width:auto;">Annuller</button>
+</div>
+
+<!-- Kamera modal -->
+<div id="photoModal" style="display:none; position:fixed; inset:0; background:#000; z-index:9998; flex-direction:column; align-items:center; justify-content:center;">
+  <video id="photoVideo" autoplay playsinline muted style="width:100%; max-height:80vh; object-fit:cover;"></video>
+  <canvas id="photoCanvas" style="display:none;"></canvas>
+  <div style="display:flex; gap:20px; margin-top:24px;">
+    <button id="photoCancel" style="width:auto; padding:14px 24px; background:#333; color:#fff; border-radius:999px;">Annuller</button>
+    <button id="photoCapture" style="width:80px; height:80px; border-radius:50%; background:#fff; border:4px solid #ccc;"></button>
+  </div>
+</div>
+
+<script type="text/javascript" id="freshscan-main">
+/* =====================================================================
+   SUPABASE SQL SCHEMA  v2.1
+   Kør i Supabase → SQL editor → New query
+   =====================================================================
+
+create table public.stores (
+  id uuid primary key default gen_random_uuid(),
+  navn text not null, by text, postnr text, land text default 'Danmark',
+  lat float8, lon float8, settings_json text default '{}',
+  created_at timestamptz default now(), updated_at timestamptz default now()
+);
+alter table public.stores enable row level security;
+create policy "store_read" on public.stores for select using (id in (select store_id from public.profiles where id=auth.uid()));
+create policy "store_write" on public.stores for update using (id in (select store_id from public.profiles where id=auth.uid() and role in ('ADMIN','BUTIKSCHEF')));
+
+create table public.profiles (
+  id uuid primary key references auth.users on delete cascade,
+  email text, full_name text, role text not null default 'MEDARBEJDER',
+  store_id uuid references public.stores(id), aktiv boolean default true,
+  last_sign_in_at timestamptz, created_at timestamptz default now(), updated_at timestamptz default now()
+);
+alter table public.profiles enable row level security;
+create policy "profile_self" on public.profiles for select using (auth.uid()=id);
+create policy "profile_store_admin" on public.profiles for select using (store_id in (select store_id from public.profiles where id=auth.uid() and role in ('ADMIN','BUTIKSCHEF')));
+create policy "profile_update_admin" on public.profiles for update using (store_id in (select store_id from public.profiles where id=auth.uid() and role in ('ADMIN','BUTIKSCHEF')));
+
+create table public.products (
+  ean text not null, store_id uuid not null references public.stores(id),
+  navn text not null, leverandor text, aktiv boolean default true,
+  omraade text, hylde text, sektion text, tilbudspris numeric,
+  created_at timestamptz default now(), updated_at timestamptz default now(),
+  primary key (ean, store_id)
+);
+alter table public.products enable row level security;
+create policy "products_read" on public.products for select using (store_id in (select store_id from public.profiles where id=auth.uid()));
+create policy "products_write" on public.products for all using (store_id in (select store_id from public.profiles where id=auth.uid() and role in ('ADMIN','BUTIKSCHEF','AFDELINGSLEDER')));
+
+create table public.registrations (
+  id text primary key,
+  store_id uuid not null references public.stores(id),
+  date date not null, ean text not null,
+  modtaget int, luk int, mp_data text default '{}',
+  status text default 'normal', kommentar text, foto text,
+  created_by uuid references auth.users, updated_by uuid references auth.users,
+  created_at timestamptz default now(), updated_at timestamptz default now()
+);
+alter table public.registrations enable row level security;
+create policy "reg_read" on public.registrations for select using (store_id in (select store_id from public.profiles where id=auth.uid()));
+create policy "reg_write" on public.registrations for all using (store_id in (select store_id from public.profiles where id=auth.uid() and aktiv=true) from public.profiles);
+
+create table public.weather (
+  id text primary key, store_id uuid not null references public.stores(id),
+  date date not null, temp float8, currentTemp float8,
+  sol boolean default false, regn boolean default false,
+  vind boolean default false, vindHard boolean default false, sne boolean default false,
+  weathercode int, updated_at timestamptz default now()
+);
+alter table public.weather enable row level security;
+create policy "weather_all" on public.weather for all using (store_id in (select store_id from public.profiles where id=auth.uid()));
+
+create table public.ai_memory (
+  id text primary key, store_id uuid not null references public.stores(id),
+  date date not null, ean text not null,
+  forecast int, actual int, pct_deviation int, abs_deviation int,
+  confidence text, factors_json text default '{}', mp_data_json text default '{}',
+  recorded_at timestamptz default now()
+);
+alter table public.ai_memory enable row level security;
+create policy "ai_memory_all" on public.ai_memory for all using (store_id in (select store_id from public.profiles where id=auth.uid()));
+
+create table public.calendar_events (
+  id text primary key, store_id uuid not null references public.stores(id),
+  navn text not null, start date not null, slut date not null,
+  impact text default 'middel', kommentar text,
+  gentagAarligt boolean default false, aktiv boolean default true,
+  created_at timestamptz default now(), updated_at timestamptz default now()
+);
+alter table public.calendar_events enable row level security;
+create policy "events_all" on public.calendar_events for all using (store_id in (select store_id from public.profiles where id=auth.uid()));
+
+create table public.day_tags (
+  id text primary key, store_id uuid not null references public.stores(id),
+  date date not null, tags_json text default '{}',
+  updated_at timestamptz default now()
+);
+alter table public.day_tags enable row level security;
+create policy "day_tags_all" on public.day_tags for all using (store_id in (select store_id from public.profiles where id=auth.uid()));
+
+create table public.analytics (
+  id uuid primary key default gen_random_uuid(),
+  store_id uuid not null references public.stores(id),
+  date date not null, metric text not null,
+  value_num float8, value_json text, created_at timestamptz default now()
+);
+alter table public.analytics enable row level security;
+create policy "analytics_all" on public.analytics for all using (store_id in (select store_id from public.profiles where id=auth.uid()));
+
+-- Trigger: ny bruger → profile
+create or replace function public.handle_new_user() returns trigger language plpgsql security definer as $$
+begin
+  insert into public.profiles(id,email,full_name,role)
+  values(new.id,new.email,new.raw_user_meta_data->>'full_name',coalesce(new.raw_user_meta_data->>'role','MEDARBEJDER'))
+  on conflict(id) do update set last_sign_in_at=now(),updated_at=now(); return new;
+end; $$;
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created after insert on auth.users for each row execute procedure public.handle_new_user();
+
+-- Edge Function: create-user (deploy separat via Supabase CLI)
+-- supabase functions new create-user
+-- Kode: se README.md
+
+create index if not exists idx_reg_store_date on public.registrations(store_id,date);
+create index if not exists idx_aimem_store_date on public.ai_memory(store_id,date);
+create index if not exists idx_profiles_store on public.profiles(store_id);
+
+===================================================================== */
+
+const $ = sel => document.querySelector(sel);
+const app = $('#app');
+const TIMEZONE = 'Europe/Copenhagen';
+function todayISO(){
+  return new Intl.DateTimeFormat('en-CA',{
+    timeZone:TIMEZONE,year:'numeric',month:'2-digit',day:'2-digit'
+  }).format(new Date());
+}
+const DAY_NAMES=["Søndag","Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag"];
+const MONTH_NAMES=["januar","februar","marts","april","maj","juni","juli","august","september","oktober","november","december"];
+function isoToUTCDate(iso){const[y,m,d]=iso.split('-').map(Number);return new Date(Date.UTC(y,m-1,d));}
+function utcDateToISO(d){return d.toISOString().slice(0,10);}
+function fmtDateDK(iso){
+  const d=isoToUTCDate(iso);
+  return DAY_NAMES[d.getUTCDay()]+" "+d.getUTCDate()+". "+MONTH_NAMES[d.getUTCMonth()];
+}
+function weekdayName(iso){return DAY_NAMES[isoToUTCDate(iso).getUTCDay()];}
+function isoDaysAgo(n){const d=isoToUTCDate(todayISO());d.setUTCDate(d.getUTCDate()-n);return utcDateToISO(d);}
+function avg(arr){if(!arr.length)return 0;return arr.reduce((a,b)=>a+b,0)/arr.length;}
+function round1(n){return Math.round(n*10)/10;}
+function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+
+/* ---------- Storage ---------- */
+const memStore={};
+function storageGet(key){
+  try{const v=localStorage.getItem('freshscan_'+key);return v===null?undefined:v;}
+  catch(e){return memStore[key];}
+}
+function storageSet(key,val){
+  try{localStorage.setItem('freshscan_'+key,val);}
+  catch(e){memStore[key]=val;}
+}
+function errMsg(e){
+  try{if(e==null)return'Ukendt fejl';if(typeof e==='string')return e;if(e.message)return String(e.message);return String(e);}
+  catch(x){return'Ukendt fejl';}
+}
+function safePlainObject(obj,seen){
+  seen=seen||new Set();
+  if(obj===null||obj===undefined)return null;
+  const t=typeof obj;
+  if(t==='string'||t==='number'||t==='boolean')return obj;
+  if(t==='function')return undefined;
+  if(t!=='object'){try{return String(obj);}catch(e){return null;}}
+  if(Array.isArray(obj))return obj.map(item=>safePlainObject(item,seen));
+  if(obj instanceof Error)return errMsg(obj);
+  if(seen.has(obj))return null;
+  seen.add(obj);
+  const proto=Object.getPrototypeOf(obj);
+  if(proto!==Object.prototype&&proto!==null){try{return String(obj);}catch(e){return null;}}
+  const out={};
+  for(const key of Object.keys(obj)){const val=safePlainObject(obj[key],seen);if(val!==undefined)out[key]=val;}
+  return out;
+}
+function safeStringify(obj){try{return JSON.stringify(safePlainObject(obj));}catch(e){return'null';}}
+
+/* ---------- Core data ---------- */
+let VARER=[], REGS={}, EVENTS=[];
+const DEFAULT_MALEPUNKTER=[
+  {id:'modtaget',label:'Morgen',emoji:'🌅',timeStr:'07:00',aktiv:true,isModtaget:true,isLuk:false},
+  {id:'kl13',label:'Kl. 13',emoji:'☀️',timeStr:'13:00',aktiv:true,isModtaget:false,isLuk:false},
+  {id:'luk',label:'Luk',emoji:'🌙',timeStr:'18:00',aktiv:true,isModtaget:false,isLuk:true},
+];
+const DEFAULT_SETTINGS={
+  butiksnavn:'Føtex Ebeltoft',by:'Ebeltoft',postnr:'8400',land:'Danmark',
+  lat:null,lon:null,turistMonths:[6,7,8],
+  malepunkter:DEFAULT_MALEPUNKTER,primaertMalepunkt:'kl13',
+  kundeNavn:'Føtex Ebeltoft',logo:'🍞',accentColor:'#1b7a3d',
+  afdeling:'Bager',ansvarlig:''
+};
+let SETTINGS={...DEFAULT_SETTINGS,malepunkter:DEFAULT_MALEPUNKTER.map(m=>({...m}))};
+let LAST_GOOD_WEATHER=null;
+
+/* =====================================================================
+   AI MEMORY ENGINE  (nyt i v2.0)
+   ---------------------------------------------------------------------
+   Kernen i FreshScan AI 2.0. Gemmer for hvert afsluttet døgn:
+   - Forecast der blev givet (pr. vare)
+   - Faktisk salg (modtaget − luk)
+   - Afvigelse (pct og absolut)
+   - Alle faktorer der var til stede
+   - Konfidens der blev givet
+   Denne hukommelse er grundlaget for Learning_Engine og Confidence_Engine.
+   Arkitektonisk er den separeret fra REGS (pilotdata) og gemmes i en
+   dedikeret localStorage-nøgle 'ai_memory', klar til at blive løftet
+   til cloud i v3.0 uden ændringer i resten af koden.
+   ===================================================================== */
+
+
+
+/* =====================================================================
+   FRESHSCAN AI v2.0  —  MULTI-MEDARBEJDER SYNC LAYER
+   ---------------------------------------------------------------------
+   Arkitektur: Én butik = én installation = ét sync-endpoint.
+   Medarbejdere logger IKKE ind. Appen åbnes og bruges direkte.
+   Sync sker via et enkelt delt endpoint konfigureret af admin.
+
+   KONFIGURATION (sættes af administrator i filen før deployment):
+   - SYNC_ENDPOINT : URL til din sync-server (Supabase, egen API, etc.)
+   - SYNC_TOKEN    : Delt hemmelighed for butikken (ikke brugernøgle)
+   - STORE_ID      : Permanent butiks-ID
+
+   Demo-tilstand aktiveres automatisk hvis SYNC_ENDPOINT er tomt.
+   ===================================================================== */
+
+/* ---------- Butikskonfiguration (sættes pr. butik) ---------- */
+const STORE_CONFIG = {
+  SYNC_ENDPOINT : '',          // ← Sæt til din sync-URL ved cloud-deploy
+  SYNC_TOKEN    : '',          // ← Delt sync-token for butikken
+  STORE_ID      : 'lokal',     // ← Butiks-ID (bruges som database-namespace)
+  STORE_NAME    : '',          // ← Tilsidesætter SETTINGS.butiksnavn hvis sat
+};
+
+/* ---------- Sync-tilstand ---------- */
+let _syncEnabled = false;      // Sættes til true når SYNC_ENDPOINT er konfigureret
+let _deviceId    = null;       // Unikt ID for denne enhed (telefon/tablet/PC)
+let _lastSyncAt  = null;       // ISO-tidsstempel for seneste vellykkede sync
+let _syncPending = 0;          // Antal operationer i kø
+
+function _initSyncConfig() {
+  _syncEnabled = !!(
+    STORE_CONFIG.SYNC_ENDPOINT &&
+    STORE_CONFIG.SYNC_ENDPOINT.length > 10 &&
+    !STORE_CONFIG.SYNC_ENDPOINT.includes('eksempel.com')
+  );
+  // Tildel permanent enhed-ID (gemmes i localStorage)
+  _deviceId = storageGet('device_id');
+  if (!_deviceId) {
+    _deviceId = 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,7);
+    storageSet('device_id', _deviceId);
+  }
+  console.log('[FreshScan] Sync ' + (_syncEnabled ? 'aktiveret ('+STORE_CONFIG.SYNC_ENDPOINT+')' : 'deaktiveret (demo-tilstand)'));
+}
+
+/* =====================================================================
+   OFFLINE QUEUE  —  simpel, robust, enhedsagnostisk
+   ===================================================================== */
+const OfflineQueue = (function(){
+  const KEY = 'freshscan_queue';
+  let _q = [];
+
+  function load() {
+    try { _q = JSON.parse(localStorage.getItem(KEY) || '[]'); }
+    catch(e) { _q = []; }
+    if (!Array.isArray(_q)) _q = [];
+  }
+  function _save() {
+    try { localStorage.setItem(KEY, JSON.stringify(_q.slice(-200))); } // max 200 ops
+    catch(e) {}
+  }
+  function enqueue(op) {
+    op.qid     = 'q' + Date.now() + Math.random().toString(36).slice(2,5);
+    op.device  = _deviceId;
+    op.queued  = new Date().toISOString();
+    _q.push(op);
+    _save();
+    _syncPending = _q.length;
+    _scheduleFlush(2000);
+  }
+  let _ft = null, _busy = false;
+  function _scheduleFlush(ms) {
+    clearTimeout(_ft);
+    _ft = setTimeout(flush, ms || 3000);
+  }
+  async function flush() {
+    if (_busy || !_q.length || !_syncEnabled || !navigator.onLine) return;
+    _busy = true;
+    const list = [..._q];
+    let ok = 0;
+    for (const op of list) {
+      try {
+        await DeviceSync._sendOp(op);
+        const idx = _q.findIndex(x => x.qid === op.qid);
+        if (idx >= 0) _q.splice(idx, 1);
+        ok++;
+      } catch(e) {
+        break; // Stop ved første fejl, prøv igen om 15 sek
+      }
+    }
+    _save();
+    _syncPending = _q.length;
+    _busy = false;
+    if (_q.length) _scheduleFlush(15000);
+    if (ok > 0) _showSyncBadge(ok);
+  }
+  function _showSyncBadge(n) {
+    const el = document.getElementById('saveIndicator');
+    if (!el) return;
+    el.textContent = '☁️ ' + n + ' synk.';
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2000);
+  }
+  window.addEventListener('online', () => _scheduleFlush(1000));
+  function pendingCount() { return _q.length; }
+  function getQueue() { return [..._q]; }
+  return { load, enqueue, flush, pendingCount, getQueue };
+})();
+
+/* =====================================================================
+   DEVICE SYNC ENGINE
+   ---------------------------------------------------------------------
+   Håndterer al kommunikation med sync-endpoint.
+   Bruges direkte af save-funktionerne og OfflineQueue.
+   Ingen login, ingen roller, ingen sessions — kun et delt token.
+   ===================================================================== */
+const DeviceSync = (function(){
+
+  function _headers() {
+    return {
+      'Content-Type'  : 'application/json',
+      'X-Store-ID'    : STORE_CONFIG.STORE_ID,
+      'X-Device-ID'   : _deviceId || 'unknown',
+      'X-Sync-Token'  : STORE_CONFIG.SYNC_TOKEN,
+    };
+  }
+
+  // Generisk HTTP-kald med timeout og retry
+  async function _fetch(path, method, body, timeoutMs) {
+    timeoutMs = timeoutMs || 8000;
+    const url = STORE_CONFIG.SYNC_ENDPOINT.replace(/\/$/, '') + path;
+    let lastErr;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+      try {
+        const opts = { method: method || 'GET', headers: _headers(), signal: ctrl.signal };
+        if (body) opts.body = JSON.stringify(body);
+        const res = await fetch(url, opts);
+        clearTimeout(timer);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+      } catch(e) {
+        clearTimeout(timer);
+        lastErr = e;
+        if (attempt === 2) throw e;
+        await new Promise(r => setTimeout(r, 400));
+      }
+    }
+    throw lastErr;
+  }
+
+  // Afsend én queued operation
+  async function _sendOp(op) {
+    if (!_syncEnabled) return;
+    return _fetch('/sync', 'POST', op);
+  }
+
+  // Gem én registrering — prøv cloud, ellers queue
+  async function saveRegistration(date, ean, regData) {
+    const op = {
+      type    : 'registration',
+      store_id: STORE_CONFIG.STORE_ID,
+      date, ean,
+      data    : safePlainObject(regData),
+      ts      : new Date().toISOString(),
+    };
+    if (!_syncEnabled || !navigator.onLine) {
+      OfflineQueue.enqueue(op);
+      return false;
+    }
+    try {
+      await _fetch('/sync', 'POST', op);
+      return true;
+    } catch(e) {
+      OfflineQueue.enqueue(op);
+      return false;
+    }
+  }
+
+  // Gem vare
+  async function saveVare(vare) {
+    if (!_syncEnabled) return false;
+    const op = { type:'product', store_id:STORE_CONFIG.STORE_ID, data:safePlainObject(vare), ts:new Date().toISOString() };
+    if (!navigator.onLine) { OfflineQueue.enqueue(op); return false; }
+    try { await _fetch('/sync','POST',op); return true; }
+    catch(e) { OfflineQueue.enqueue(op); return false; }
+  }
+
+  // Gem event/arrangement
+  async function saveEvent(ev) {
+    if (!_syncEnabled) return false;
+    const op = { type:'event', store_id:STORE_CONFIG.STORE_ID, data:safePlainObject(ev), ts:new Date().toISOString() };
+    if (!navigator.onLine) { OfflineQueue.enqueue(op); return false; }
+    try { await _fetch('/sync','POST',op); return true; }
+    catch(e) { OfflineQueue.enqueue(op); return false; }
+  }
+
+  // Gem vejr
+  async function saveWeather(date, weatherData) {
+    if (!_syncEnabled) return false;
+    const op = { type:'weather', store_id:STORE_CONFIG.STORE_ID, date, data:safePlainObject(weatherData), ts:new Date().toISOString() };
+    if (!navigator.onLine) { OfflineQueue.enqueue(op); return false; }
+    try { await _fetch('/sync','POST',op); return true; }
+    catch(e) { OfflineQueue.enqueue(op); return false; }
+  }
+
+  // Gem AI-læringsdata
+  async function saveAIMemory(date, ean, outcome) {
+    if (!_syncEnabled) return false;
+    const op = { type:'ai_memory', store_id:STORE_CONFIG.STORE_ID, date, ean, data:safePlainObject(outcome), ts:new Date().toISOString() };
+    if (!navigator.onLine) { OfflineQueue.enqueue(op); return false; }
+    try { await _fetch('/sync','POST',op); return true; }
+    catch(e) { OfflineQueue.enqueue(op); return false; }
+  }
+
+  // Gem indstillinger
+  async function saveSettings(s) {
+    if (!_syncEnabled) return false;
+    const op = { type:'settings', store_id:STORE_CONFIG.STORE_ID, data:safePlainObject(s), ts:new Date().toISOString() };
+    if (!navigator.onLine) { OfflineQueue.enqueue(op); return false; }
+    try { await _fetch('/sync','POST',op); return true; }
+    catch(e) { OfflineQueue.enqueue(op); return false; }
+  }
+
+  // Gem dag-tags (handelskalender)
+  async function saveDayTags(date, tags) {
+    if (!_syncEnabled) return false;
+    const op = { type:'day_tags', store_id:STORE_CONFIG.STORE_ID, date, data:safePlainObject(tags), ts:new Date().toISOString() };
+    if (!navigator.onLine) { OfflineQueue.enqueue(op); return false; }
+    try { await _fetch('/sync','POST',op); return true; }
+    catch(e) { OfflineQueue.enqueue(op); return false; }
+  }
+
+  // Hent al butiksdata fra cloud (full pull ved opstart)
+  async function pullStoreData() {
+    if (!_syncEnabled) return false;
+    try {
+      const data = await _fetch('/pull?store_id=' + encodeURIComponent(STORE_CONFIG.STORE_ID) + '&since=' + encodeURIComponent(_lastSyncAt || ''), 'GET');
+      if (!data) return false;
+
+      // Varer
+      if (Array.isArray(data.products) && data.products.length) {
+        VARER = data.products;
+        storageSet('varer', safeStringify(VARER));
+      }
+      // Registreringer — flet (nyeste vinder pr. ean+dato)
+      if (data.registrations && typeof data.registrations === 'object') {
+        Object.keys(data.registrations).forEach(date => {
+          if (!REGS[date]) REGS[date] = {};
+          Object.keys(data.registrations[date]).forEach(ean => {
+            const remote = data.registrations[date][ean];
+            const local  = REGS[date][ean];
+            // Seneste vinder — brug updated_at/ts
+            if (!local || (remote._ts && (!local._ts || remote._ts > local._ts))) {
+              REGS[date][ean] = remote;
+            }
+          });
+        });
+        storageSet('registreringer', safeStringify(REGS));
+      }
+      // Events
+      if (Array.isArray(data.events)) {
+        EVENTS = data.events;
+        storageSet('events', safeStringify(EVENTS));
+      }
+      // AI Memory
+      if (data.ai_memory) {
+        storageSet('ai_memory', JSON.stringify(data.ai_memory));
+        AI_MemoryEngine.load();
+      }
+      // Settings (butikskonfiguration fra cloud)
+      if (data.settings && typeof data.settings === 'object') {
+        SETTINGS = Object.assign({ ...DEFAULT_SETTINGS, malepunkter: DEFAULT_MALEPUNKTER.map(m=>({...m})) }, data.settings);
+        if (!Array.isArray(SETTINGS.malepunkter) || !SETTINGS.malepunkter.length)
+          SETTINGS.malepunkter = DEFAULT_MALEPUNKTER.map(m=>({...m}));
+        storageSet('settings', safeStringify(SETTINGS));
+      }
+      _lastSyncAt = new Date().toISOString();
+      storageSet('last_sync_at', _lastSyncAt);
+      return true;
+    } catch(e) {
+      console.error('[FreshScan] pullStoreData fejl:', errMsg(e));
+      return false;
+    }
+  }
+
+  // Polling: hent opdateringer fra andre enheder hvert N sekund
+  let _pollTimer = null;
+  function startPolling(intervalSec) {
+    if (!_syncEnabled) return;
+    intervalSec = intervalSec || 30;
+    stopPolling();
+    _pollTimer = setInterval(async () => {
+      if (!navigator.onLine) return;
+      const ok = await pullStoreData();
+      if (ok && ['home','admin-dashboard','admin-historik'].includes(currentTab)) {
+        const el = document.getElementById('saveIndicator');
+        if (el) { el.textContent = '🔄 Opdateret'; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 1500); }
+      }
+    }, intervalSec * 1000);
+  }
+  function stopPolling() {
+    if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+  }
+
+  // Enhedsaktivitet — hvornår var hver enhed sidst aktiv?
+  async function getDeviceActivity() {
+    if (!_syncEnabled) return [];
+    try { return await _fetch('/devices?store_id=' + encodeURIComponent(STORE_CONFIG.STORE_ID), 'GET') || []; }
+    catch(e) { return []; }
+  }
+
+  return { saveRegistration, saveVare, saveEvent, saveWeather, saveAIMemory, saveSettings, saveDayTags, pullStoreData, startPolling, stopPolling, getDeviceActivity, _sendOp };
+})();
+
+/* =====================================================================
+   APP INIT  (ingen login, ingen roller)
+   ===================================================================== */
+let _initDone = false;
+
+async function initApp() {
+  if (_initDone) { console.warn('[FreshScan] initApp kaldt igen — ignoreret'); return; }
+  _initDone = true;
+
+  console.log('[FreshScan] 1/5 App start — FreshScan AI v2.0');
+  _initSyncConfig();
+  OfflineQueue.load();
+
+  // 2) Indlæs lokal data (altid — offline-cache)
+  console.log('[FreshScan] 2/5 Indlæser lokal data');
+  try { await loadAll(); } catch(e) { console.error('[FreshScan] loadAll fejl:', errMsg(e)); }
+
+  // Anvend butiksnavn fra STORE_CONFIG hvis sat
+  if (STORE_CONFIG.STORE_NAME) {
+    SETTINGS.kundeNavn = STORE_CONFIG.STORE_NAME;
+    SETTINGS.butiksnavn = STORE_CONFIG.STORE_NAME;
+  }
+
+  console.log('[FreshScan] 3/5 ' + (_syncEnabled ? 'Cloud sync aktiveret' : 'Demo-tilstand aktiv (lokal)'));
+
+  // 3) Forsøg cloud pull (ikke blokerende)
+  if (_syncEnabled && navigator.onLine) {
+    console.log('[FreshScan] 4/5 Henter butiksdata fra cloud');
+    try {
+      const ok = await DeviceSync.pullStoreData();
+      if (ok) {
+        console.log('[FreshScan] 5/5 Cloud-data indlæst');
+      } else {
+        console.log('[FreshScan] 5/5 Cloud pull fejlede — bruger lokal cache');
+      }
+    } catch(e) {
+      console.error('[FreshScan] Cloud pull fejl:', errMsg(e));
+    }
+  } else {
+    console.log('[FreshScan] 4/5 Offline eller demo — springer cloud over');
+    console.log('[FreshScan] 5/5 Data klar (lokal)');
+  }
+
+  // 4) Start polling og flush af offline-kø
+  DeviceSync.startPolling(30);
+  OfflineQueue.flush();
+
+  // 5) Render
+  currentTab = 'home';
+  render();
+
+  // Demo-banner kun synlig i Developer Mode (ikke på medarbejder-forsiden)
+}
+
+
+const AI_MemoryEngine = (function(){
+  let memory = {}; // { date: { ean: { forecast, actual, pct, factors, confidence, mpData } } }
+  const STORAGE_KEY = 'ai_memory';
+
+  function load(){
+    try{const v=storageGet(STORAGE_KEY);memory=v?JSON.parse(v):{};}
+    catch(e){memory={};}
+    if(!memory||typeof memory!=='object')memory={};
+  }
+  function save(){
+    try{storageSet(STORAGE_KEY,safeStringify(memory));}
+    catch(e){console.error('AI_MemoryEngine.save error:',errMsg(e));}
+  }
+
+  // Registrér et afsluttet salgsforløb for én vare på én dato.
+  // Kaldes automatisk fra saveRegsAuto() når luk-registrering er gemt.
+  function recordOutcome(date, ean, forecastGiven, actualSold, factors, confidenceLabel, mpData){
+    if(!memory[date]) memory[date]={};
+    const pct = forecastGiven>0 ? Math.round(((actualSold-forecastGiven)/forecastGiven)*100) : null;
+    memory[date][ean]={
+      forecast:forecastGiven,
+      actual:actualSold,
+      pctDeviation:pct,
+      absDeviation:actualSold-forecastGiven,
+      factors:factors||{},
+      confidence:confidenceLabel||'Lav',
+      mpData:mpData||{},
+      recordedAt:new Date().toISOString()
+    };
+    save();
+  }
+
+  // Hent alle læringsdata for én vare, sorteret nyeste→ældste
+  function getOutcomesForVare(ean){
+    const results=[];
+    Object.keys(memory).sort().reverse().forEach(date=>{
+      if(memory[date]&&memory[date][ean]) results.push({date,...memory[date][ean]});
+    });
+    return results;
+  }
+
+  // Hent alle outcomes på tværs af varer, valgfrit filtreret
+  function getAllOutcomes(filter){
+    const results=[];
+    Object.keys(memory).sort().reverse().forEach(date=>{
+      if(!memory[date])return;
+      Object.keys(memory[date]).forEach(ean=>{
+        const o=memory[date][ean];
+        if(filter&&!filter(date,ean,o))return;
+        results.push({date,ean,...o});
+      });
+    });
+    return results;
+  }
+
+  // Antal læringspunkter (dage × varer med komplette data)
+  function getLearningCount(){return getAllOutcomes().length;}
+
+  // Samlet forecast-præcision: pct af outcomes inden for ±15%
+  function getOverallAccuracy(){
+    const outcomes=getAllOutcomes((_d,_e,o)=>o.pctDeviation!=null);
+    if(!outcomes.length)return null;
+    const within15=outcomes.filter(o=>Math.abs(o.pctDeviation)<=15).length;
+    return Math.round((within15/outcomes.length)*100);
+  }
+
+  // Gennemsnitlig absolut procentafvigelse (lavere = bedre)
+  function getMAPE(){
+    const outcomes=getAllOutcomes((_d,_e,o)=>o.pctDeviation!=null&&o.actual>0);
+    if(!outcomes.length)return null;
+    const mape=avg(outcomes.map(o=>Math.abs(o.pctDeviation)));
+    return Math.round(mape);
+  }
+
+  // Præcision opdelt i konfidensklasser (bruges til Confidence_Engine kalibrering)
+  function getAccuracyByConfidence(){
+    const bins={Høj:[],Middel:[],Lav:[]};
+    getAllOutcomes((_d,_e,o)=>o.pctDeviation!=null).forEach(o=>{
+      const b=bins[o.confidence];
+      if(b) b.push(Math.abs(o.pctDeviation)<=15?1:0);
+    });
+    const out={};
+    Object.keys(bins).forEach(k=>{
+      out[k]=bins[k].length?Math.round(avg(bins[k])*100):null;
+    });
+    return out;
+  }
+
+  // Faktor-effekt: for en binær faktor (f.eks. 'regn'), hvad er den gennemsnitlige
+  // procentafvigelse på dage med vs. uden faktoren?
+  function getFactorBias(factorKey){
+    const withF=[],withoutF=[];
+    getAllOutcomes((_d,_e,o)=>o.pctDeviation!=null).forEach(o=>{
+      if(o.factors&&o.factors[factorKey]===true) withF.push(o.pctDeviation);
+      else withoutF.push(o.pctDeviation);
+    });
+    if(withF.length<3||withoutF.length<3)return null;
+    return{avgWith:round1(avg(withF)),avgWithout:round1(avg(withoutF)),count:withF.length};
+  }
+
+  // Hvilke faktorer har AI konsekvent undervurderet/overvurderet?
+  function getSystematicBiases(){
+    const biasKeys=['regn','sol','varmt','koldt','sne','vind',
+      'cal_lonweekend','cal_turistsaeson','cal_helligdag',
+      'cal_sommerferie','cal_paaskeferie','cal_vinterferie',
+      'cal_efterarsferie','cal_juleferie','lokaltArrangement'];
+    const found=[];
+    biasKeys.forEach(k=>{
+      const b=getFactorBias(k);
+      if(b&&Math.abs(b.avgWith-b.avgWithout)>=10){
+        found.push({factor:k,biasWhenPresent:round1(b.avgWith-b.avgWithout),count:b.count});
+      }
+    });
+    found.sort((a,b)=>Math.abs(b.biasWhenPresent)-Math.abs(a.biasWhenPresent));
+    return found;
+  }
+
+  // Præcision pr. ugedag
+  function getAccuracyByWeekday(){
+    const days={};
+    DAY_NAMES.forEach(d=>{days[d]=[];});
+    getAllOutcomes((_d,_e,o)=>o.pctDeviation!=null).forEach(o=>{
+      const wd=o.factors&&o.factors.ugedag;
+      if(wd&&days[wd]) days[wd].push(Math.abs(o.pctDeviation)<=15?1:0);
+    });
+    const out={};
+    Object.keys(days).forEach(k=>{
+      out[k]=days[k].length?{accuracy:Math.round(avg(days[k])*100),n:days[k].length}:null;
+    });
+    return out;
+  }
+
+  // Præcisionsudvikling over tid: returnerer en tidsserie af rullende præcision
+  function getAccuracyTrend(windowDays){
+    windowDays=windowDays||7;
+    const all=getAllOutcomes((_d,_e,o)=>o.pctDeviation!=null);
+    const byDate={};
+    all.forEach(o=>{
+      if(!byDate[o.date])byDate[o.date]=[];
+      byDate[o.date].push(Math.abs(o.pctDeviation)<=15?1:0);
+    });
+    const dates=Object.keys(byDate).sort();
+    if(dates.length<2)return[];
+    const trend=[];
+    for(let i=windowDays-1;i<dates.length;i++){
+      const window=dates.slice(Math.max(0,i-windowDays+1),i+1);
+      const vals=window.flatMap(d=>byDate[d]);
+      trend.push({date:dates[i],accuracy:Math.round(avg(vals)*100),n:vals.length});
+    }
+    return trend;
+  }
+
+  // Vurder om ekstra målepunkter har forbedret forecast-præcision.
+  // Sammenligner præcision på dage med 2 vs 3+ målepunkter registreret.
+  function getMeasurementPointValue(){
+    const with2=[],with3plus=[];
+    getAllOutcomes((_d,_e,o)=>o.pctDeviation!=null).forEach(o=>{
+      const mpCount=o.mpData?Object.keys(o.mpData).filter(k=>o.mpData[k]!=null).length:0;
+      const acc=Math.abs(o.pctDeviation)<=15?1:0;
+      if(mpCount>=3)with3plus.push(acc);
+      else if(mpCount===2)with2.push(acc);
+    });
+    return{
+      with2:{accuracy:with2.length?Math.round(avg(with2)*100):null,n:with2.length},
+      with3plus:{accuracy:with3plus.length?Math.round(avg(with3plus)*100):null,n:with3plus.length}
+    };
+  }
+
+  // Foreslå om ekstra målepunkt ville hjælpe
+  function shouldSuggestExtraMP(){
+    const mpVal=getMeasurementPointValue();
+    if(!mpVal.with2.accuracy||mpVal.with3plus.n<5)return null;
+    const gain=(mpVal.with3plus.accuracy||0)-(mpVal.with2.accuracy||0);
+    if(gain>=8)return{gain,msg:`Et ekstra målepunkt har forbedret forecast-præcision med ${gain}% på dage med tilstrækkelig data.`};
+    return null;
+  }
+
+  // Er vi ved at nå præcisionsloftet? (ekstra data giver ikke mere)
+  function hasSufficientData(){
+    const trend=getAccuracyTrend(7);
+    if(trend.length<4)return false;
+    const recent=trend.slice(-3).map(t=>t.accuracy);
+    const older=trend.slice(-6,-3).map(t=>t.accuracy);
+    if(!recent.length||!older.length)return false;
+    const improvement=avg(recent)-avg(older);
+    return improvement<2&&avg(recent)>80;// præcision >80% og stagnerer
+  }
+
+  function getMemory(){return memory;}
+  function clear(){memory={};save();}
+
+  return{
+    load,save,recordOutcome,getOutcomesForVare,getAllOutcomes,
+    getLearningCount,getOverallAccuracy,getMAPE,getAccuracyByConfidence,
+    getFactorBias,getSystematicBiases,getAccuracyByWeekday,
+    getAccuracyTrend,getMeasurementPointValue,shouldSuggestExtraMP,
+    hasSufficientData,getMemory,clear
+  };
+})();
+
+/* =====================================================================
+   LEARNING ENGINE  (nyt i v2.0)
+   ---------------------------------------------------------------------
+   Beregner en lærings-korrektionsfaktor pr. vare og pr. faktor,
+   baseret på AI_MemoryEngine's historik. Bruges af Forecast_Engine
+   til at korrigere næste dags anbefaling.
+   ===================================================================== */
+const Learning_Engine = (function(){
+
+  // Beregn en korrektionsmultiplikator for en given vare.
+  // Logik: se på de seneste N outcomes; hvis AI konsekvent under-/overvurderer,
+  // justér fremtidigt forecast proportionelt. Capper korrektionen til ±25%.
+  function getCorrection(ean,n){
+    n=n||20;
+    const outcomes=AI_MemoryEngine.getOutcomesForVare(ean).slice(0,n);
+    if(outcomes.length<5)return{factor:1,samples:outcomes.length,ready:false};
+    const ratios=outcomes
+      .filter(o=>o.forecast>0&&o.actual!=null)
+      .map(o=>o.actual/o.forecast);
+    if(ratios.length<5)return{factor:1,samples:ratios.length,ready:false};
+    let factor=avg(ratios);
+    factor=clamp(factor,0.75,1.25);
+    // Lineær blending: vægt af lærings-faktor stiger med antal samples
+    const weight=clamp((ratios.length-5)/15,0,1); // fuld vægt ved 20 samples
+    const blended=1+weight*(factor-1);
+    return{factor:round1(blended),samples:ratios.length,ready:true};
+  }
+
+  // Faktor-specifikke korrektioner: kalibrerer individuelle faktorer
+  // baseret på systematiske bias i AI_MemoryEngine.
+  function getFactorCorrections(){
+    const biases=AI_MemoryEngine.getSystematicBiases();
+    const corrections={};
+    biases.forEach(b=>{
+      // Konverter bias (pct-afvigelse) til korrektionsmultiplikator
+      const adj=clamp(1+(-b.biasWhenPresent/200),0.85,1.15);
+      corrections[b.factor]=round1(adj);
+    });
+    return corrections;
+  }
+
+  // Samlet korrekteret forecast for én vare med forklaring
+  function applyCorrections(rawForecast,ean,activeFactors){
+    const vareCorr=getCorrection(ean);
+    const factorCorrs=getFactorCorrections();
+    let adjusted=rawForecast*vareCorr.factor;
+    const appliedFactors=[];
+    if(activeFactors){
+      Object.keys(factorCorrs).forEach(fk=>{
+        if(activeFactors[fk]===true&&factorCorrs[fk]!==1){
+          adjusted*=factorCorrs[fk];
+          appliedFactors.push({factor:fk,multiplier:factorCorrs[fk]});
+        }
+      });
+    }
+    return{
+      corrected:Math.max(0,Math.round(adjusted)),
+      vareCorr,appliedFactors,
+      totalAdjustment:rawForecast>0?Math.round(((adjusted-rawForecast)/rawForecast)*100):0
+    };
+  }
+
+  return{getCorrection,getFactorCorrections,applyCorrections};
+})();
+
+/* =====================================================================
+   CONFIDENCE ENGINE  (nyt i v2.0)
+   ---------------------------------------------------------------------
+   Beregner en kalibreret konfidensscore (Høj/Middel/Lav) pr. vare
+   pr. dag, baseret på:
+   1) Antal historiske læringsdata (mere data = højere tillid)
+   2) Historisk præcision for denne vare (høj præcision = højere tillid)
+   3) Faktorkompleksitet (mange usikre faktorer = lavere tillid)
+   4) Kalibrering mod konfidensklassernes reelle præcision (se AI_MemoryEngine)
+   ===================================================================== */
+const Confidence_Engine = (function(){
+
+  function compute(ean,qualityFlag,activeFactors){
+    const outcomes=AI_MemoryEngine.getOutcomesForVare(ean);
+    const n=outcomes.length;
+
+    // Base-score fra antal datapunkter (0-50 point)
+    const dataScore=clamp(n*2.5,0,50);
+
+    // Præcisionsscore fra historik (0-35 point)
+    let precisionScore=0;
+    if(n>=5){
+      const within15=outcomes.filter(o=>o.pctDeviation!=null&&Math.abs(o.pctDeviation)<=15).length;
+      precisionScore=clamp((within15/outcomes.length)*35,0,35);
+    }
+
+    // Korrektionsscore: er læringskorr. tæt på 1? (0-10 point)
+    const corr=Learning_Engine.getCorrection(ean);
+    const corrScore=corr.ready?Math.max(0,10-Math.abs(corr.factor-1)*50):0;
+
+    // Kompleksitetspenalty: flere usikre faktorer → lavere konfidens
+    const uncertainFactors=['regn','sne','vind','lokaltArrangement','cal_tilbudsavis'];
+    let penalty=0;
+    if(activeFactors){
+      uncertainFactors.forEach(f=>{if(activeFactors[f])penalty+=3;});
+    }
+    if(qualityFlag==='low')penalty+=8;
+    if(qualityFlag==='none')penalty+=18;
+
+    const rawScore=dataScore+precisionScore+corrScore-penalty;
+    const pct=clamp(Math.round(rawScore+20),15,97);
+
+    let label;
+    if(pct>=72)label='Høj';
+    else if(pct>=48)label='Middel';
+    else label='Lav';
+
+    // Kalibrér label mod historisk konfidensklasse-præcision
+    const calibration=AI_MemoryEngine.getAccuracyByConfidence();
+    if(calibration.Høj!=null&&calibration.Lav!=null){
+      // Hvis "Høj" historisk kun rammer 50%, nedgrader
+      if(label==='Høj'&&calibration.Høj<60)label='Middel';
+      if(label==='Middel'&&calibration.Middel<45)label='Lav';
+    }
+
+    return{pct,label,dataPoints:n,precisionScore:Math.round(precisionScore)};
+  }
+
+  function badge(label){
+    const cls={Høj:'conf-hoj',Middel:'conf-middel',Lav:'conf-lav'}[label]||'conf-lav';
+    const ico={Høj:'🟢',Middel:'🟡',Lav:'🔴'}[label]||'🔴';
+    return`<span class="confidence-badge ${cls}">${ico} ${label}</span>`;
+  }
+
+  return{compute,badge};
+})();
+
+/* =====================================================================
+   PATTERN ENGINE  (opgraderet v2.0)
+   ---------------------------------------------------------------------
+   Finder gentagende salgsmønstre i butikkens egne data.
+   I v2.0 kombinerer den mønstre fra REGS (pilotdata) MED
+   mønstre fra AI_MemoryEngine (læringsdata), og scorer mønstre
+   med en konfidens baseret på antal observationer og effektstørrelse.
+   ===================================================================== */
+const Pattern_Engine = (function(){
+  const MIN_OBS_WITH=4,MIN_OBS_WITHOUT=4,MIN_EFFECT_PCT=8;
+
+  function extractFactors(date){
+    const d=isoToUTCDate(date);
+    const eff=getEffectiveTags(date);
+    const weather=getDayWeather(date);
+    const events=getActiveEvents(date);
+    const f={ugedag:weekdayName(date),maaned:MONTH_NAMES[d.getUTCMonth()]};
+    CAL_TAGS.forEach(t=>{f['cal_'+t.key]=!!eff.tags[t.key];});
+    f.lokaltArrangement=events.length>0;
+    f.sol=!!weather.sol;f.regn=!!weather.regn;
+    f.vind=!!weather.vind;f.sne=!!weather.sne;
+    f.varmt=weather.temp!=null&&weather.temp>=20;
+    f.koldt=weather.temp!=null&&weather.temp<=5;
+    f.temp=weather.temp;
+    return f;
+  }
+
+  function _soldOnLocal(date,ean){
+    const r=REGS[date]&&REGS[date][ean];
+    if(r&&r.modtaget!=null&&r.luk!=null)return Math.max(0,r.modtaget-r.luk);
+    return null;
+  }
+
+  function collectObs(ean,dates){
+    const obs=[];
+    dates.forEach(date=>{
+      const sold=_soldOnLocal(date,ean);
+      if(sold==null)return;
+      obs.push({date,sold,factors:extractFactors(date)});
+    });
+    // Berig med AI_Memory outcomes (kan have salgsdata fra ældre perioder)
+    AI_MemoryEngine.getOutcomesForVare(ean).forEach(o=>{
+      if(obs.find(x=>x.date===o.date))return;// undgå dubletter
+      if(o.actual==null)return;
+      obs.push({date:o.date,sold:o.actual,factors:o.factors||extractFactors(o.date)});
+    });
+    return obs;
+  }
+
+  function patternConfidence(nWith,nWithout,pct){
+    const sampleScore=clamp(Math.min(nWith,nWithout)*4,0,60);
+    const effectScore=clamp(Math.abs(pct)*0.7,0,35);
+    return Math.round(clamp(20+sampleScore*0.5+effectScore,20,96));
+  }
+
+  const FACTOR_LABELS={
+    cal_tilbudsavis:'Tilbudsavis',cal_lonweekend:'Lønweekend',cal_vinterferie:'Vinterferie',
+    cal_paaskeferie:'Påskeferie',cal_sommerferie:'Sommerferie',cal_efterarsferie:'Efterårsferie',
+    cal_juleferie:'Juleferie',cal_helligdag:'Helligdag',cal_turistsaeson:'Turistsæson',
+    cal_lokalt:'Lokalt arrangement',lokaltArrangement:'Lokale arrangementer',
+    sol:'Sol',regn:'Regn',vind:'Vind',sne:'Sne',varmt:'Temperatur over 20°',koldt:'Temperatur under 5°'
+  };
+
+  function describeBinary(key,pct){
+    const dir=pct>=0?'øger':'reducerer';
+    const abs=Math.abs(pct);
+    return`${FACTOR_LABELS[key]||key} ${dir} salget med ${abs}%`;
+  }
+
+  function mineBinaryPatterns(obs,navn){
+    const patterns=[];
+    if(!obs.length)return patterns;
+    const boolKeys=Object.keys(obs[0].factors).filter(k=>typeof obs[0].factors[k]==='boolean');
+    boolKeys.forEach(key=>{
+      const withF=obs.filter(o=>o.factors[key]===true).map(o=>o.sold);
+      const withoutF=obs.filter(o=>o.factors[key]===false).map(o=>o.sold);
+      if(withF.length<MIN_OBS_WITH||withoutF.length<MIN_OBS_WITHOUT)return;
+      const avgWith=avg(withF),avgWithout=avg(withoutF);
+      if(avgWithout<=0)return;
+      const pct=Math.round(((avgWith-avgWithout)/avgWithout)*100);
+      if(Math.abs(pct)<MIN_EFFECT_PCT)return;
+      const lastSeen=obs.filter(o=>o.factors[key]===true).map(o=>o.date).sort().slice(-1)[0];
+      patterns.push({key,type:'binary',label:describeBinary(key,pct),
+        pct,avgWith:round1(avgWith),avgWithout:round1(avgWithout),
+        observations:withF.length,totalObservations:obs.length,lastSeen,
+        confidence:patternConfidence(withF.length,withoutF.length,pct)});
+    });
+    return patterns;
+  }
+
+  function mineWeekdayPatterns(obs,navn){
+    const patterns=[];
+    DAY_NAMES.forEach(day=>{
+      const withD=obs.filter(o=>o.factors.ugedag===day).map(o=>o.sold);
+      const withoutD=obs.filter(o=>o.factors.ugedag!==day).map(o=>o.sold);
+      if(withD.length<MIN_OBS_WITH||withoutD.length<MIN_OBS_WITHOUT)return;
+      const avgWith=avg(withD),avgWithout=avg(withoutD);
+      if(avgWithout<=0)return;
+      const pct=Math.round(((avgWith-avgWithout)/avgWithout)*100);
+      if(pct<MIN_EFFECT_PCT)return;
+      const lastSeen=obs.filter(o=>o.factors.ugedag===day).map(o=>o.date).sort().slice(-1)[0];
+      patterns.push({key:'ugedag_'+day,type:'weekday',
+        label:`${navn} topper altid ${day.toLowerCase()}`,
+        pct,avgWith:round1(avgWith),avgWithout:round1(avgWithout),
+        observations:withD.length,totalObservations:obs.length,lastSeen,
+        confidence:patternConfidence(withD.length,withoutD.length,pct)});
+    });
+    return patterns;
+  }
+
+  function mine(ean,varenavn,dates){
+    const obs=collectObs(ean,dates);
+    if(obs.length<MIN_OBS_WITH+MIN_OBS_WITHOUT)
+      return{patterns:[],observationCount:obs.length,dataReady:false};
+    const patterns=[...mineBinaryPatterns(obs,varenavn),...mineWeekdayPatterns(obs,varenavn)];
+    patterns.sort((a,b)=>Math.abs(b.pct)-Math.abs(a.pct));
+    return{patterns,observationCount:obs.length,dataReady:true};
+  }
+
+  function trendStatement(ean,varenavn,dates56){
+    const obs=collectObs(ean,dates56);
+    if(obs.length<14)return null;
+    const sorted=obs.slice().sort((a,b)=>a.date.localeCompare(b.date));
+    const recent=sorted.slice(-14),earlier=sorted.slice(0,Math.max(0,sorted.length-14)).slice(-28);
+    if(recent.length<5||earlier.length<5)return null;
+    const avgRecent=avg(recent.map(o=>o.sold)),avgEarlier=avg(earlier.map(o=>o.sold));
+    if(avgEarlier<=0)return null;
+    const pct=Math.round(((avgRecent-avgEarlier)/avgEarlier)*100);
+    if(Math.abs(pct)<8)return null;
+    const weeks=Math.max(1,Math.round(recent.length/7));
+    const dir=pct>=0?'steget':'faldet';
+    return{ean,text:`Salget af ${varenavn} er ${dir} ${Math.abs(pct)}% de seneste ${weeks===1?'uge':weeks+' uger'}.`,pct,weeks};
+  }
+
+  function topInsights(varer,dates56){
+    const candidates=[];
+    varer.forEach(v=>{
+      const mined=mine(v.ean,v.navn,dates56);
+      mined.patterns.slice(0,2).forEach(p=>{
+        candidates.push({
+          richText:p.type==='weekday'?p.label:`${v.navn}: ${describeBinary(p.key,p.pct)}.`,
+          confidence:p.confidence,abs:Math.abs(p.pct)
+        });
+      });
+      const trend=trendStatement(v.ean,v.navn,dates56);
+      if(trend) candidates.push({richText:trend.text,confidence:clamp(40+Math.abs(trend.pct),40,90),abs:Math.abs(trend.pct)});
+    });
+    candidates.sort((a,b)=>(b.confidence*b.abs)-(a.confidence*a.abs));
+    return candidates.filter(c=>c.richText).slice(0,5);
+  }
+
+  return{mine,trendStatement,topInsights,extractFactors,describeBinary,FACTOR_LABELS};
+})();
+
+/* =====================================================================
+   ANALYTICS ENGINE  (nyt i v2.0)
+   ---------------------------------------------------------------------
+   Sammenstiller alle AI-data til dashboards og rapporter.
+   Inkluderer: AI Performance Dashboard, faktor-vigtighed,
+   madspild-analyse, servicegrad-udvikling.
+   ===================================================================== */
+const Analytics_Engine = (function(){
+
+  // Top-5 vigtigste faktorer baseret på absolutværdi af bias-korrektioner
+  function getTopFactors(n){
+    n=n||5;
+    const biases=AI_MemoryEngine.getSystematicBiases();
+    const factorCorrs=Learning_Engine.getFactorCorrections();
+    const patterns=Pattern_Engine.topInsights(VARER.filter(v=>v.aktiv),periodDates(56));
+
+    const scoreMap={};
+    // Fra systematiske biases
+    biases.forEach(b=>{
+      scoreMap[b.factor]=(scoreMap[b.factor]||0)+Math.abs(b.biasWhenPresent)*2;
+    });
+    // Fra faktor-korrektioner
+    Object.keys(factorCorrs).forEach(k=>{
+      scoreMap[k]=(scoreMap[k]||0)+Math.abs(factorCorrs[k]-1)*100;
+    });
+    // Fra mønstre (højt konfidens-mønster = vigtig faktor)
+    patterns.forEach(p=>{
+      if(p.richText) scoreMap['patterns']=(scoreMap['patterns']||0)+p.abs*0.5;
+    });
+
+    const LABELS=Pattern_Engine.FACTOR_LABELS;
+    return Object.entries(scoreMap)
+      .filter(([k])=>k!=='patterns')
+      .sort((a,b)=>b[1]-a[1])
+      .slice(0,n)
+      .map(([k,score])=>({key:k,label:LABELS[k]||k,score:Math.round(score)}));
+  }
+
+  // Madspild-analyse: dage med høj rest ved luk
+  function getWasteAnalysis(dates){
+    const aktive=VARER.filter(v=>v.aktiv);
+    let totalSpild=0,totalSolgt=0,spildDage=0,dageTotal=0;
+    dates.forEach(date=>{
+      const day=REGS[date];
+      if(!day)return;
+      let anyReg=false;
+      aktive.forEach(v=>{
+        const r=day[v.ean];
+        if(!r||r.modtaget==null)return;
+        anyReg=true;
+        if(r.luk!=null){
+          totalSpild+=r.luk;
+          totalSolgt+=Math.max(0,r.modtaget-r.luk);
+          if(r.luk>2)spildDage++;
+        }
+      });
+      if(anyReg)dageTotal++;
+    });
+    const spildPct=totalSolgt+totalSpild>0?Math.round((totalSpild/(totalSolgt+totalSpild))*100):null;
+    return{totalSpild,totalSolgt,spildDage,dageTotal,spildPct};
+  }
+
+  // Servicegrad pr. dag
+  function getServicegradTrend(dates){
+    const aktive=VARER.filter(v=>v.aktiv);
+    const pmp=getPrimaertMP();
+    const pmpField=mpFieldKey(pmp);
+    const trend=[];
+    dates.forEach(date=>{
+      const day=REGS[date];
+      if(!day){trend.push(null);return;}
+      let total=0,withStock=0;
+      aktive.forEach(v=>{
+        const r=day[v.ean];
+        if(!r)return;
+        const val=r[pmpField]??(pmpField==='mp_kl13'?r.kl13:null);
+        if(val!=null){total++;if(val>0)withStock++;}
+      });
+      trend.push(total>0?Math.round((withStock/total)*100):null);
+    });
+    return trend;
+  }
+
+  // Saml alt til AI Performance Summary
+  function getPerformanceSummary(){
+    const accuracy=AI_MemoryEngine.getOverallAccuracy();
+    const mape=AI_MemoryEngine.getMAPE();
+    const learningCount=AI_MemoryEngine.getLearningCount();
+    const byConf=AI_MemoryEngine.getAccuracyByConfidence();
+    const trend=AI_MemoryEngine.getAccuracyTrend(7);
+    const topFactors=getTopFactors(5);
+    const waste=getWasteAnalysis(periodDates(14));
+    const sufficient=AI_MemoryEngine.hasSufficientData();
+    const mpSuggestion=AI_MemoryEngine.shouldSuggestExtraMP();
+    const byWeekday=AI_MemoryEngine.getAccuracyByWeekday();
+    const biases=AI_MemoryEngine.getSystematicBiases();
+    return{accuracy,mape,learningCount,byConf,trend,topFactors,waste,sufficient,mpSuggestion,byWeekday,biases};
+  }
+
+  return{getTopFactors,getWasteAnalysis,getServicegradTrend,getPerformanceSummary};
+})();
+
+
+/* ---------- DB migration + load/save ---------- */
+const CURRENT_DB_VERSION=2;
+const MIGRATIONS={
+  2:function(){
+    let changed=false;
+    Object.keys(REGS).forEach(date=>{
+      const dayRegs=REGS[date];
+      if(!dayRegs||typeof dayRegs!=='object')return;
+      Object.keys(dayRegs).forEach(ean=>{
+        if(ean.startsWith('_'))return;
+        const r=dayRegs[ean];
+        if(!r||typeof r!=='object')return;
+        if(r.kl13!=null&&r['mp_kl13']==null){r['mp_kl13']=r.kl13;changed=true;}
+      });
+    });
+    return changed;
+  }
+};
+async function runMigrations(){
+  let fromVersion=parseInt(storageGet('dbversion')||'1',10);
+  if(isNaN(fromVersion)||fromVersion<1)fromVersion=1;
+  let anyChange=false;
+  for(let v=fromVersion+1;v<=CURRENT_DB_VERSION;v++){
+    if(typeof MIGRATIONS[v]==='function'){
+      try{const changed=MIGRATIONS[v]();if(changed)anyChange=true;}
+      catch(e){console.error('Migration til v'+v+' fejlede:',errMsg(e));}
+    }
+  }
+  if(anyChange)await saveRegs();
+  storageSet('dbversion',String(CURRENT_DB_VERSION));
+}
+
+async function loadAll(){
+  let varerKeyExisted=false;
+  try{const v=storageGet('varer');varerKeyExisted=(v!==undefined&&v!==null);VARER=v?JSON.parse(v):[];}
+  catch(e){VARER=[];}
+  try{const r=storageGet('registreringer');REGS=r?JSON.parse(r):{};}
+  catch(e){REGS={};}
+  if(!Array.isArray(VARER))VARER=[];
+  if(!REGS||typeof REGS!=='object')REGS={};
+  await runMigrations();
+  try{
+    const s=storageGet('settings');
+    if(s){
+      SETTINGS=Object.assign({...DEFAULT_SETTINGS,malepunkter:DEFAULT_MALEPUNKTER.map(m=>({...m}))},JSON.parse(s));
+      if(!Array.isArray(SETTINGS.turistMonths)||!SETTINGS.turistMonths.length)SETTINGS.turistMonths=[6,7,8];
+      if(!Array.isArray(SETTINGS.malepunkter)||!SETTINGS.malepunkter.length)
+        SETTINGS.malepunkter=DEFAULT_MALEPUNKTER.map(m=>({...m}));
+      if(!SETTINGS.primaertMalepunkt)SETTINGS.primaertMalepunkt='kl13';
+    }else{
+      SETTINGS={...DEFAULT_SETTINGS,malepunkter:DEFAULT_MALEPUNKTER.map(m=>({...m}))};
+      await saveSettings();
+    }
+  }catch(e){console.error('loadAll settings:',errMsg(e));}
+  try{const ev=storageGet('events');EVENTS=ev?JSON.parse(ev):[];}
+  catch(e){EVENTS=[];}
+  if(!Array.isArray(EVENTS))EVENTS=[];
+  try{const lw=storageGet('lastweather');LAST_GOOD_WEATHER=lw?JSON.parse(lw):null;}
+  catch(e){LAST_GOOD_WEATHER=null;}
+  // AI Memory load
+  AI_MemoryEngine.load();
+
+  if(VARER.length===0&&!varerKeyExisted){
+    VARER=[
+      {ean:"5701234500011",navn:"Solsikkerugbrød",leverandor:"Kohberg",aktiv:true},
+      {ean:"5701234500028",navn:"Kernerugbrød",leverandor:"Schulstad",aktiv:true},
+      {ean:"5701234500035",navn:"Fuldkorn",leverandor:"Kohberg",aktiv:true},
+    ];
+    await saveVarer();
+  }
+  let migrated=false;
+  VARER.forEach(v=>{
+    if(v.tilbudspris===undefined){v.tilbudspris=null;migrated=true;}
+    if(v.hylde===undefined){v.hylde='';migrated=true;}
+    if(v.sektion===undefined){v.sektion='';migrated=true;}
+    if(v.omraade===undefined){v.omraade='';migrated=true;}
+  });
+  if(migrated)await saveVarer();
+}
+async function saveVarer(){
+  try{ storageSet('varer',safeStringify(VARER)); }
+  catch(e){ console.error('saveVarer local:',errMsg(e)); }
+  if(_syncEnabled) VARER.forEach(v=>{ DeviceSync.saveVare(v).catch(()=>{}); });
+}
+async function saveRegs(){
+  try{ storageSet('registreringer',safeStringify(REGS)); }
+  catch(e){ console.error('saveRegs local:',errMsg(e)); }
+}
+async function saveSettings(){
+  try{ storageSet('settings',safeStringify(SETTINGS)); }
+  catch(e){ console.error('saveSettings local:',errMsg(e)); }
+  if(_syncEnabled) DeviceSync.saveSettings(SETTINGS).catch(()=>{});
+}
+async function saveEvents(){
+  try{ storageSet('events',safeStringify(EVENTS)); }
+  catch(e){ console.error('saveEvents local:',errMsg(e)); }
+  if(_syncEnabled) EVENTS.forEach(ev=>{ DeviceSync.saveEvent(ev).catch(()=>{}); });
+}
+async function saveLastGoodWeather(date,w,includeCurrent){
+  const prevCurrentTemp=LAST_GOOD_WEATHER?LAST_GOOD_WEATHER.currentTemp:null;
+  LAST_GOOD_WEATHER={
+    date,temp:w.temp,currentTemp:includeCurrent?w.currentTemp:prevCurrentTemp,
+    sol:w.sol,regn:w.regn,vind:w.vind,vindHard:w.vindHard,sne:w.sne,
+    weathercode:w.weathercode,savedAt:new Date().toISOString()
+  };
+  try{storageSet('lastweather',safeStringify(LAST_GOOD_WEATHER));}
+  catch(e){console.error('saveLastGoodWeather:',errMsg(e));}
+}
+
+/* ---------- AI Memory auto-recording ----------
+   Når luk-registrering gemmes, tjekker vi om alle målepunkter er udfyldte
+   for alle varer. Hvis ja, beregner vi forecast vs. faktisk og gemmer i AI Memory. */
+async function tryRecordAIOutcomes(date){
+  const aktive=VARER.filter(v=>v.aktiv);
+  const mps=getMalepunkter(true);
+  const dates56=periodDates(56).filter(d=>d<date);
+  aktive.forEach(v=>{
+    const r=REGS[date]&&REGS[date][v.ean];
+    if(!r)return;
+    // Tjek at luk er registreret (primær trigger)
+    if(r.luk==null)return;
+    if(r.modtaget==null)return;
+    const actual=Math.max(0,r.modtaget-r.luk);
+    // Byg mpData snapshot
+    const mpData={};
+    mps.forEach(mp=>{
+      const key=mpFieldKey(mp);
+      mpData[mp.id]=r[key]!==undefined?r[key]:null;
+    });
+    // Forecast
+    let forecastVal=0;
+    let confLabel='Lav';
+    try{
+      if(dates56.length>=3){
+        const factors=Pattern_Engine.extractFactors(date);
+        const f=computeForecast(v.ean,date,dates56);
+        forecastVal=f.anbefalet;
+        const conf=Confidence_Engine.compute(v.ean,f.quality,factors);
+        confLabel=conf.label;
+        // Gem outcome
+        AI_MemoryEngine.recordOutcome(date,v.ean,forecastVal,actual,factors,confLabel,mpData);
+        if(_syncEnabled){
+          const outcome = AI_MemoryEngine.getOutcomesForVare(v.ean).find(o=>o.date===date);
+          if(outcome) DeviceSync.saveAIMemory(date,v.ean,outcome).catch(()=>{});
+        }
+      }
+    }catch(e){console.error('tryRecordAIOutcomes:',errMsg(e));}
+  });
+}
+
+/* ---------- Helpers ---------- */
+function getMalepunkter(onlyAktive){
+  const mps=SETTINGS.malepunkter||DEFAULT_MALEPUNKTER;
+  return onlyAktive?mps.filter(m=>m.aktiv!==false):mps;
+}
+function getPrimaertMP(){
+  const mps=getMalepunkter(true);
+  return mps.find(m=>m.id===SETTINGS.primaertMalepunkt)||mps.find(m=>!m.isModtaget&&!m.isLuk)||mps[1]||mps[0];
+}
+function mpFieldKey(mp){return mp.isModtaget?'modtaget':mp.isLuk?'luk':`mp_${mp.id}`;}
+function getReg(date,ean){
+  if(!REGS[date])REGS[date]={};
+  if(!REGS[date][ean]){
+    const base={modtaget:null,luk:null,status:"normal",kommentar:'',foto:null};
+    getMalepunkter(false).forEach(mp=>{if(!mp.isModtaget&&!mp.isLuk)base[`mp_${mp.id}`]=null;});
+    REGS[date][ean]=base;
+  }
+  if(REGS[date][ean].kommentar===undefined)REGS[date][ean].kommentar='';
+  if(REGS[date][ean].foto===undefined)REGS[date][ean].foto=null;
+  return REGS[date][ean];
+}
+
+/* ---------- UI State ---------- */
+let currentTab='home',currentDate=todayISO(),calDate=todayISO();
+let DEV_MODE=storageGet('devmode')==='1';
+let saveTimer=null;
+function showSaved(){
+  const el=$('#saveIndicator');if(!el)return;
+  el.textContent='✅ Gemt';el.classList.add('show');
+  clearTimeout(saveTimer);saveTimer=setTimeout(()=>el.classList.remove('show'),1400);
+}
+async function saveRegsAuto(ean_hint){
+  await saveRegs(); showSaved();
+  // Tilføj tidsstempel for konfliktløsning (seneste vinder)
+  if(ean_hint && REGS[currentDate] && REGS[currentDate][ean_hint]){
+    REGS[currentDate][ean_hint]._ts = new Date().toISOString();
+    REGS[currentDate][ean_hint]._device = _deviceId;
+  }
+  // Sync til cloud/DeviceSync
+  if(ean_hint && REGS[currentDate] && REGS[currentDate][ean_hint]){
+    DeviceSync.saveRegistration(currentDate, ean_hint, REGS[currentDate][ean_hint]).catch(()=>{});
+  } else {
+    const dayRegs = REGS[currentDate]||{};
+    Object.keys(dayRegs).forEach(ean=>{ if(!ean.startsWith('_')){ DeviceSync.saveRegistration(currentDate,ean,dayRegs[ean]).catch(()=>{}); } });
+  }
+  // Auto-trigger AI memory recording
+  try{ await tryRecordAIOutcomes(currentDate); }
+  catch(e){ console.error('tryRecordAIOutcomes error:',errMsg(e)); }
+}
+async function saveVarerAuto(){await saveVarer();showSaved();}
+async function saveSettingsAuto(){await saveSettings();showSaved();}
+async function saveEventsAuto(){await saveEvents();showSaved();}
+
+function applyBranding(){
+  // FIX v2.1: samlet funktion — ingen override/rekursion
+  try{
+    const logoEl=$('#brandLogo'),nameEl=$('#brandName'),custEl=$('#brandCustomer');
+    if(logoEl)logoEl.textContent=SETTINGS.logo||'🍞';
+    if(nameEl)nameEl.textContent='FreshScan AI';
+    if(custEl)custEl.textContent=SETTINGS.kundeNavn||SETTINGS.butiksnavn||'';
+    const accent=SETTINGS.accentColor||'#1b7a3d';
+    document.documentElement.style.setProperty('--accent',accent);
+    document.documentElement.style.setProperty('--green',accent);
+  }catch(e){}
+  // Menu-brugerinfo (inlined — ingen separat override)
+  // Sync-status i header (valgfrit)
+  try{
+    const lo=$('#menuLogout'); if(lo)lo.style.display='none';
+    const ui=$('#menuUserInfo'); if(ui)ui.style.display='none';
+  }catch(e){}
+}
+
+function render(){
+  applyBranding();
+  const map={
+    home:renderHome,newreg:renderNewReg,continuereg:renderContinueReg,
+    reports:renderReports,admin:renderAdminHome,
+    'admin-dashboard':renderAdminDashboard,'admin-historik':renderAdminHistorik,
+    'admin-monstre':renderAdminMonstre,'admin-varer':renderAdminVarer,
+    'admin-malepunkter':renderAdminMalepunkter,'admin-settings':renderAdminSettings,
+    'admin-system':renderAdminSystem,'admin-hjaelp':renderAdminHjaelp,
+    'admin-ai':renderAdminAI,'admin-enheder':renderAdminEnheder,'admin-scanner':renderAdminScanner,'dev-mode':renderDeveloperMode
+  };
+  const fn=map[currentTab];
+  if(typeof fn==='function')safeRender(currentTab,fn);
+  else{currentTab='home';safeRender('home',renderHome);}
+}
+function safeRender(name,fn){
+  try{fn();}
+  catch(err){
+    console.error(name+'() error:',errMsg(err));
+    app.innerHTML=`<div class="card empty">Fejl under indlæsning.<br>
+      <button class="btn-secondary" id="errBackHome" style="margin-top:14px;">Tilbage til forsiden</button></div>`;
+    const b=$('#errBackHome');if(b)b.addEventListener('click',()=>{currentTab='home';render();});
+  }
+}
+function goHome(){currentTab='home';render();}
+function backRow(label,onClick){
+  return`<div class="back-row" id="backRow"><span class="ico">←</span><span class="lbl">${label}</span></div>`;
+}
+function wireBackRow(onClick){const el=$('#backRow');if(el)el.addEventListener('click',onClick);}
+
+/* ---- Menu ---- */
+const menuBtn=$('#menuBtn'),mainMenuOverlay=$('#mainMenuOverlay');
+if(menuBtn&&mainMenuOverlay){
+  menuBtn.addEventListener('click',()=>{mainMenuOverlay.style.display='block';});
+  mainMenuOverlay.addEventListener('click',(e)=>{if(e.target===mainMenuOverlay)mainMenuOverlay.style.display='none';});
+}
+$('#menuHome').addEventListener('click',()=>{mainMenuOverlay.style.display='none';goHome();});
+$('#menuAdmin').addEventListener('click',()=>{mainMenuOverlay.style.display='none';openAdminPanel();});
+// Menu: ingen login/logout for medarbejdere — admin via PIN
+
+/* ---- Logo tap (developer mode) ---- */
+let _logoTapCount=0,_logoTapTimer=null;
+const brandLogoEl=$('#brandLogo');
+if(brandLogoEl){
+  brandLogoEl.addEventListener('click',()=>{
+    _logoTapCount++;clearTimeout(_logoTapTimer);
+    _logoTapTimer=setTimeout(()=>{_logoTapCount=0;},1500);
+    if(_logoTapCount>=7){_logoTapCount=0;openDeveloperMode();}
+  });
+}
+
+/* ---- Foto kamera ---- */
+const FreshScanCamera=(function(){
+  let stream=null,onCaptured=null;
+  function getEls(){return{modal:document.getElementById('photoModal'),video:document.getElementById('photoVideo'),canvas:document.getElementById('photoCanvas')};}
+  async function stop(){
+    if(stream){try{stream.getTracks().forEach(t=>t.stop());}catch(e){}stream=null;}
+    const{modal,video}=getEls();
+    if(video){try{video.pause();}catch(e){}video.srcObject=null;}
+    if(modal)modal.style.display='none';
+  }
+  async function start(callback){
+    onCaptured=callback;
+    const{modal,video}=getEls();
+    if(!modal||!video||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){alert('Kamera ikke tilgængeligt.');return;}
+    modal.style.display='flex';
+    try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:960}}});video.srcObject=stream;await video.play();}
+    catch(e){alert('Kunne ikke åbne kamera: '+errMsg(e));stop();}
+  }
+  function capture(){
+    const{video,canvas}=getEls();if(!video||!canvas)return null;
+    canvas.width=video.videoWidth||800;canvas.height=video.videoHeight||600;
+    const ctx=canvas.getContext('2d');ctx.drawImage(video,0,0,canvas.width,canvas.height);
+    let dataUrl;try{dataUrl=canvas.toDataURL('image/jpeg',0.6);}catch(e){dataUrl=null;}
+    stop();if(onCaptured)onCaptured(dataUrl);return dataUrl;
+  }
+  return{start,stop,capture};
+})();
+document.getElementById('photoCancel').addEventListener('click',()=>FreshScanCamera.stop());
+document.getElementById('photoCapture').addEventListener('click',()=>FreshScanCamera.capture());
+
+/* ---- Midnat-skift ---- */
+setInterval(()=>{
+  const t=todayISO();
+  if(t!==currentDate){currentDate=t;newRegState=null;if(['newreg','continuereg','home'].includes(currentTab))render();}
+},60000);
+
+/* ---------- KALENDER + TAGS ---------- */
+const CAL_TAGS=[
+  {key:'tilbudsavis',label:'Tilbudsavis'},{key:'lonweekend',label:'Lønweekend'},
+  {key:'vinterferie',label:'Vinterferie'},{key:'paaskeferie',label:'Påskeferie'},
+  {key:'sommerferie',label:'Sommerferie'},{key:'efterarsferie',label:'Efterårsferie'},
+  {key:'juleferie',label:'Juleferie'},{key:'helligdag',label:'Helligdag'},
+  {key:'turistsaeson',label:'Turistsæson'},{key:'lokalt',label:'Lokalt arrangement'},
+];
+const FERIE_KEYS=['vinterferie','paaskeferie','sommerferie','efterarsferie','juleferie'];
+function getDayTags(date){if(!REGS[date])REGS[date]={};if(!REGS[date]._tags)REGS[date]._tags={};return REGS[date]._tags;}
+function getDayWeather(date){
+  if(!REGS[date])REGS[date]={};
+  if(!REGS[date]._weather)REGS[date]._weather={temp:null,currentTemp:null,sol:false,regn:false,vind:false,vindHard:false,sne:false,weathercode:null,auto:null,manualOverride:false};
+  const w=REGS[date]._weather;
+  if(w.vindHard===undefined)w.vindHard=false;
+  if(w.manualOverride===undefined)w.manualOverride=false;
+  if(w.weathercode===undefined)w.weathercode=null;
+  if(w.currentTemp===undefined)w.currentTemp=null;
+  return w;
+}
+function easterSunday(year){
+  const a=year%19,b=Math.floor(year/100),c=year%100;
+  const d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25);
+  const g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30;
+  const i=Math.floor(c/4),k=c%4;
+  const l=(32+2*e+2*i-h-k)%7;
+  const m=Math.floor((a+11*h+22*l)/451);
+  const month=Math.floor((h+l-7*m+114)/31);
+  const day=((h+l-7*m+114)%31)+1;
+  return new Date(Date.UTC(year,month-1,day));
+}
+function addDays(date,n){const d=new Date(date);d.setUTCDate(d.getUTCDate()+n);return d;}
+function dISO(d){return d.toISOString().slice(0,10);}
+const _autoCalCache={};
+function getAutoCalendarYear(year){
+  if(_autoCalCache[year])return _autoCalCache[year];
+  const easter=easterSunday(year);
+  const holidays={};
+  holidays[dISO(new Date(Date.UTC(year,0,1)))]='Nytårsdag';
+  holidays[dISO(addDays(easter,-3))]='Skærtorsdag';
+  holidays[dISO(addDays(easter,-2))]='Langfredag';
+  holidays[dISO(easter)]='Påskedag';
+  holidays[dISO(addDays(easter,1))]='2. påskedag';
+  holidays[dISO(addDays(easter,39))]='Kristi Himmelfartsdag';
+  holidays[dISO(addDays(easter,49))]='Pinsedag';
+  holidays[dISO(addDays(easter,50))]='2. pinsedag';
+  holidays[dISO(new Date(Date.UTC(year,11,25)))]='Juledag';
+  holidays[dISO(new Date(Date.UTC(year,11,26)))]='2. juledag';
+  const paaskeferieStart=addDays(easter,-10);
+  const ferieRanges={
+    vinterferie:[dISO(new Date(Date.UTC(year,1,10))),dISO(new Date(Date.UTC(year,1,18)))],
+    paaskeferie:[dISO(paaskeferieStart),dISO(addDays(easter,1))],
+    sommerferie:[dISO(new Date(Date.UTC(year,5,24))),dISO(new Date(Date.UTC(year,7,9)))],
+    efterarsferie:[dISO(new Date(Date.UTC(year,9,14))),dISO(new Date(Date.UTC(year,9,22)))],
+    juleferie:[dISO(new Date(Date.UTC(year,11,21))),dISO(new Date(Date.UTC(year+1,0,2)))],
+  };
+  const result={holidays,ferieRanges};
+  _autoCalCache[year]=result;
+  return result;
+}
+function inRange(iso,range){return iso>=range[0]&&iso<=range[1];}
+function getAutoTags(date){
+  const d=isoToUTCDate(date);const year=d.getUTCFullYear();
+  const cal=getAutoCalendarYear(year);const calPrev=getAutoCalendarYear(year-1);
+  const tags={};const reasons=[];
+  let holidayName=cal.holidays[date];if(!holidayName&&calPrev.holidays[date])holidayName=calPrev.holidays[date];
+  if(holidayName){tags.helligdag=true;reasons.push(holidayName);}
+  FERIE_KEYS.forEach(key=>{
+    if(inRange(date,cal.ferieRanges[key])||inRange(date,calPrev.ferieRanges[key])){
+      tags[key]=true;
+      const labels={vinterferie:'vinterferie',paaskeferie:'påskeferie',sommerferie:'sommerferie',efterarsferie:'efterårsferie',juleferie:'juleferie'};
+      reasons.push(labels[key]);
+    }
+  });
+  const dow=d.getUTCDay();const lastDayOfMonth=new Date(Date.UTC(year,d.getUTCMonth()+1,0)).getUTCDate();
+  if((dow===5||dow===6||dow===0)&&d.getUTCDate()>=lastDayOfMonth-6){tags.lonweekend=true;reasons.push('lønweekend');}
+  const month=d.getUTCMonth()+1;
+  const turistMonths=(SETTINGS.turistMonths&&SETTINGS.turistMonths.length)?SETTINGS.turistMonths:[6,7,8];
+  if(turistMonths.includes(month)){tags.turistsaeson=true;reasons.push('turistsæson');}
+  return{tags,reasons};
+}
+function getEffectiveTags(date){
+  const auto=getAutoTags(date);const manual=getDayTags(date);
+  const effective={};const reasons={auto:[],manual:[]};const autoActiveKeys=[];
+  CAL_TAGS.forEach(t=>{
+    const autoVal=!!auto.tags[t.key];if(autoVal)autoActiveKeys.push(t.key);
+    if(Object.prototype.hasOwnProperty.call(manual,t.key)){effective[t.key]=!!manual[t.key];if(manual[t.key])reasons.manual.push(t.label);}
+    else effective[t.key]=autoVal;
+  });
+  if(auto.reasons.length)reasons.autoText=auto.reasons.join(', ');
+  return{tags:effective,reasons,autoActiveKeys};
+}
+
+/* ---------- Lokale arrangementer ---------- */
+const IMPACT_PCT={lav:0.05,middel:0.10,hoj:0.20};
+const IMPACT_LABEL={lav:'Lav',middel:'Middel',hoj:'Høj'};
+function getActiveEvents(date){
+  return EVENTS.filter(e=>{
+    if(e.aktiv===false)return false;
+    if(e.gentagAarligt){
+      const md=date.slice(5);const startMd=e.start.slice(5),slutMd=e.slut.slice(5);
+      if(startMd<=slutMd)return md>=startMd&&md<=slutMd;
+      return md>=startMd||md<=slutMd;
+    }
+    return date>=e.start&&date<=e.slut;
+  });
+}
+function eventFactor(date){
+  const evs=getActiveEvents(date);if(!evs.length)return null;
+  let maxPct=0,maxEv=null;
+  evs.forEach(e=>{const pct=IMPACT_PCT[e.impact]||0;if(pct>maxPct){maxPct=pct;maxEv=e;}});
+  return{pct:maxPct,events:evs,top:maxEv};
+}
+
+/* ---------- Vejr ---------- */
+const COUNTRY_CODES={'danmark':'DK','denmark':'DK','sverige':'SE','sweden':'SE','norge':'NO','norway':'NO','tyskland':'DE','germany':'DE','finland':'FI','island':'IS','iceland':'IS'};
+let WEATHER_DEBUG={city:'',postcode:'',country:'',query:'',latitude:null,longitude:null,apiStatus:null,apiUrl:'',errorMessage:'',timestamp:null,temp:null,currentTemp:null,weathercode:null,auto:null,httpStatus:null,rawResponse:''};
+function resetWeatherDebugLocation(){WEATHER_DEBUG.city=SETTINGS.by||'';WEATHER_DEBUG.postcode=SETTINGS.postnr||'';WEATHER_DEBUG.country=SETTINGS.land||'';WEATHER_DEBUG.query='';WEATHER_DEBUG.latitude=null;WEATHER_DEBUG.longitude=null;}
+function setWeatherDebugApi(status,url,error){WEATHER_DEBUG.apiStatus=status;WEATHER_DEBUG.apiUrl=url||'';WEATHER_DEBUG.errorMessage=error?errMsg(error):'';WEATHER_DEBUG.timestamp=new Date().toISOString();}
+async function fetchJSON(url,timeoutMs){
+  timeoutMs=timeoutMs||8000;let lastErr;
+  for(let attempt=1;attempt<=2;attempt++){
+    const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),timeoutMs);
+    try{
+      const res=await fetch(url,{method:'GET',cache:'no-store',mode:'cors',credentials:'omit',referrerPolicy:'no-referrer',signal:controller.signal});
+      clearTimeout(timer);WEATHER_DEBUG.httpStatus=res.status;
+      const text=await res.text();WEATHER_DEBUG.rawResponse=text.slice(0,1500);
+      let json;try{json=JSON.parse(text);}catch(pe){throw new Error('HTTP '+res.status+' – ikke gyldig JSON');}
+      if(!res.ok&&!(json&&json.error))throw new Error('HTTP '+res.status);
+      return json;
+    }catch(e){clearTimeout(timer);lastErr=e;if(attempt===2)throw e;await new Promise(r=>setTimeout(r,400));}
+  }
+  throw lastErr;
+}
+function weatherCodeFlags(code,precip,snow){
+  const res={sol:false,regn:false,sne:false};
+  if(code===0||code===1)res.sol=true;
+  if([51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].includes(code)||(precip!=null&&precip>0.2))res.regn=true;
+  if([71,73,75,77,85,86].includes(code)||(snow!=null&&snow>0))res.sne=true;
+  if(res.sne)res.regn=false;
+  return res;
+}
+function weatherCodeLabel(code){
+  if(code==null)return'–';
+  const map={0:'Klart vejr',1:'Næsten klart',2:'Delvist skyet',3:'Overskyet',45:'Tåge',48:'Rimtåge',51:'Let støvregn',53:'Støvregn',55:'Tæt støvregn',61:'Let regn',63:'Regn',65:'Kraftig regn',71:'Let snefald',73:'Snefald',75:'Kraftigt snefald',80:'Lette regnbyger',81:'Regnbyger',82:'Voldsomme regnbyger',95:'Tordenvejr',96:'Tordenvejr m. hagl',99:'Kraftigt tordenvejr m. hagl'};
+  return map[code]||('Kode '+code);
+}
+async function geocodeStore(){
+  if(SETTINGS.lat!=null&&SETTINGS.lon!=null){
+    resetWeatherDebugLocation();WEATHER_DEBUG.query=SETTINGS.by+(SETTINGS.postnr?` (${SETTINGS.postnr})`:'')+(SETTINGS.land?`, ${SETTINGS.land}`:'');
+    WEATHER_DEBUG.latitude=SETTINGS.lat;WEATHER_DEBUG.longitude=SETTINGS.lon;setWeatherDebugApi('OK','','');return true;
+  }
+  resetWeatherDebugLocation();if(!SETTINGS.by){setWeatherDebugApi('FAILED','','Ingen by angivet.');return false;}
+  const searchTerm=SETTINGS.by;WEATHER_DEBUG.query=searchTerm+(SETTINGS.postnr?` (${SETTINGS.postnr})`:'')+(SETTINGS.land?`, ${SETTINGS.land}`:'');
+  const url=`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(searchTerm)}&count=10&language=da&format=json`;
+  try{
+    const data=await fetchJSON(url);
+    if(data&&data.error){setWeatherDebugApi('FAILED',url,data.reason||'Geokodning fejlede.');return false;}
+    const results=data&&data.results;
+    if(!results||!results.length){setWeatherDebugApi('FAILED',url,'Ingen resultater.');return false;}
+    let best=results[0];
+    if(SETTINGS.postnr){const pcMatch=results.find(r=>Array.isArray(r.postcodes)&&r.postcodes.includes(String(SETTINGS.postnr)));if(pcMatch)best=pcMatch;}
+    const countryCode=COUNTRY_CODES[(SETTINGS.land||'Danmark').trim().toLowerCase()]||'';
+    if(best===results[0]&&countryCode){const ccMatch=results.find(r=>r.country_code===countryCode);if(ccMatch)best=ccMatch;}
+    SETTINGS.lat=best.latitude;SETTINGS.lon=best.longitude;await saveSettings();
+    WEATHER_DEBUG.latitude=best.latitude;WEATHER_DEBUG.longitude=best.longitude;setWeatherDebugApi('OK',url,'');return true;
+  }catch(e){setWeatherDebugApi('FAILED',url,e);}
+  return false;
+}
+const WEATHER_VAR_SETS=['temperature_2m_max,precipitation_sum,wind_speed_10m_max,snowfall_sum,weather_code','temperature_2m_max,precipitation_sum,windspeed_10m_max,snowfall_sum,weathercode'];
+async function fetchAutoWeather(date){
+  WEATHER_DEBUG.temp=null;WEATHER_DEBUG.currentTemp=null;WEATHER_DEBUG.weathercode=null;WEATHER_DEBUG.auto=null;
+  const ok=await geocodeStore();if(!ok){WEATHER_DEBUG.auto=false;return false;}
+  const daysFromToday=Math.round((new Date(date+"T00:00:00Z")-new Date(todayISO()+"T00:00:00Z"))/86400000);
+  const useArchive=daysFromToday<-92;
+  const base=useArchive?'https://archive-api.open-meteo.com/v1/archive':'https://api.open-meteo.com/v1/forecast';
+  const includeCurrent=!useArchive&&date===todayISO();
+  let lastError='',lastUrl='';
+  for(const vars of WEATHER_VAR_SETS){
+    let url=`${base}?latitude=${SETTINGS.lat}&longitude=${SETTINGS.lon}&start_date=${date}&end_date=${date}&daily=${vars}&timezone=auto`;
+    if(includeCurrent)url+=`&current=temperature_2m`;
+    lastUrl=url;
+    try{
+      const data=await fetchJSON(url);
+      if(data&&data.error){lastError=data.reason||'Vejr-API fejlede.';continue;}
+      if(!data||!data.daily||!data.daily.time||!data.daily.time.length){lastError='Ingen data.';continue;}
+      const idx=data.daily.time.indexOf(date);if(idx===-1){lastError='Dato ikke i svar.';continue;}
+      const d=data.daily;
+      const temp=d.temperature_2m_max?d.temperature_2m_max[idx]:null;
+      const precip=d.precipitation_sum?d.precipitation_sum[idx]:null;
+      const snow=d.snowfall_sum?d.snowfall_sum[idx]:null;
+      const wind=d.windspeed_10m_max?d.windspeed_10m_max[idx]:(d.wind_speed_10m_max?d.wind_speed_10m_max[idx]:null);
+      const code=d.weathercode?d.weathercode[idx]:(d.weather_code?d.weather_code[idx]:null);
+      const flags=weatherCodeFlags(code,precip,snow);
+      const currentTemp=(data.current&&data.current.temperature_2m!=null)?data.current.temperature_2m:null;
+      const w=getDayWeather(date);
+      w.temp=temp!=null?Math.round(temp*10)/10:w.temp;
+      w.currentTemp=currentTemp!=null?Math.round(currentTemp*10)/10:w.currentTemp;
+      w.sol=flags.sol;w.regn=flags.regn;w.sne=flags.sne;
+      w.vind=wind!=null?wind>=25:w.vind;w.vindHard=wind!=null?wind>=40:false;
+      w.weathercode=code!=null?code:w.weathercode;w.auto=true;
+      setWeatherDebugApi('OK',url,'');
+      WEATHER_DEBUG.temp=w.temp;WEATHER_DEBUG.currentTemp=w.currentTemp;WEATHER_DEBUG.weathercode=w.weathercode;WEATHER_DEBUG.auto=true;
+      await saveRegs();await saveLastGoodWeather(date,w,includeCurrent);
+      if(_syncEnabled) DeviceSync.saveWeather(date,{temp:w.temp,currentTemp:w.currentTemp,sol:w.sol,regn:w.regn,vind:w.vind,vindHard:w.vindHard,sne:w.sne,weathercode:w.weathercode}).catch(()=>{});
+      return true;
+    }catch(e){lastError=errMsg(e);}
+  }
+  setWeatherDebugApi('FAILED',lastUrl,lastError||'Ukendt fejl.');WEATHER_DEBUG.auto=false;return false;
+}
+async function ensureWeatherAuto(date,isStillRelevant){
+  const w=getDayWeather(date);if(w.auto===true)return;if(w.manualOverride)return;
+  const before=w.auto;const ok=await fetchAutoWeather(date);
+  if(!ok){getDayWeather(date).auto=false;await saveRegs();}
+  const after=getDayWeather(date).auto;if(before!==after&&isStillRelevant())render();
+}
+function weatherForDisplay(date){
+  const w=getDayWeather(date);const hasData=w.temp!=null||w.sol||w.regn||w.vind||w.sne;
+  if(!hasData&&w.auto===false&&!w.manualOverride&&LAST_GOOD_WEATHER)return{w:LAST_GOOD_WEATHER,fromFallback:true};
+  return{w,fromFallback:false};
+}
+function weatherStatusMessage(weather,forTomorrow){
+  const ctx=forTomorrow?' for i morgen':'';
+  if(weather.auto===true)return`✅ Automatisk vejr${ctx} hentet`;
+  if(weather.auto===false){if(LAST_GOOD_WEATHER)return'⚠️ Seneste kendte vejr anvendes.';return'⚠️ Vejr ikke tilgængeligt.';}
+  return`Henter automatisk vejr${ctx}...`;
+}
+function autoChecklistHTML(date){
+  const eff=getEffectiveTags(date);const weather=getDayWeather(date);const items=[];
+  CAL_TAGS.forEach(t=>{if(eff.tags[t.key])items.push(t.label);});
+  if(weather.sol)items.push('☀️ Sol');if(weather.regn)items.push('🌧️ Regn');
+  if(weather.vind)items.push('💨 Vind');if(weather.sne)items.push('❄️ Sne');
+  if(!items.length)return`<div class="small-muted">Normal dag – ingen særlige forhold.</div>`;
+  return`<div class="small-muted" style="margin-bottom:6px;">Automatisk registreret:</div>`+items.map(i=>`<div style="padding:3px 0; font-size:14px;">☑ ${i}</div>`).join('');
+}
+
+/* ---------- FORECAST ENGINE (opgraderet v2.0) ---------- */
+function soldOn(date,ean){
+  const r=REGS[date]&&REGS[date][ean];
+  if(r&&r.modtaget!=null&&r.luk!=null)return Math.max(0,r.modtaget-r.luk);
+  return null;
+}
+function tomorrowISO(){const d=isoToUTCDate(todayISO());d.setUTCDate(d.getUTCDate()+1);return utcDateToISO(d);}
+function periodDates(days){return Array.from({length:days},(_,i)=>isoDaysAgo(i));}
+
+function computeForecastRaw(ean,targetDate,dates56){
+  const weekday=weekdayName(targetDate);
+  const sameWeekday=dates56.filter(d=>weekdayName(d)===weekday).map(d=>soldOn(d,ean)).filter(x=>x!=null);
+  // Berig med AI Memory outcomes
+  AI_MemoryEngine.getOutcomesForVare(ean).forEach(o=>{
+    if(weekdayName(o.date)===weekday&&o.actual!=null&&!dates56.includes(o.date))
+      sameWeekday.push(o.actual);
+  });
+  let basis,quality;
+  if(sameWeekday.length>=2){basis=avg(sameWeekday);quality='ok';}
+  else{
+    const allSold=dates56.map(d=>soldOn(d,ean)).filter(x=>x!=null);
+    if(allSold.length>0){basis=avg(allSold);quality='low';}
+    else{
+      let lastMod=null;
+      for(const d of dates56){const r=REGS[d]&&REGS[d][ean];if(r&&r.modtaget!=null){lastMod=r.modtaget;break;}}
+      basis=lastMod!=null?lastMod:0;quality='none';
+    }
+  }
+  const{tags,reasons}=getEffectiveTags(targetDate);
+  const weather=weatherForDisplay(targetDate).w;
+  const factors=[];
+  if(tags.lonweekend)factors.push({label:'Lønweekend',pct:0.10});
+  if(FERIE_KEYS.some(k=>tags[k]))factors.push({label:'Ferieperiode',pct:0.10});
+  if(tags.turistsaeson)factors.push({label:'Turistsæson',pct:0.15});
+  if(tags.helligdag)factors.push({label:'Helligdag',pct:0.10});
+  if(tags.lokalt)factors.push({label:'Lokalt arrangement',pct:0.10});
+  if(weather.regn)factors.push({label:'Regn',pct:0.05});
+  if(weather.sol&&weather.temp!=null&&weather.temp>20)factors.push({label:'Sol >20°',pct:0.05});
+  if(weather.sne)factors.push({label:'Sne',pct:0.05});
+  if(weather.vind&&weather.vindHard)factors.push({label:'Kraftig vind',pct:-0.05});
+  const ev=eventFactor(targetDate);
+  if(ev&&!tags.lokalt)factors.push({label:`${ev.top.navn} (${IMPACT_LABEL[ev.top.impact]})`,pct:ev.pct});
+  const totalPct=factors.reduce((s,f)=>s+f.pct,0);
+  const forecast=Math.round(basis*(1+totalPct));
+  return{weekday,basis:round1(basis),factors,totalPct,forecast,quality,calReasons:reasons};
+}
+
+function computeForecast(ean,targetDate,dates56){
+  const raw=computeForecastRaw(ean,targetDate,dates56);
+  const activeFactors=Pattern_Engine.extractFactors(targetDate);
+
+  // v2.0: Anvend Learning Engine korrektioner
+  const corrResult=Learning_Engine.applyCorrections(raw.basis*(1+raw.totalPct),ean,activeFactors);
+  const forecast=Math.max(0,corrResult.corrected);
+
+  // Udsolgt-buffer
+  const pmpField=mpFieldKey(getPrimaertMP());
+  const last7=dates56.slice(0,7);
+  const kl13zero=last7.filter(d=>{const r=REGS[d]&&REGS[d][ean];if(!r)return false;const val=r[pmpField]??(pmpField==='mp_kl13'?r.kl13:null);return val===0;}).length;
+  const buffer=kl13zero>=2?1:0;
+  const anbefalet=forecast+buffer;
+
+  // v2.0: Kalibreret konfidens
+  const confidence=Confidence_Engine.compute(ean,raw.quality,activeFactors);
+
+  const risk=stockoutRisk(ean,dates56);
+  return{...raw,forecast,anbefalet,buffer,kl13zero,learning:corrResult,confidence,risk,activeFactors};
+}
+
+function stockoutRisk(ean,dates56){
+  const pmp=getPrimaertMP();const pmpField=mpFieldKey(pmp);
+  const days28=dates56.slice(0,28);let zero=0,total=0;
+  days28.forEach(d=>{
+    const r=REGS[d]&&REGS[d][ean];if(!r)return;
+    const val=r[pmpField]??(pmpField==='mp_kl13'?r.kl13:null);
+    if(val!=null){total++;if(val===0)zero++;}
+  });
+  if(!total)return{level:'Lav',sharePct:0};
+  const share=zero/total;
+  return{level:share>=0.4?'Høj':(share>=0.15?'Mellem':'Lav'),sharePct:Math.round(share*100)};
+}
+
+function forecastExplanation(v,f){
+  if(f.quality==='none')return`Ingen historik for ${v.navn} – forslaget er baseret på seneste registrering.`;
+  const parts=[];
+  if(!f.factors.length)parts.push(`historikken for ${f.weekday.toLowerCase()} viser et gennemsnitligt salg på ${f.basis} stk.`);
+  else{
+    const factorTxt=f.factors.map(fa=>{const p=Math.round(fa.pct*100);return`${fa.label} ${p>=0?'+':''}${p}%`;}).join(', ');
+    parts.push(`${f.weekday.toLowerCase()} med ${factorTxt}, historik: ${f.basis} stk. i snit.`);
+  }
+  if(f.buffer>0)parts.push(`+1 stk. buffer (udsolgt ${f.kl13zero} gange på 7 dage).`);
+  if(f.learning&&f.learning.totalAdjustment!==0){
+    const p=f.learning.totalAdjustment;
+    parts.push(`AI læringskorr. ${p>=0?'+':''}${p}% (${f.learning.vareCorr.samples} datapunkter).`);
+  }
+  return parts.join(' ');
+}
+
+/* ---------- Summarize ---------- */
+function isoWeek(date){
+  const d=new Date(Date.UTC(date.getUTCFullYear(),date.getUTCMonth(),date.getUTCDate()));
+  const dayNum=(d.getUTCDay()+6)%7;d.setUTCDate(d.getUTCDate()-dayNum+3);
+  const firstThursday=new Date(Date.UTC(d.getUTCFullYear(),0,4));
+  const diff=(d-firstThursday)/86400000;return 1+Math.round(diff/7);
+}
+function summarize(ean,dates){
+  const pmp=getPrimaertMP();const pmpField=mpFieldKey(pmp);
+  let mod=[],pmpVals=[],luk=[],pmpZero=0,restDays=0;
+  dates.forEach(date=>{
+    const r=REGS[date]&&REGS[date][ean];if(!r)return;
+    if(r.modtaget!=null)mod.push(r.modtaget);
+    const pmpVal=r[pmpField]??(pmpField==='mp_kl13'?r.kl13:null);
+    if(pmpVal!=null){pmpVals.push(pmpVal);if(pmpVal===0)pmpZero++;}
+    if(r.luk!=null){luk.push(r.luk);if(r.luk>0)restDays++;}
+  });
+  return{gnsModtaget:round1(avg(mod)),gnsKl13:round1(avg(pmpVals)),gnsLuk:round1(avg(luk)),kl13zero:pmpZero,restDays,regDays:dates.filter(d=>REGS[d]&&REGS[d][ean]).length,pmpLabel:pmp.label};
+}
+function vareTrend(ean,dates14){
+  const recent=dates14.slice(0,7),older=dates14.slice(7,14);
+  function gnsSalg(ds){let sold=[];ds.forEach(date=>{const r=REGS[date]&&REGS[date][ean];if(r&&r.modtaget!=null&&r.luk!=null)sold.push(r.modtaget-r.luk);});return avg(sold);}
+  const a=gnsSalg(recent),b=gnsSalg(older);
+  if(b===0&&a===0)return{arrow:'→',label:'stabil'};if(b===0)return{arrow:'↑',label:'stigende efterspørgsel'};
+  const pct=(a-b)/b;
+  if(pct>0.1)return{arrow:'↑',label:'stigende efterspørgsel'};if(pct<-0.1)return{arrow:'↓',label:'faldende efterspørgsel'};
+  return{arrow:'→',label:'stabil'};
+}
+
+/* =====================================================================
+   UI – FORSIDE
+   ===================================================================== */
+function getSimpleSuggestion(){
+  try{
+    const aktive=VARER.filter(v=>v.aktiv);if(!aktive.length)return null;
+    const dates56=periodDates(56);const tDate=tomorrowISO();
+    let best=null;
+    aktive.forEach(v=>{
+      const f=computeForecast(v.ean,tDate,dates56);
+      if(f.risk&&f.risk.level==='Høj'&&f.confidence&&f.confidence.label!=='Lav'){
+        if(!best||f.anbefalet>best.f.anbefalet)best={v,f};
+      }
+    });
+    if(!best)return null;
+    return`Forslag i morgen: Bestil ${best.f.anbefalet} ekstra ${best.v.navn}`;
+  }catch(e){console.error('getSimpleSuggestion:',errMsg(e));return null;}
+}
+function hasOpenRegistration(){
+  const today=REGS[currentDate];if(!today)return false;
+  const aktive=VARER.filter(v=>v.aktiv);if(!aktive.length)return false;
+  const mps=getMalepunkter(true);
+  return aktive.some(v=>{const r=today[v.ean];return mps.some(mp=>{const key=mpFieldKey(mp);const val=r?r[key]:null;return val===null||val===undefined;});});
+}
+function renderHome(){
+  var suggestion=getSimpleSuggestion();
+  var openReg=hasOpenRegistration();
+  var html='<div class="home-tiles">'
+    +'<div class="home-tile primary" id="tileNewReg">'
+    +'<div class="ico">➕</div>'
+    +'<div><div class="label">Ny registrering</div>'
+    +'<div class="desc">Vælg vare og registrér antal</div></div>'
+    +'</div>';
+
+  if(__scanSupportLevel()!=='none'){
+    html+='<div class="home-tile" id="tileScanReg">'
+      +'<div class="ico">📷</div>'
+      +'<div><div class="label">Scan stregkode</div>'
+      +'<div class="desc">Hurtig registrering med kamera</div></div>'
+      +'</div>';
+  }
+
+  if(openReg){
+    html+='<div class="home-tile" id="tileContinueReg">'
+      +'<div class="ico">📂</div>'
+      +'<div><div class="label">Fortsæt registrering</div>'
+      +'<div class="desc">Du har ikke registreret alle varer i dag endnu</div></div>'
+      +'</div>';
+  }
+
+  html+='<div class="home-tile" id="tileReports">'
+    +'<div class="ico">📄</div>'
+    +'<div><div class="label">Rapporter</div>'
+    +'<div class="desc">Se og del dagens rapport</div></div>'
+    +'</div>'
+    +'</div>';
+
+  if(suggestion){
+    html+='<div class="suggestion-banner"><span class="ico">💡</span><span>'+suggestion+'</span></div>';
+  }
+
+  app.innerHTML=html;
+
+  document.getElementById('tileNewReg').addEventListener('click',function(){newRegState=null;currentTab='newreg';render();});
+  var contBtn=document.getElementById('tileContinueReg');
+  if(contBtn) contBtn.addEventListener('click',function(){currentTab='continuereg';render();});
+  document.getElementById('tileReports').addEventListener('click',function(){currentTab='reports';render();});
+  var scanBtn=document.getElementById('tileScanReg');
+  if(scanBtn) scanBtn.addEventListener('click',function(){ __startQuickScan(); });
+
+  ensureWeatherAuto(todayISO(),function(){return currentTab==='home';});
+  ensureWeatherAuto(tomorrowISO(),function(){return currentTab==='home';});
+}
+
+
+/* =====================================================================
+   UI – NY REGISTRERING (uændret fra v1.0)
+   ===================================================================== */
+let newRegState=null;
+function activeRegMP(){
+  const mps=getMalepunkter(true);const aktive=VARER.filter(v=>v.aktiv);
+  for(const mp of mps){
+    const key=mpFieldKey(mp);
+    if(aktive.some(v=>{const r=getReg(currentDate,v.ean);return r[key]===null||r[key]===undefined;}))return mp;
+  }
+  return getPrimaertMP();
+}
+function startNewRegSession(mpOverride){
+  const mp=mpOverride||activeRegMP();const aktive=VARER.filter(v=>v.aktiv);const key=mpFieldKey(mp);
+  const missing=aktive.filter(v=>{const r=getReg(currentDate,v.ean);return r[key]===null||r[key]===undefined;});
+  const rest=aktive.filter(v=>!missing.includes(v));
+  newRegState={mp,queue:[...missing,...rest].map(v=>v.ean),idx:0,photo:null,kommentar:''};
+}
+function renderNewReg(){
+  const aktive=VARER.filter(v=>v.aktiv);
+  if(!aktive.length){app.innerHTML=backRow('Forside')+`<div class="card empty">Ingen varer oprettet endnu.</div>`;wireBackRow(goHome);return;}
+  if(!newRegState)startNewRegSession();
+  if(newRegState.idx>=newRegState.queue.length){renderRegComplete();return;}
+  const ean=newRegState.queue[newRegState.idx];const v=VARER.find(x=>x.ean===ean);
+  if(!v){newRegState.idx++;renderNewReg();return;}
+  const mp=newRegState.mp;const key=mpFieldKey(mp);const r=getReg(currentDate,ean);const currentVal=r[key];
+  const total=newRegState.queue.length;const idx=newRegState.idx;
+  let dots='';const showCount=Math.min(total,8);
+  for(let i=0;i<showCount;i++){const cls=i<idx?'done':(i===idx?'current':'');dots+=`<span class="${cls}"></span>`;}
+
+  // AI inline-hint til registrering
+  let aiHint='';
+  try{
+    const dates56=periodDates(56);
+    const f=computeForecast(ean,currentDate,dates56);
+    if(f&&f.anbefalet>0&&mp.isModtaget){
+      const conf=f.confidence;
+      aiHint=`<div class="ai-banner" style="margin:0 0 10px 0; font-size:13px;">
+        🧠 AI-forventet salg i dag: <b>~${f.anbefalet} stk.</b> ${Confidence_Engine.badge(conf.label)}
+        <span class="small-muted" style="margin-left:6px;">${forecastExplanation(v,f)}</span>
+      </div>`;
+    }
+  }catch(e){}
+
+  let html=backRow('Forside');
+  html+=`<div class="progress-dots">${dots}</div>`;
+  html+=`<div class="card">
+    <div class="small-muted" style="text-align:center; margin-bottom:4px;">${mp.emoji} ${mp.label} · vare ${idx+1} af ${total}</div>
+    <h2 style="text-align:center; font-size:22px;">${v.navn}</h2>
+    ${aiHint}
+    <div class="camera-tile" id="photoTile">
+      ${newRegState.photo?`<img src="${newRegState.photo}" alt="Billede"><button class="retake" id="retakePhoto">Tag nyt billede</button>`:`<div class="ico">📷</div><div class="lbl">Tag billede (valgfrit)</div>`}
+    </div>
+    <div class="stepper">
+      <button id="stepDown">−</button>
+      <div class="val" id="stepVal">${currentVal??0}</div>
+      <button id="stepUp">+</button>
+    </div>
+    <details id="kommentarDetails">
+      <summary style="cursor:pointer; color:var(--green-d); font-size:14px; text-align:center; list-style:none;">💬 Tilføj kommentar (valgfrit)</summary>
+      <textarea id="kommentarInput" placeholder="F.eks. årsag til spild, kvalitet, mv.">${newRegState.kommentar||r.kommentar||''}</textarea>
+    </details>
+    <button class="btn-primary" id="saveAndNext" style="margin-top:16px;">Gem og fortsæt</button>
+  </div>`;
+  app.innerHTML=html;
+  wireBackRow(()=>{newRegState=null;goHome();});
+  $('#photoTile').addEventListener('click',(e)=>{
+    if(e.target.id==='retakePhoto'||e.target.closest('#retakePhoto')||!newRegState.photo){
+      FreshScanCamera.start((dataUrl)=>{if(dataUrl)newRegState.photo=dataUrl;renderNewReg();});
+    }
+  });
+  const valEl=$('#stepVal');let val=currentVal??0;
+  $('#stepDown').addEventListener('click',()=>{val=Math.max(0,val-1);valEl.textContent=val;});
+  $('#stepUp').addEventListener('click',()=>{val=val+1;valEl.textContent=val;});
+  $('#saveAndNext').addEventListener('click',async()=>{
+    const reg=getReg(currentDate,ean);reg[key]=val;
+    const komInp=$('#kommentarInput');if(komInp&&komInp.value.trim())reg.kommentar=komInp.value.trim();
+    if(newRegState.photo)reg.foto=newRegState.photo;
+    await saveRegsAuto(ean);// cloud + AI memory
+    newRegState.idx++;newRegState.photo=null;newRegState.kommentar='';renderNewReg();
+  });
+}
+function renderRegComplete(){
+  const mp=newRegState?newRegState.mp:getPrimaertMP();
+  const lc=AI_MemoryEngine.getLearningCount();
+  app.innerHTML=`<div class="card" style="text-align:center; padding:32px 18px;">
+    <div style="font-size:48px; margin-bottom:10px;">✅</div>
+    <h2>${mp.label} er registreret</h2>
+    <div class="small-muted" style="margin-bottom:10px;">Alle aktive varer er gemt for i dag.</div>
+    ${lc>0?`<div class="ai-banner" style="margin-bottom:16px; justify-content:center;"><span>🧠 AI har nu lært af ${lc} registreringer i alt.</span></div>`:''}
+    <button class="btn-primary" id="regCompleteHome">Til forsiden</button>
+  </div>`;
+  $('#regCompleteHome').addEventListener('click',()=>{newRegState=null;goHome();});
+}
+
+/* =====================================================================
+   UI – FORTSÆT REGISTRERING (uændret fra v1.0)
+   ===================================================================== */
+function renderContinueReg(){
+  const aktive=VARER.filter(v=>v.aktiv);
+  if(!aktive.length){app.innerHTML=backRow('Forside')+`<div class="card empty">Ingen varer oprettet endnu.</div>`;wireBackRow(goHome);return;}
+  const mps=getMalepunkter(true);
+  let html=backRow('Forside');
+  html+=`<div class="card"><h2>Fortsæt registrering</h2>
+    <div class="small-muted" style="margin-bottom:10px;">Vælg målepunkt at fortsætte med.</div>`;
+  mps.forEach(mp=>{
+    const key=mpFieldKey(mp);const done=aktive.filter(v=>{const r=getReg(currentDate,v.ean);return r[key]!==null&&r[key]!==undefined;}).length;
+    const complete=done===aktive.length;
+    html+=`<div class="row" style="cursor:pointer;" data-mp="${mp.id}">
+      <div><div class="name">${mp.emoji} ${mp.label}</div><div class="sub">${complete?'Færdig':done+' af '+aktive.length+' varer registreret'}</div></div>
+      <div style="font-size:20px;">${complete?'✅':'→'}</div>
+    </div>`;
+  });
+  html+=`</div>`;
+  app.innerHTML=html;wireBackRow(goHome);
+  app.querySelectorAll('[data-mp]').forEach(row=>{
+    row.addEventListener('click',()=>{const mp=mps.find(m=>m.id===row.dataset.mp);startNewRegSession(mp);currentTab='newreg';render();});
+  });
+}
+
+/* =====================================================================
+   UI – RAPPORTER (uændret fra v1.0)
+   ===================================================================== */
+let reportDate=todayISO();
+function buildReportData(date){
+  const aktive=VARER.filter(v=>v.aktiv);const mps=getMalepunkter(true);
+  const rows=aktive.map(v=>{const r=getReg(date,v.ean);return{navn:v.navn,cells:mps.map(mp=>({label:mp.label,val:r[mpFieldKey(mp)]})),kommentar:r.kommentar||'',harFoto:!!r.foto};});
+  return{date,mps,rows};
+}
+function renderReports(){
+  const data=buildReportData(reportDate);
+  let html=backRow('Forside');
+  html+=`<div class="card"><h2>📄 Dagens rapport</h2>
+    <input type="text" id="reportDateLabel" value="${fmtDateDK(reportDate)}" readonly style="background:#eef2ef;">
+    <table><tr><td class="small-muted">Butik</td><td>${SETTINGS.kundeNavn||SETTINGS.butiksnavn||'–'}</td></tr></table>
+  </div>`;
+  html+=`<div class="card"><h3 style="margin-top:0;">Registreringer</h3>`;
+  if(!data.rows.length)html+=`<div class="empty">Ingen varer at vise.</div>`;
+  else{
+    html+=`<table><tr><th>Vare</th>${data.mps.map(mp=>`<th>${mp.label}</th>`).join('')}<th>📷</th></tr>`;
+    data.rows.forEach(row=>{html+=`<tr><td>${row.navn}</td>${row.cells.map(c=>`<td>${c.val??'–'}</td>`).join('')}<td>${row.harFoto?'✅':'–'}</td></tr>`;});
+    html+=`</table>`;
+  }
+  html+=`</div>`;
+  html+=`<button class="btn-primary" id="reportPdf">⬇️ Gem som PDF</button>
+    <button class="btn-secondary" id="reportShare">📤 Del</button>`;
+  app.innerHTML=html;wireBackRow(goHome);
+  $('#reportPdf').addEventListener('click',()=>window.print?window.print():alert('Print ikke understøttet.'));
+  $('#reportShare').addEventListener('click',async()=>{
+    const text=`FreshScan AI – ${SETTINGS.kundeNavn||SETTINGS.butiksnavn} – ${fmtDateDK(reportDate)}\n`+data.rows.map(r=>`${r.navn}: `+r.cells.map(c=>`${c.label} ${c.val??'–'}`).join(', ')).join('\n');
+    if(navigator.share)try{await navigator.share({title:'FreshScan-rapport',text});}catch(e){}
+    else if(navigator.clipboard&&navigator.clipboard.writeText)try{await navigator.clipboard.writeText(text);alert('Kopieret til udklipsholder.');}catch(e){alert('Deling understøttes ikke.');}
+    else alert('Deling understøttes ikke i denne browser.');
+  });
+}
+
+/* =====================================================================
+   UI – ADMIN (PIN-beskyttet)
+   ===================================================================== */
+const DEFAULT_ADMIN_PIN='1234';
+let adminUnlocked=false,adminPinEntry='';
+function getAdminPin(){return storageGet('adminpin')||DEFAULT_ADMIN_PIN;}
+function openAdminPanel(){
+  if(adminUnlocked){currentTab='admin';render();return;}
+  adminPinEntry='';currentTab='__pinpad__';renderPinPad();
+}
+function renderPinPad(){
+  const dots=Array.from({length:4},(_,i)=>i<adminPinEntry.length?'filled':'').map(c=>`<span class="${c}"></span>`).join('');
+  let html=backRow('Forside');
+  html+=`<div class="card" style="text-align:center;">
+    <div style="font-size:40px;">🔐</div><h2>Administrator</h2>
+    <div class="small-muted">Indtast PIN-kode</div>
+    <div class="pin-dots">${dots}</div>
+    <div class="pin-pad" id="pinPad">
+      ${[1,2,3,4,5,6,7,8,9].map(n=>`<button data-pin="${n}">${n}</button>`).join('')}
+      <button data-pin="clear" style="background:#fbeceb; color:var(--red);">✕</button>
+      <button data-pin="0">0</button>
+      <button data-pin="back">⌫</button>
+    </div>
+    <div id="pinError" class="small-muted" style="color:var(--red); margin-top:10px; min-height:16px;"></div>
+  </div>`;
+  app.innerHTML=html;wireBackRow(goHome);
+  app.querySelectorAll('[data-pin]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const v=btn.dataset.pin;
+      if(v==='clear')adminPinEntry='';else if(v==='back')adminPinEntry=adminPinEntry.slice(0,-1);
+      else if(adminPinEntry.length<4)adminPinEntry+=v;
+      if(adminPinEntry.length===4){
+        if(adminPinEntry===getAdminPin()){adminUnlocked=true;currentTab='admin';render();return;}
+        else{$('#pinError').textContent='Forkert PIN – prøv igen.';adminPinEntry='';}
+      }
+      renderPinPad();
+    });
+  });
+}
+
+const ADMIN_MENU=[
+  {id:'admin-dashboard',ico:'📊',label:'Forecast',desc:'Dagens overblik og bestillingsforslag'},
+  {id:'admin-ai',ico:'🧠',label:'AI Performance',desc:'Læringsdata, præcision og AI-indsigt'},
+  {id:'admin-enheder',ico:'📱',label:'Enheder & Sync',desc:'Aktive enheder, offline-kø og synkronisering'},
+  {id:'admin-historik',ico:'📈',label:'Historik & rapporter',desc:'Udvikling, dagsoversigt, sammenligninger'},
+  {id:'admin-monstre',ico:'🔍',label:'Mønstre & Kalender',desc:'Kalender, arrangementer og AI-mønstre'},
+  {id:'admin-varer',ico:'📦',label:'Varer',desc:'Tilføj, ret og slet varer'},
+  {id:'admin-malepunkter',ico:'⏱️',label:'Målepunkter',desc:'Tilpas hvornår der registreres'},
+  {id:'admin-scanner',ico:'📷',label:'Test scanner',desc:'Tjek kamera og stregkodescanning'},
+  {id:'admin-settings',ico:'⚙️',label:'Indstillinger',desc:'PIN, backup, import og nulstilling'},
+  {id:'admin-system',ico:'ℹ️',label:'Om FreshScan AI',desc:'Version og grundlæggende info'},
+  {id:'admin-hjaelp',ico:'📖',label:'Hjælp',desc:'Sådan bruges FreshScan'},
+];
+function renderAdminHome(){
+  if(!adminUnlocked){openAdminPanel();return;}
+  const lc=AI_MemoryEngine.getLearningCount();const acc=AI_MemoryEngine.getOverallAccuracy();
+  let html=backRow('Forside');
+  html+=`<div class="admin-badge">🔐 Administrator</div>`;
+  if(lc>0)html+=`<div class="ai-banner" style="margin-bottom:10px;">🧠 AI: ${lc} læringspoint${acc!=null?' · Præcision: '+acc+'%':''}</div>`;
+  html+=`<div class="card">`;
+  ADMIN_MENU.forEach((item,i)=>{
+    const isAI=item.id==='admin-ai';
+    html+=`<div class="row" style="cursor:pointer; ${i===0?'':'border-top:1px solid var(--border);'}" data-goto="${item.id}">
+      <div style="display:flex; gap:12px; align-items:center;">
+        <span style="font-size:22px;">${item.ico}</span>
+        <div>
+          <div class="name" style="${isAI?'color:var(--ai);':''}">${item.label}</div>
+          <div class="sub">${item.desc}</div>
+        </div>
+      </div>
+      <div style="font-size:18px; color:var(--muted);">→</div>
+    </div>`;
+  });
+  html+=`</div>`;
+  app.innerHTML=html;wireBackRow(goHome);
+  app.querySelectorAll('[data-goto]').forEach(row=>{row.addEventListener('click',()=>{currentTab=row.dataset.goto;render();});});
+
+}
+
+function adminBackRow(){return`<div class="back-row" id="adminBackRow"><span class="ico">←</span><span class="lbl">Administrator</span></div>`;}
+function wireAdminBackRow(){const el=$('#adminBackRow');if(el)el.addEventListener('click',()=>{currentTab='admin';render();});}
+
+/* =====================================================================
+   UI – AI PERFORMANCE DASHBOARD (NYT i v2.0)
+   ===================================================================== */
+function renderAdminAI(){
+  const perf=Analytics_Engine.getPerformanceSummary();
+  const lc=AI_MemoryEngine.getLearningCount();
+  let html=adminBackRow();
+  html+=`<div class="ai-badge">🧠 AI Performance</div>`;
+
+  // ---- Topkort: Præcision + læringspunkter ----
+  html+=`<div class="topcards">
+    <div class="topcard ai-topcard">
+      <div class="num">${perf.accuracy!=null?perf.accuracy+'%':'–'}</div>
+      <div class="lbl">Forecast-præcision (±15%)</div>
+    </div>
+    <div class="topcard ai-topcard">
+      <div class="num">${lc}</div>
+      <div class="lbl">Læringspunkter</div>
+    </div>
+    <div class="topcard ai-topcard">
+      <div class="num">${perf.mape!=null?perf.mape+'%':'–'}</div>
+      <div class="lbl">Gns. afvigelse (MAPE)</div>
+    </div>
+    <div class="topcard ai-topcard">
+      <div class="num">${perf.byConf.Høj!=null?perf.byConf.Høj+'%':'–'}</div>
+      <div class="lbl">Præcision ved Høj konfidens</div>
+    </div>
+  </div>`;
+
+  if(!lc){
+    html+=`<div class="card" style="text-align:center; padding:28px;">
+      <div style="font-size:40px; margin-bottom:10px;">🌱</div>
+      <h2>AI er klar til at lære</h2>
+      <div class="small-muted" style="margin-bottom:16px;">Start med at registrere dagens varer. AI begynder at lære fra din første afsluttede dag med morgen + luk-registrering.</div>
+      <button class="btn-primary" id="goToRegFromAI">Start registrering nu</button>
+    </div>`;
+    app.innerHTML=html;wireAdminBackRow();
+    const btn=$('#goToRegFromAI');if(btn)btn.addEventListener('click',()=>{newRegState=null;currentTab='newreg';render();});
+    return;
+  }
+
+  // ---- Præcisionsudvikling over tid ----
+  html+=`<div class="card"><h2>Præcisionsudvikling over tid</h2>`;
+  if(perf.trend.length<2){
+    html+=`<div class="small-muted">Kræver mindst 2 uger af data for at vise trend.</div>`;
+  }else{
+    const trendLast=perf.trend.slice(-5);
+    html+=`<table><tr><th>Dato</th><th>7-dages præcision</th><th>Datapunkter</th></tr>`;
+    trendLast.forEach(t=>{
+      const bar=`<div class="progress-bar" style="width:80px; display:inline-block; margin-left:6px;"><div class="progress-fill ai" style="width:${t.accuracy}%;"></div></div>`;
+      html+=`<tr><td>${fmtDateDK(t.date).split(' ').slice(1).join(' ')}</td><td>${t.accuracy}% ${bar}</td><td>${t.n}</td></tr>`;
+    });
+    html+=`</table>`;
+    const first=perf.trend[0].accuracy,last=perf.trend.slice(-1)[0].accuracy;
+    const improvement=last-first;
+    html+=`<div class="suggestion ai" style="margin-top:10px;">
+      ${improvement>0?`✅ Præcision er forbedret med <b>${improvement}%</b> siden piloten startede.`:improvement<0?`⚠️ Præcision er faldet med ${Math.abs(improvement)}% – AI er ved at kalibrere sig.`:`→ Præcisionen er stabil.`}
+    </div>`;
+  }
+  html+=`</div>`;
+
+  // ---- Konfidensniveauer kalibrering ----
+  html+=`<div class="card"><h2>Konfidensniveauer – kalibrering</h2>
+    <div class="small-muted" style="margin-bottom:10px;">Andel af forecasts inden for ±15% pr. konfidensklasse.</div>
+    <table><tr><th>Konfidens</th><th>Præcision</th><th>Forventet</th></tr>`;
+  [{k:'Høj',exp:'>80%'},{k:'Middel',exp:'50-80%'},{k:'Lav',exp:'<50%'}].forEach(row=>{
+    const v=perf.byConf[row.k];
+    html+=`<tr><td>${Confidence_Engine.badge(row.k)}</td><td><b>${v!=null?v+'%':'–'}</b></td><td class="small-muted">${row.exp}</td></tr>`;
+  });
+  html+=`</table></div>`;
+
+  // ---- Vigtigste faktorer ----
+  html+=`<div class="card"><h2>Vigtigste påvirkningsfaktorer</h2>
+    <div class="small-muted" style="margin-bottom:10px;">Faktorer der har størst indflydelse på AI's anbefalinger.</div>`;
+  if(!perf.topFactors.length){
+    html+=`<div class="small-muted">Kræver flere læringsdata.</div>`;
+  }else{
+    const maxScore=perf.topFactors[0].score||1;
+    perf.topFactors.forEach(f=>{
+      html+=`<div class="factor-row">
+        <div style="width:130px; font-size:13px;">${f.label||f.key}</div>
+        <div class="factor-bar"><div class="factor-fill" style="width:${Math.round((f.score/maxScore)*100)}%;"></div></div>
+        <div style="width:50px; text-align:right; font-size:12px; color:var(--muted);">${f.score}</div>
+      </div>`;
+    });
+  }
+  html+=`</div>`;
+
+  // ---- Systematiske bias ----
+  if(perf.biases&&perf.biases.length){
+    html+=`<div class="card"><h2>AI-selvkritik: systematiske fejl</h2>
+      <div class="small-muted" style="margin-bottom:10px;">Faktorer hvor AI konsekvent under- eller overvurderer. Learning Engine korrigerer disse automatisk.</div>
+      <table><tr><th>Faktor</th><th>Bias</th><th>Datapunkter</th></tr>`;
+    perf.biases.slice(0,5).forEach(b=>{
+      const dir=b.biasWhenPresent>0?'+':'';
+      html+=`<tr><td>${Pattern_Engine.FACTOR_LABELS[b.factor]||b.factor}</td><td style="color:${b.biasWhenPresent>0?'var(--green)':'var(--red)'};">${dir}${b.biasWhenPresent}%</td><td>${b.count}</td></tr>`;
+    });
+    html+=`</table><div class="small-muted" style="margin-top:8px;">Positiv bias = AI undervurderede efterspørgslen på disse dage. Negativ = overvurderede.</div>
+    </div>`;
+  }
+
+  // ---- Præcision pr. ugedag ----
+  html+=`<div class="card"><h2>Præcision pr. ugedag</h2>`;
+  const weekdayOrder=['Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lørdag','Søndag'];
+  html+=`<table><tr><th>Dag</th><th>Præcision</th><th>N</th></tr>`;
+  weekdayOrder.forEach(day=>{
+    const d=perf.byWeekday[day];
+    html+=`<tr><td>${day}</td><td>${d?d.accuracy+'%':'–'}</td><td>${d?d.n:'–'}</td></tr>`;
+  });
+  html+=`</table></div>`;
+
+  // ---- Målepunkt-værdi ----
+  const mpVal=AI_MemoryEngine.getMeasurementPointValue();
+  html+=`<div class="card"><h2>Målepunkters præcisionsværdi</h2>
+    <div class="small-muted" style="margin-bottom:8px;">Forbedrer ekstra målepunkter forecast-præcisionen?</div>
+    <table><tr><th>Målepunkter pr. dag</th><th>Præcision</th><th>N</th></tr>
+    <tr><td>2 målepunkter</td><td>${mpVal.with2.accuracy!=null?mpVal.with2.accuracy+'%':'–'}</td><td>${mpVal.with2.n}</td></tr>
+    <tr><td>3+ målepunkter</td><td>${mpVal.with3plus.accuracy!=null?mpVal.with3plus.accuracy+'%':'–'}</td><td>${mpVal.with3plus.n}</td></tr>
+    </table>`;
+  const mpSug=AI_MemoryEngine.shouldSuggestExtraMP();
+  if(mpSug)html+=`<div class="suggestion ai" style="margin-top:8px;">💡 ${mpSug.msg}</div>`;
+  const sufficient=AI_MemoryEngine.hasSufficientData();
+  if(sufficient)html+=`<div class="suggestion" style="background:#dcfce7; color:#166534; margin-top:8px;">✅ AI har nok data til stabile anbefalinger. Ekstra målepunkter giver minimal forbedring nu.</div>`;
+  html+=`</div>`;
+
+  // ---- Madspild & Servicegrad ----
+  const waste=perf.waste;
+  html+=`<div class="card"><h2>Madspild & Servicegrad (seneste 14 dage)</h2>
+    <div class="topcards" style="margin-top:10px;">
+      <div class="topcard">
+        <div class="num">${waste.spildPct!=null?waste.spildPct+'%':'–'}</div>
+        <div class="lbl">Madspild-andel</div>
+      </div>
+      <div class="topcard">
+        <div class="num">${waste.totalSpild}</div>
+        <div class="lbl">Total rest ved luk</div>
+      </div>
+    </div>
+    <div class="small-muted" style="margin-top:6px;">Mål: optimér balancen – færre udsolgte OG mindre spild.</div>
+  </div>`;
+
+  // ---- AI Trends ----
+  const aktive=VARER.filter(v=>v.aktiv);const dates56=periodDates(56);
+  const trendLines=[];
+  try{aktive.forEach(v=>{const t=Pattern_Engine.trendStatement(v.ean,v.navn,dates56);if(t)trendLines.push(t.text);});}
+  catch(e){}
+  if(trendLines.length){
+    html+=`<div class="card"><h2>🧠 AI Salgstrender</h2>`;
+    trendLines.slice(0,5).forEach(t=>{html+=`<div class="row"><div class="name">${t}</div></div>`;});
+    html+=`</div>`;
+  }
+
+  // ---- AI Indsigter ----
+  const insights=Pattern_Engine.topInsights(aktive,dates56).filter(i=>i.confidence>=55);
+  if(insights.length){
+    html+=`<div class="card"><h2>🧠 AI Fundne mønstre</h2>
+      <div class="small-muted" style="margin-bottom:8px;">Observationer fundet i butikkens egne data.</div>`;
+    insights.forEach(i=>{
+      html+=`<div style="padding:5px 0; font-size:14px; border-bottom:1px solid var(--border);">• ${i.richText} <span class="small-muted">(${i.confidence}% sikkerhed)</span></div>`;
+    });
+    html+=`</div>`;
+  }
+
+  // ---- Pilot-status ----
+  const pilotuger=Math.floor(lc/5);// approx
+  html+=`<div class="card"><h2>Pilot-status</h2>
+    <div class="small-muted" style="margin-bottom:10px;">FreshScan AI v2.0 pilot. Mål: dokumenteret forbedring efter 2-4 uger.</div>
+    <table>
+      <tr><td>Læringsregistreringer</td><td><b>${lc}</b></td></tr>
+      <tr><td>Forecast-præcision (±15%)</td><td><b>${perf.accuracy!=null?perf.accuracy+'%':'Ikke nok data endnu'}</b></td></tr>
+      <tr><td>Gns. absolut afvigelse</td><td><b>${perf.mape!=null?perf.mape+'%':'–'}</b></td></tr>
+      <tr><td>AI-status</td><td><b>${lc===0?'Starter':'Aktiv og lærende'}</b></td></tr>
+    </table>
+    ${lc<20?`<div class="suggestion yellow" style="margin-top:10px;">🟡 AI har brug for mindst 20 læringsregistreringer for at vise statistisk signifikante forbedringer. Nuværende: ${lc}.</div>`:`<div class="suggestion ai" style="margin-top:10px;">✅ AI har tilstrækkelig data til meningsfuld kalibrering. Præcision forbedres løbende.</div>`}
+  </div>`;
+
+  app.innerHTML=html;wireAdminBackRow();
+}
+
+/* =====================================================================
+   UI – FORECAST DASHBOARD (opgraderet v2.0)
+   ===================================================================== */
+function renderAdminDashboard(){
+  const aktive=VARER.filter(v=>v.aktiv);
+  if(!aktive.length){app.innerHTML=adminBackRow()+`<div class="card empty">Ingen aktive varer endnu.</div>`;wireAdminBackRow();return;}
+  const hasAnyData=Object.keys(REGS).some(date=>REGS[date]&&Object.values(REGS[date]).some(r=>r.modtaget!=null||r.kl13!=null||r.luk!=null||Object.keys(r).some(k=>k.startsWith("mp_")&&r[k]!=null)));
+  if(!hasAnyData){
+    app.innerHTML=adminBackRow()+`<div class="card" style="text-align:center;">
+      <h2>Ingen registreringer endnu</h2>
+      <button class="btn-primary" id="goToReg">Start ny registrering</button>
+    </div>`;
+    wireAdminBackRow();$('#goToReg').addEventListener('click',()=>{newRegState=null;currentTab='newreg';render();});return;
+  }
+  const dates14=Array.from({length:14},(_,i)=>isoDaysAgo(i));
+  const dates7=dates14.slice(0,7);const today=REGS[currentDate]||{};
+  const dates56=periodDates(56);const tDate=tomorrowISO();
+  const tWeekday=weekdayName(tDate);const tEffective=getEffectiveTags(tDate);
+  const tWeatherDisp=weatherForDisplay(tDate);const tWeather=tWeatherDisp.w;
+  const tEvents=getActiveEvents(tDate);
+  const forecasts={};
+  aktive.forEach(v=>{forecasts[v.ean]=computeForecast(v.ean,tDate,dates56);});
+
+  const fcChips=[];
+  if(tWeather.sne)fcChips.push('❄️ Sne');else if(tWeather.regn)fcChips.push('🌧️ Regn');else if(tWeather.sol)fcChips.push('☀️ Sol');
+  if(tWeather.temp!=null)fcChips.push('maks. '+tWeather.temp+'°C');
+  if(tWeather.vind)fcChips.push(tWeather.vindHard?'💨 Kraftig vind':'💨 Vind');
+  CAL_TAGS.forEach(t=>{if(t.key!=='lokalt'&&tEffective.tags[t.key])fcChips.push(t.label);});
+  tEvents.forEach(e=>fcChips.push(`🎪 ${e.navn}`));
+  if(!fcChips.length)fcChips.push('Normal dag');
+
+  const avgConfidence=Math.round(avg(aktive.map(v=>forecasts[v.ean].confidence.pct)));
+  const avgTotalPct=avg(aktive.map(v=>forecasts[v.ean].totalPct*100));
+  const lc=AI_MemoryEngine.getLearningCount();const acc=AI_MemoryEngine.getOverallAccuracy();
+
+  let html=adminBackRow();
+  html+=`<div class="card">
+    <h2>Forecast for i morgen</h2>
+    <div class="small-muted" style="margin-bottom:8px;">${tWeekday} d. ${fmtDateDK(tDate).split(' ').slice(1).join(' ')}</div>
+    <div class="name" style="margin-bottom:10px;">${fcChips.join(' · ')}</div>
+    <div class="topcards">
+      <div class="topcard">
+        <div class="num">${avgTotalPct>=0?'+':''}${Math.round(avgTotalPct)}%</div>
+        <div class="lbl">Anbefalet produktion</div>
+      </div>
+      <div class="topcard ai-topcard">
+        <div class="num">${avgConfidence}%</div>
+        <div class="lbl">AI konfidens</div>
+      </div>
+    </div>
+    ${lc>0?`<div class="small-muted" style="margin-top:6px;">🧠 AI-korrigeret med ${lc} læringsregistreringer${acc!=null?' · Præcision: '+acc+'%':''}.</div>`:'<div class="small-muted" style="margin-top:6px;">🌱 AI starter læring fra din første registrering.</div>'}
+  </div>`;
+
+  // ---- Smart Forecast pr. vare ----
+  html+=`<div class="card"><h2>Smart Forecast – pr. vare</h2>`;
+  aktive.forEach((v,i)=>{
+    const f=forecasts[v.ean];
+    const factorTxt=f.factors.length?f.factors.map(fa=>{const p=Math.round(fa.pct*100);return`${p>=0?'+':''}${p}% ${fa.label.toLowerCase()}`;}).join(', '):'ingen særlige påvirkninger';
+    const riskColor=f.risk.level==='Høj'?'var(--red)':(f.risk.level==='Mellem'?'#8a6213':'var(--muted)');
+    html+=`<div style="${i>0?'border-top:1px solid var(--border); padding-top:10px; margin-top:10px;':''}">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <div class="name">${v.navn}</div>
+        ${Confidence_Engine.badge(f.confidence.label)}
+      </div>
+      <table style="margin-bottom:6px;">
+        <tr><th>Basis</th><th>Påvirkninger</th><th>AI-anbefaling</th></tr>
+        <tr><td>${f.basis} stk.</td><td style="font-size:12px;">${factorTxt}</td><td><b>${f.anbefalet} stk.</b></td></tr>
+      </table>
+      <div class="small-muted" style="margin-bottom:4px;">${forecastExplanation(v,f)}</div>
+      <div style="display:flex; gap:14px; font-size:12px; align-items:center;">
+        <div>Konfidens: <b>${f.confidence.pct}%</b> (${f.confidence.label})</div>
+        <div style="color:${riskColor};">Udsolgt-risiko: <b>${f.risk.level}</b></div>
+      </div>
+      <button class="btn-secondary" data-explain-ai="${v.ean}" style="margin-top:8px; font-size:13px; padding:8px 14px;">🔍 Forklar AI</button>
+      <div id="aiExplain_${v.ean}" style="display:none; margin-top:10px;"></div>
+    </div>`;
+  });
+  html+=`</div>`;
+
+  // ---- AI Indsigt ----
+  html+=`<div class="card"><h2>🧠 AI Indsigt</h2>
+    <div class="small-muted" style="margin-bottom:10px;">Fundne mønstre i jeres egne data.</div>`;
+  let aiInsights=[];
+  try{aiInsights=Pattern_Engine.topInsights(aktive,dates56).filter(i=>i.confidence>=55);}catch(e){}
+  if(!aiInsights.length)html+=`<div class="small-muted">FreshScan AI lærer stadig butikkens salgsmønstre.</div>`;
+  else aiInsights.forEach(ins=>{html+=`<div style="padding:5px 0; font-size:14px;">• ${ins.richText} <span class="small-muted">(${ins.confidence}%)</span></div>`;});
+  html+=`</div>`;
+
+  // ---- Servicegrad + AI vurdering ----
+  const pmp=getPrimaertMP();const pmpField=mpFieldKey(pmp);
+  let withStock=0,withReg=0,udsolgte=0,lavRest=0,hojRestCnt=0;
+  aktive.forEach(v=>{
+    const r=today[v.ean];if(!r)return;
+    const val=r[pmpField]??(pmpField==='mp_kl13'?r.kl13:null);
+    if(val!=null){withReg++;if(val>0)withStock++;else udsolgte++;}
+    if(r.luk!=null){if(r.luk>=1&&r.luk<=2)lavRest++;else if(r.luk>4)hojRestCnt++;}
+  });
+  let servicegrad=withReg?Math.round((withStock/withReg)*100):null;
+  let sgEmoji=servicegrad!=null?(servicegrad<80?'🔴':(servicegrad<90?'🟡':'🟢')):'–';
+  html+=`<div class="topcards">
+    <div class="topcard"><div class="num">${sgEmoji} ${servicegrad!=null?servicegrad:0}%</div><div class="lbl">Servicegrad ${pmp.label}</div></div>
+    <div class="topcard"><div class="num">🔴 ${udsolgte||0}</div><div class="lbl">Udsolgte ${pmp.label}</div></div>
+    <div class="topcard"><div class="num">🟡 ${lavRest||0}</div><div class="lbl">Lav rest ved luk</div></div>
+    <div class="topcard"><div class="num">🔵 ${hojRestCnt||0}</div><div class="lbl">Høj rest ved luk</div></div>
+  </div>`;
+
+  // ---- AI udsolgt-risiko ----
+  html+=`<div class="card"><h2>🧠 AI udsolgt-risiko i morgen</h2>`;
+  aktive.forEach(v=>{
+    const f=forecasts[v.ean];if(!f)return;
+    const riskColor=f.risk.level==='Høj'?'var(--red)':(f.risk.level==='Mellem'?'#8a6213':'var(--muted)');
+    html+=`<div class="row"><div class="name">${v.navn}</div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="color:${riskColor}; font-weight:600;">${f.risk.level}</div>
+        ${Confidence_Engine.badge(f.confidence.label)}
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+
+  // ---- Vejr ----
+  const todayDisp=weatherForDisplay(todayISO());const todayW=todayDisp.w;
+  const todayCurTemp=todayW.currentTemp!=null?todayW.currentTemp:todayW.temp;
+  html+=`<div class="card"><h2>Dagens vejr</h2>`;
+  if(todayCurTemp==null&&!todayW.sol&&!todayW.regn&&!todayW.vind&&!todayW.sne){
+    html+=`<div class="name">Vejr ikke registreret endnu.</div>`;
+  }else{
+    const wp=[];if(todayCurTemp!=null)wp.push(todayCurTemp+'°C');if(todayW.sol)wp.push('sol');if(todayW.regn)wp.push('regn');if(todayW.vind)wp.push(todayW.vindHard?'kraftig vind':'blæst');if(todayW.sne)wp.push('sne');
+    html+=`<div class="name">${wp.join(', ')}.</div>`;
+    if(todayDisp.fromFallback)html+=`<div class="small-muted">⚠️ Seneste kendte vejr anvendes.</div>`;
+    else html+=`<div class="small-muted">${weatherStatusMessage(todayW)}</div>`;
+  }
+  html+=`</div>`;
+
+  // ---- Hurtig status ----
+  const dates14arr=Array.from({length:14},(_,i)=>isoDaysAgo(i));
+  let spildfriDage=0;
+  dates14arr.forEach(date=>{
+    const day=REGS[date];if(!day)return;
+    let allReg=true,sumLuk=0;
+    aktive.forEach(v=>{const r=day[v.ean];if(!r||r.luk==null){allReg=false;return;}sumLuk+=r.luk;});
+    if(allReg&&sumLuk===0)spildfriDage++;
+  });
+  const topUdsolgt=aktive.map(v=>({v,n:summarize(v.ean,dates7).kl13zero})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n)[0];
+  html+=`<div class="card"><h2>Hurtig status</h2>
+    <div class="row"><div class="name">✅ ${spildfriDage} af 14 dage uden spild</div></div>
+    ${topUdsolgt?`<div class="row"><div class="name">⚠️ ${topUdsolgt.v.navn} udsolgt ${topUdsolgt.n} gange (7 dage)</div></div>`:''}
+  </div>`;
+
+  app.innerHTML=html;wireAdminBackRow();
+  ensureWeatherAuto(todayISO(),()=>currentTab==='admin-dashboard');
+  ensureWeatherAuto(tDate,()=>currentTab==='admin-dashboard');
+
+  app.querySelectorAll('[data-explain-ai]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const ean=btn.dataset.explainAi;const panel=$(`#aiExplain_${ean}`);if(!panel)return;
+      if(panel.style.display==='block'){panel.style.display='none';btn.textContent='🔍 Forklar AI';return;}
+      const v=aktive.find(x=>x.ean===ean);const f=forecasts[ean];
+      panel.innerHTML=buildExplainPanel(v,f,dates56);panel.style.display='block';btn.textContent='🔼 Skjul forklaring';
+    });
+  });
+}
+
+function buildExplainPanel(v,f,dates56){
+  const outcomes=AI_MemoryEngine.getOutcomesForVare(v.ean).slice(0,5);
+  const corr=Learning_Engine.getCorrection(v.ean);
+  let html=`<div style="padding:12px; background:var(--ai-light); border-radius:10px; font-size:13px; border:1px solid #c4b5fd;">`;
+  html+=`<div style="font-weight:700; color:var(--ai); margin-bottom:8px;">AI Forklaring: ${f.anbefalet} stk.</div>`;
+  // Kalender/vejr faktorer
+  if(f.factors.length){f.factors.forEach(fa=>{const p=Math.round(fa.pct*100);html+=`<div>✓ ${fa.label} (${p>=0?'+':''}${p}%)</div>`;});}
+  else html+=`<div class="small-muted">Ingen særlige faktorer i morgen.</div>`;
+  // Learning korrektioner
+  if(corr.ready&&corr.factor!==1){
+    const p=Math.round((corr.factor-1)*100);
+    html+=`<div style="margin-top:6px;">🧠 Læringskorr. ${p>=0?'+':''}${p}% (${corr.samples} historiske dage)</div>`;
+  }
+  if(f.learning&&f.learning.appliedFactors&&f.learning.appliedFactors.length){
+    f.learning.appliedFactors.forEach(af=>{
+      const p=Math.round((af.multiplier-1)*100);
+      html+=`<div>🧠 Faktor-kalibrering: ${Pattern_Engine.FACTOR_LABELS[af.factor]||af.factor} (${p>=0?'+':''}${p}%)</div>`;
+    });
+  }
+  html+=`<div style="margin-top:8px;">Konfidens: ${Confidence_Engine.badge(f.confidence.label)} ${f.confidence.pct}% (${f.confidence.dataPoints} læringsdag${f.confidence.dataPoints!==1?'e':''})</div>`;
+  // Seneste outcomes
+  if(outcomes.length){
+    html+=`<div style="font-weight:700; margin-top:12px; margin-bottom:6px;">Seneste AI-læringsdata</div>
+      <table><tr><th>Dato</th><th>Forecast</th><th>Faktisk</th><th>Afvigelse</th></tr>`;
+    outcomes.forEach(o=>{
+      const dev=o.pctDeviation!=null?`${o.pctDeviation>=0?'+':''}${o.pctDeviation}%`:'–';
+      const devColor=o.pctDeviation!=null?(Math.abs(o.pctDeviation)<=15?'color:var(--green);':'color:var(--red);'):'';
+      html+=`<tr><td>${fmtDateDK(o.date).split(' ').slice(1).join(' ')}</td><td>${o.forecast}</td><td>${o.actual}</td><td style="${devColor}">${dev}</td></tr>`;
+    });
+    html+=`</table>`;
+  }else{
+    html+=`<div class="small-muted" style="margin-top:10px;">Ingen læringsdata endnu – AI begynder at lære efter første afsluttede dag.</div>`;
+  }
+  html+=`</div>`;
+  return html;
+}
+
+/* =====================================================================
+   UI – HISTORIK (fra v1.0, minor AI-berigelse)
+   ===================================================================== */
+let histPeriod=14,histVareEan='alle',histLev='alle',histUgedag='alle',histDate=isoDaysAgo(1);
+function renderAdminHistorik(){
+  const aktive=VARER.filter(v=>v.aktiv);
+  if(!aktive.length){app.innerHTML=adminBackRow()+`<div class="card empty">Ingen aktive varer endnu.</div>`;wireAdminBackRow();return;}
+  const periods=[{label:'2 uger',val:14},{label:'4 uger',val:28},{label:'8 uger',val:56},{label:'År til dato',val:'ytd'}];
+  let days;
+  if(histPeriod==='ytd'){const start=isoToUTCDate(todayISO().slice(0,4)+'-01-01');days=Math.floor((isoToUTCDate(todayISO())-start)/86400000)+1;}
+  else days=histPeriod;
+  const dates=periodDates(days);
+  let html=adminBackRow()+`<div class="card">
+    <h2>Historik</h2>
+    <div class="step-pill">`;
+  periods.forEach(p=>{html+=`<span class="${histPeriod===p.val?'done':''}" data-period="${p.val}" style="cursor:pointer;">${p.label}</span>`;});
+  html+=`</div>
+    <label>Vis vare</label>
+    <select id="histVare">
+      <option value="alle" ${histVareEan==='alle'?'selected':''}>Alle varer</option>`;
+  aktive.forEach(v=>{html+=`<option value="${v.ean}" ${histVareEan===v.ean?'selected':''}>${v.navn}</option>`;});
+  html+=`</select>
+    <label>Producent</label><select id="histLev"><option value="alle">Alle</option>`;
+  [...new Set(aktive.map(v=>v.leverandor))].forEach(lev=>{html+=`<option value="${lev}" ${histLev===lev?'selected':''}>${lev}</option>`;});
+  html+=`</select>
+    <label>Ugedag</label><select id="histUgedag"><option value="alle">Alle</option>`;
+  ["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","Søndag"].forEach(d=>{html+=`<option value="${d}" ${histUgedag===d?'selected':''}>${d}</option>`;});
+  html+=`</select>
+    <div class="small-muted">Periode: ${fmtDateDK(dates[dates.length-1])} – ${fmtDateDK(dates[0])}</div>
+  </div>`;
+
+  let filteredDates=histUgedag==='alle'?dates:dates.filter(date=>weekdayName(date)===histUgedag);
+  const showVarer=(histVareEan==='alle'?aktive:aktive.filter(v=>v.ean===histVareEan)).filter(v=>histLev==='alle'||v.leverandor===histLev);
+
+  if(!showVarer.length){html+=`<div class="card empty">Ingen varer matcher filter.</div>`;app.innerHTML=html;wireAdminBackRow();return;}
+
+  // Uge for uge
+  let weekBuckets={};
+  filteredDates.forEach(date=>{const d=isoToUTCDate(date);const key=d.getUTCFullYear()+"-U"+String(isoWeek(d)).padStart(2,'0');if(!weekBuckets[key])weekBuckets[key]=[];weekBuckets[key].push(date);});
+  const weekKeys=Object.keys(weekBuckets).sort();
+  html+=`<div class="card"><h2>Uge for uge</h2><table><tr><th>Uge</th><th>Vare</th><th>Gns. modtaget</th><th>Gns. kl.13</th><th>Gns. luk</th></tr>`;
+  weekKeys.forEach(wk=>{showVarer.forEach(v=>{const s=summarize(v.ean,weekBuckets[wk]);if(!s.regDays)return;html+=`<tr><td>${wk}</td><td>${v.navn}</td><td>${s.gnsModtaget}</td><td>${s.gnsKl13}</td><td>${s.gnsLuk}</td></tr>`;});});
+  html+=`</table></div>`;
+
+  // Dagsoversigt
+  html+=`<div class="card"><h2>Dagsoversigt</h2>
+    <div class="date-row" id="histDateRow" style="cursor:pointer; color:var(--green-d); margin-bottom:10px;">
+      <span class="date-text">${fmtDateDK(histDate)}</span>
+    </div>
+    <input type="date" id="histDatePicker" style="position:absolute; opacity:0; width:1px; height:1px;">`;
+  const histDates56=periodDates(56).filter(d=>d<histDate);
+  // Byg visningsliste: inkl. slettede varer der har registreringer på den valgte dato
+  const dayRegsForHist=REGS[histDate]||{};
+  const eanerMedReg=Object.keys(dayRegsForHist).filter(k=>!k.startsWith('_'));
+  // Flet showVarer + ean'er fra registreringer der ikke er i showVarer
+  const extraEans=eanerMedReg.filter(ean=>!showVarer.find(v=>v.ean===ean));
+  const allHistVarer=[
+    ...showVarer,
+    ...extraEans.map(ean=>({ean,navn:'Slettet vare',leverandor:'–',slettet:true}))
+  ];
+  html+=`<table><tr><th>Vare</th><th>Modtaget</th><th>${getPrimaertMP().label}</th><th>Luk</th><th>Solgt</th><th>Forecast</th><th>Afvigelse</th></tr>`;
+  allHistVarer.forEach(v=>{
+    const r=REGS[histDate]&&REGS[histDate][v.ean];
+    const sold=soldOn(histDate,v.ean);
+    let forecastVal='–',afvigelseTxt='–';
+    if(!v.slettet&&histDates56.length>=2){
+      try{const f=computeForecast(v.ean,histDate,histDates56);forecastVal=''+f.anbefalet;
+      if(sold!=null){const diff=sold-f.anbefalet;afvigelseTxt=diff===0?'Præcist':((diff>0?'+':'')+diff+' stk.');}}catch(e){}
+    }
+    const memEntry=AI_MemoryEngine.getOutcomesForVare(v.ean).find(o=>o.date===histDate);
+    const devColor=memEntry&&memEntry.pctDeviation!=null?(Math.abs(memEntry.pctDeviation)<=15?'color:var(--green);':'color:var(--red);'):'';
+    const nameDisplay=v.slettet?`<span style="color:var(--muted);font-style:italic;">Slettet vare (${v.ean})</span>`:v.navn;
+    html+=`<tr><td>${nameDisplay}</td><td>${r&&r.modtaget!=null?r.modtaget:'–'}</td>
+      <td>${(()=>{const pf=mpFieldKey(getPrimaertMP());const val=r&&(r[pf]??r.kl13);return val!=null?val:'–';})()}</td>
+      <td>${r&&r.luk!=null?r.luk:'–'}</td><td>${sold!=null?sold:'–'}</td>
+      <td>${forecastVal}</td>
+      <td style="${devColor}">${afvigelseTxt}${memEntry&&memEntry.pctDeviation!=null?` (${memEntry.pctDeviation>=0?'+':''}${memEntry.pctDeviation}%)`:''}
+      </td></tr>`;
+  });
+  html+=`</table></div>`;
+
+  // Sammenligning
+  function sumSalg(ds){let t=0;showVarer.forEach(v=>{ds.forEach(date=>{const r=REGS[date]&&REGS[date][v.ean];if(r&&r.modtaget!=null&&r.luk!=null)t+=r.modtaget-r.luk;});});return t;}
+  function pctDiff(a,b){if(!b)return a===0?'0%':'–';const p=Math.round(((a-b)/b)*100);return(p>=0?'+':'')+p+'%';}
+  const last7=periodDates(7),prev7=periodDates(14).slice(7,14);
+  const last30=periodDates(30),prev30=periodDates(60).slice(30,60);
+  html+=`<div class="card"><h2>Sammenligninger</h2><table>
+    <tr><th></th><th>Periode</th><th>Forrige</th><th>Ændring</th></tr>
+    <tr><td>Uge vs. forrige</td><td>${sumSalg(last7)}</td><td>${sumSalg(prev7)}</td><td>${pctDiff(sumSalg(last7),sumSalg(prev7))}</td></tr>
+    <tr><td>30 dage vs. forrige</td><td>${sumSalg(last30)}</td><td>${sumSalg(prev30)}</td><td>${pctDiff(sumSalg(last30),sumSalg(prev30))}</td></tr>
+  </table></div>`;
+
+  app.innerHTML=html;wireAdminBackRow();
+  app.querySelectorAll('[data-period]').forEach(el=>{el.addEventListener('click',()=>{const val=el.dataset.period;histPeriod=val==='ytd'?'ytd':parseInt(val,10);renderAdminHistorik();});});
+  $('#histVare').addEventListener('change',e=>{histVareEan=e.target.value;renderAdminHistorik();});
+  $('#histLev').addEventListener('change',e=>{histLev=e.target.value;renderAdminHistorik();});
+  $('#histUgedag').addEventListener('change',e=>{histUgedag=e.target.value;renderAdminHistorik();});
+  $('#histDateRow').addEventListener('click',()=>{const dp=$('#histDatePicker');dp.value=histDate;dp.showPicker?dp.showPicker():dp.click();});
+  $('#histDatePicker').addEventListener('change',e=>{if(e.target.value){histDate=e.target.value;renderAdminHistorik();}});
+  ensureWeatherAuto(histDate,()=>currentTab==='admin-historik'&&histDate===histDate);
+}
+
+/* =====================================================================
+   UI – MØNSTRE & KALENDER (fra v1.0 med AI-berigelse)
+   ===================================================================== */
+function renderAdminMonstre(){
+  const aktive=VARER.filter(v=>v.aktiv);
+  if(!aktive.length){app.innerHTML=adminBackRow()+`<div class="card empty">Ingen aktive varer endnu.</div>`;wireAdminBackRow();return;}
+  const dates=periodDates(56);
+  const dayNames=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","Søndag"];
+  const dayIdx=[1,2,3,4,5,6,0];
+  let html=adminBackRow()+`<div class="card"><h2>Ugedagsmønster</h2>
+    <div class="small-muted" style="margin-bottom:8px;">Gennemsnit pr. ugedag (seneste 8 uger).</div>`;
+  aktive.forEach(v=>{
+    html+=`<h3>${v.navn}</h3><table><tr><th>Dag</th><th>Gns. modtaget</th><th>Gns. kl.13</th><th>Gns. luk</th></tr>`;
+    dayIdx.forEach((dn,i)=>{const dDates=dates.filter(date=>isoToUTCDate(date).getUTCDay()===dn);const s=summarize(v.ean,dDates);html+=`<tr><td>${dayNames[i]}</td><td>${s.gnsModtaget||'–'}</td><td>${s.gnsKl13||'–'}</td><td>${s.gnsLuk||'–'}</td></tr>`;});
+    html+=`</table>`;
+  });
+  html+=`</div>`;
+
+  // AI-mønstre
+  html+=`<div class="card"><h2>🧠 AI-fundne mønstre</h2>
+    <div class="small-muted" style="margin-bottom:8px;">Statistisk analyseret fra butikkens egne data + læringshukommelse.</div>`;
+  aktive.forEach(v=>{
+    const mined=Pattern_Engine.mine(v.ean,v.navn,dates);
+    if(!mined.dataReady){html+=`<div class="small-muted">${v.navn}: Kræver flere registreringer (${mined.observationCount} dage).</div>`;return;}
+    html+=`<div style="margin-bottom:10px;"><div class="name" style="margin-bottom:6px;">${v.navn}</div>`;
+    if(!mined.patterns.length)html+=`<div class="small-muted">Ingen signifikante mønstre fundet endnu.</div>`;
+    else{
+      mined.patterns.slice(0,4).forEach(p=>{
+        html+=`<div style="padding:6px 0; font-size:13px; border-bottom:1px solid var(--border);">
+          ${p.label} <span class="small-muted">(${p.confidence}% sikkerhed · ${p.observations} obs.)</span>
+          <div class="progress-bar" style="margin-top:3px;"><div class="progress-fill ai" style="width:${p.confidence}%;"></div></div>
+        </div>`;
+      });
+    }
+    html+=`</div>`;
+  });
+  html+=`</div>`;
+
+  // Tendens
+  const dates14=periodDates(14);
+  html+=`<div class="card"><h2>Tendens</h2>`;
+  aktive.forEach(v=>{const t=vareTrend(v.ean,dates14);html+=`<div class="row"><div class="name">${v.navn}</div><div class="sub">${t.arrow} ${t.label}</div></div>`;});
+  html+=`</div>`;
+
+  // Effekter
+  function totalSoldOnDate(date){let total=0,any=false;aktive.forEach(v=>{const s=soldOn(date,v.ean);if(s!=null){total+=s;any=true;}});return any?total:null;}
+  function tagEffect(predicate){
+    const withTag=[],withoutTag=[];
+    dates.forEach(date=>{const t=totalSoldOnDate(date);if(t==null)return;if(predicate(date))withTag.push(t);else withoutTag.push(t);});
+    if(withTag.length<2||withoutTag.length<2)return null;
+    const a=avg(withTag),b=avg(withoutTag);if(!b)return null;
+    return Math.round(((a-b)/b)*100);
+  }
+  const ferieEff=tagEffect(date=>{const tags=getEffectiveTags(date).tags;return FERIE_KEYS.some(k=>tags[k]);});
+  const lonEff=tagEffect(date=>getEffectiveTags(date).tags.lonweekend);
+  const solEff=tagEffect(date=>{const w=getDayWeather(date);return w.sol&&w.temp!=null&&w.temp>20;});
+  const regnEff=tagEffect(date=>getDayWeather(date).regn);
+  const evEff=tagEffect(date=>getActiveEvents(date).length>0);
+
+  [[ferieEff,'Ferieeffekt'],[lonEff,'Lønweekend-effekt'],[solEff,'Sol >20° effekt'],[regnEff,'Regnvejrseffekt'],[evEff,'Lokale arrangementer']].forEach(([eff,label])=>{
+    html+=`<div class="card"><h2>${label}</h2>`;
+    html+=eff!=null?`<div class="suggestion ai">Salget er ${(eff>=0?'+':'')+eff}% sammenlignet med normale dage.</div>`:
+      `<div class="small-muted">Kræver flere registreringer.</div>`;
+    html+=`</div>`;
+  });
+
+  // Handelskalender
+  html+=`<div class="card"><h2>Handelskalender</h2>
+    <div class="date-row" id="calDateRow" style="cursor:pointer; color:var(--green-d); margin-bottom:10px;">
+      <span class="date-text" id="calDateLabel">${fmtDateDK(calDate)}</span>
+    </div>
+    <input type="date" id="calDatePicker" style="position:absolute; opacity:0; width:1px; height:1px;">`;
+  html+=autoChecklistHTML(calDate);
+  const calEff=getEffectiveTags(calDate);
+  html+=`<div class="tag-grid" style="margin-top:10px;">`;
+  CAL_TAGS.forEach(t=>{html+=`<button class="tag-chip ${calEff.tags[t.key]?'active':''}" data-caltag="${t.key}">${calEff.tags[t.key]?'✓ ':''}${t.label}</button>`;});
+  html+=`</div><div class="small-muted" style="margin-top:8px;">Manuel markering har altid forrang.</div>`;
+
+  const calWeather=getDayWeather(tomorrowISO());
+  const calWDisp=weatherForDisplay(tomorrowISO());const calWShow=calWDisp.w;
+  const calHasWeather=calWShow.temp!=null||calWShow.sol||calWShow.regn||calWShow.vind||calWShow.sne;
+  html+=`<h3 style="margin-top:14px;">Morgendagens vejr</h3>`;
+  if(calHasWeather){const parts=[];if(calWShow.temp!=null)parts.push(calWShow.temp+'°C');if(calWShow.sol)parts.push('☀️ Sol');if(calWShow.regn)parts.push('🌧️ Regn');if(calWShow.vind)parts.push('💨 Vind');if(calWShow.sne)parts.push('❄️ Sne');html+=`<div class="name">${parts.join(' · ')}</div><div class="small-muted">${weatherStatusMessage(calWeather,true)}</div>`;}
+  else html+=`<div class="small-muted">Vejr ikke tilgængeligt.</div>`;
+  html+=`</div>`;
+
+  // Lokale arrangementer
+  html+=`<div class="card"><h2>Lokale arrangementer</h2>
+    <label>Navn</label><input type="text" id="evNavn" placeholder="f.eks. Havnefest">
+    <label>Startdato</label><input type="date" id="evStart">
+    <label>Slutdato</label><input type="date" id="evSlut">
+    <label>Påvirkning</label>
+    <select id="evImpact"><option value="lav">Lav</option><option value="middel" selected>Middel</option><option value="hoj">Høj</option></select>
+    <label>Kommentar</label><input type="text" id="evKommentar" placeholder="valgfri">
+    <div class="row" style="padding:8px 0;"><div class="name" style="font-size:14px;">Gentag årligt</div><input type="checkbox" id="evGentag" style="width:22px; height:22px;"></div>
+    <button class="btn-primary" id="addEvent">Tilføj arrangement</button>
+    <div id="evErr" class="small-muted" style="color:var(--red); margin-top:6px;"></div>
+  </div>`;
+  html+=`<div class="card"><h2>Planlagte arrangementer</h2>`;
+  if(!EVENTS.length)html+=`<div class="empty">Ingen lokale arrangementer endnu.</div>`;
+  else EVENTS.slice().sort((a,b)=>a.start.localeCompare(b.start)).forEach(ev=>{
+    const aktiv=ev.aktiv!==false;
+    html+=`<div class="row" style="display:block;">
+      <div class="name">${ev.navn}</div>
+      <div class="sub">${fmtDateDK(ev.start)} – ${fmtDateDK(ev.slut)} · ${IMPACT_LABEL[ev.impact]}${ev.gentagAarligt?' · Gentages':''}${ev.kommentar?' · '+ev.kommentar:''}</div>
+      <div style="display:flex; gap:6px; margin-top:8px;">
+        <button class="btn-toggle ${aktiv?'active-toggle':'inactive-toggle'}" data-toggleevent="${ev.id}" style="flex:1;">${aktiv?'Aktiv':'Inaktiv'}</button>
+        <button class="btn-toggle inactive-toggle" data-delevent="${ev.id}" style="flex:1; color:var(--red);">Slet</button>
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+
+  app.innerHTML=html;wireAdminBackRow();
+  $('#calDateRow').addEventListener('click',()=>{const dp=$('#calDatePicker');dp.value=calDate;dp.showPicker?dp.showPicker():dp.click();});
+  $('#calDatePicker').addEventListener('change',e=>{if(e.target.value){calDate=e.target.value;renderAdminMonstre();}});
+  app.querySelectorAll('[data-caltag]').forEach(btn=>{btn.addEventListener('click',async()=>{const eff=getEffectiveTags(calDate);const tags=getDayTags(calDate);tags[btn.dataset.caltag]=!eff.tags[btn.dataset.caltag];await saveRegsAuto();if(_syncEnabled)DeviceSync.saveDayTags(calDate,tags).catch(()=>{});renderAdminMonstre();});});
+  $('#addEvent').addEventListener('click',async()=>{
+    const navn=$('#evNavn').value.trim(),start=$('#evStart').value,slut=$('#evSlut').value;
+    const err=$('#evErr');err.textContent='';
+    if(!navn||!start||!slut){err.textContent='Udfyld navn, start og slutdato.';return;}
+    if(slut<start){err.textContent='Slutdato skal være efter startdato.';return;}
+    EVENTS.push({id:'ev'+Date.now(),navn,start,slut,impact:$('#evImpact').value,kommentar:$('#evKommentar').value.trim(),gentagAarligt:$('#evGentag').checked,aktiv:true});
+    await saveEventsAuto();renderAdminMonstre();
+  });
+  app.querySelectorAll('[data-delevent]').forEach(btn=>{btn.addEventListener('click',async()=>{EVENTS=EVENTS.filter(e=>e.id!==btn.dataset.delevent);await saveEventsAuto();renderAdminMonstre();});});
+  app.querySelectorAll('[data-toggleevent]').forEach(btn=>{btn.addEventListener('click',async()=>{const ev=EVENTS.find(e=>e.id===btn.dataset.toggleevent);if(ev)ev.aktiv=!ev.aktiv;await saveEventsAuto();renderAdminMonstre();});});
+  ensureWeatherAuto(tomorrowISO(),()=>currentTab==='admin-monstre');
+}
+
+/* =====================================================================
+   UI – VARER, MÅLEPUNKTER, INDSTILLINGER, SYSTEM, HJÆLP
+   (fra v1.0, uændrede udover nødvendige referencer)
+   ===================================================================== */
+function renderAdminVarer(){
+  let html=adminBackRow();
+  html+='<div class="card"><h2>Tilføj vare</h2>'
+    +'<label>EAN-nummer <span style="color:var(--red);">*</span></label>'
+    +'<div style="display:flex;gap:8px;">'
+    +'<input type="text" id="newEan" inputmode="numeric" placeholder="f.eks. 5701234500042" style="flex:1;">'
+    +'<button class="btn-secondary" id="scanBtn" style="white-space:nowrap;margin-top:0;width:auto;">📷 Scan</button>'
+    +'</div>'
+    +'<label>Varenavn <span style="color:var(--red);">*</span></label>'
+    +'<input type="text" id="newNavn" placeholder="f.eks. Solsikkerugbrød">'
+    +'<button class="btn-primary" id="addVare" style="margin-top:10px;">Tilføj vare</button>'
+    +'<div id="addErr" class="small-muted" style="color:var(--red);margin-top:6px;"></div>'
+    +'</div>';
+
+  html+='<div class="card"><h2>Varer ('+VARER.length+')</h2>';
+  if(!VARER.length){
+    html+='<div class="empty">Ingen varer endnu.</div>';
+  } else {
+    VARER.forEach(function(v){
+      var lc=AI_MemoryEngine.getOutcomesForVare(v.ean).length;
+      var aiTekst=lc>0?' · AI: '+lc+' dage':'';
+      var aktivKls=v.aktiv?'active-toggle':'inactive-toggle';
+      var aktivTxt=v.aktiv?'Aktiv':'Inaktiv';
+      html+='<div class="row" style="display:block;padding:12px 0;">'
+          +'<div style="display:flex;justify-content:space-between;align-items:center;">'
+          +'<div>'
+          +'<div class="name">'+v.navn+'</div>'
+          +'<div class="sub">'+(v.leverandor||'Ukendt')+' · EAN '+v.ean+aiTekst+'</div>'
+          +'</div>'
+          +'<div style="display:flex;gap:8px;flex-shrink:0;">'
+          +'<button class="btn-toggle '+aktivKls+'" onclick="__varerToggleAktiv(\''+v.ean+'\')">'+aktivTxt+'</button>'
+          +'<button class="btn-toggle" onclick="__varerSlet(\''+v.ean+'\')" style="background:var(--red);color:#fff;font-weight:700;padding:10px 16px;">Slet</button>'
+          +'</div>'
+          +'</div>'
+          +'</div>';
+    });
+  }
+  html+='</div>';
+  app.innerHTML=html;
+  wireAdminBackRow();
+
+  var scanBtn=document.getElementById('scanBtn');
+  if(scanBtn) scanBtn.addEventListener('click',function(){
+    if(typeof FreshScanScanner==='undefined'){alert('Scanner ikke tilgængelig.');return;}
+    FreshScanScanner.start(function(ean){var el=document.getElementById('newEan');if(el)el.value=ean;});
+  });
+
+  var addBtn=document.getElementById('addVare');
+  if(addBtn) addBtn.addEventListener('click',async function(){
+    var ean=document.getElementById('newEan').value.trim();
+    var navn=document.getElementById('newNavn').value.trim();
+    var errEl=document.getElementById('addErr');
+    errEl.textContent='';
+    if(!ean){errEl.textContent='EAN-nummer er påkrævet.';return;}
+    if(!navn){errEl.textContent='Varenavn er påkrævet.';return;}
+    if(VARER.some(function(v){return v.ean===ean;})){errEl.textContent='EAN findes allerede.';return;}
+    VARER.push({ean:ean,navn:navn,leverandor:'Ukendt',aktiv:true,omraade:''});
+    await saveVarerAuto();
+    renderAdminVarer();
+  });
+}
+
+// Globale handlers for Aktiv-toggle og Slet (onclick kompatible med alle browsere)
+window.__varerToggleAktiv=async function(ean){
+  var v=VARER.find(function(x){return x.ean===ean;});
+  if(!v)return;
+  v.aktiv=!v.aktiv;
+  await saveVarerAuto();
+  renderAdminVarer();
+};
+window.__varerSlet=async function(ean){
+  var v=VARER.find(function(x){return x.ean===ean;});
+  if(!v)return;
+  if(!confirm('Er du sikker på, at varen skal slettes?\n\n'+v.navn+'\n\nHistorik og registreringer bevares.'))return;
+  // Slet KUN fra VARER — REGS og AI-hukommelse røres IKKE
+  VARER=VARER.filter(function(x){return x.ean!==ean;});
+  await saveVarerAuto();
+  renderAdminVarer();
+};
+
+
+function renderAdminMalepunkter(){
+  let html=adminBackRow();
+  html+=`<div class="card"><h2>Butiksplacering</h2>
+    <div class="small-muted" style="margin-bottom:8px;">Bruges til automatisk vejrhentning.</div>
+    <label>Butiksnavn</label><input type="text" id="setNavn" value="${SETTINGS.butiksnavn||''}">
+    <label>By</label><input type="text" id="setBy" value="${SETTINGS.by||''}">
+    <label>Postnummer</label><input type="text" id="setPostnr" inputmode="numeric" value="${SETTINGS.postnr||''}">
+    <label>Land</label><input type="text" id="setLand" value="${SETTINGS.land||'Danmark'}">
+    <div class="small-muted" style="margin-top:6px;">${SETTINGS.lat!=null?'✅ Placering fundet.':'Indtast by og land for automatisk vejr.'}</div>
+    <h3 style="margin-top:14px;">Turistsæson</h3>
+    <div class="tag-grid">
+      ${['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'].map((m,i)=>{const num=i+1;const active=(SETTINGS.turistMonths||[6,7,8]).includes(num);return`<button class="tag-chip ${active?'active':''}" data-turistmonth="${num}">${active?'✓ ':''}${m}</button>`;}).join('')}
+    </div>
+  </div>`;
+  html+=`<div class="card"><h2>Målepunkter</h2>
+    <div class="small-muted" style="margin-bottom:10px;">AI vurderer automatisk hvilke målepunkter der giver mest præcision (se AI Performance).</div>`;
+  const mps=getMalepunkter(false);
+  mps.forEach((mp,i)=>{
+    const isBuiltin=mp.id==='modtaget'||mp.id==='kl13'||mp.id==='luk';
+    html+=`<div class="row" style="display:block; padding:10px 0; ${i>0?'border-top:1px solid var(--border);':''}">
+      <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+        <input type="text" data-mpid="${mp.id}" data-mpfield="emoji" value="${mp.emoji}" style="width:42px; text-align:center;">
+        <input type="text" data-mpid="${mp.id}" data-mpfield="label" value="${mp.label}" style="flex:1; font-weight:600;">
+        <input type="time" data-mpid="${mp.id}" data-mpfield="timeStr" value="${mp.timeStr||''}" style="width:90px;">
+        <button class="btn-toggle ${mp.aktiv!==false?'active-toggle':'inactive-toggle'}" data-mptoggle="${mp.id}">${mp.aktiv!==false?'Aktiv':'Inaktiv'}</button>
+        ${!isBuiltin?`<button class="btn-toggle inactive-toggle" data-mpdel="${mp.id}" style="color:var(--red);">Slet</button>`:`<span class="small-muted" style="font-size:11px;">Standard</span>`}
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="small-muted">Primært:</span>
+        <input type="radio" name="primaert" value="${mp.id}" ${SETTINGS.primaertMalepunkt===mp.id?'checked':''} id="pmp_${mp.id}">
+        <label for="pmp_${mp.id}" class="small-muted">Vælg som primært (servicegrad + forecast)</label>
+      </div>
+    </div>`;
+  });
+  html+=`<button class="btn-secondary" id="addMalepunkt" style="margin-top:10px;">+ Tilføj målepunkt</button></div>`;
+  app.innerHTML=html;wireAdminBackRow();
+  ['setNavn','setBy','setPostnr','setLand'].forEach(id=>{
+    const inp=$('#'+id);inp.addEventListener('change',async()=>{
+      const map={setNavn:'butiksnavn',setBy:'by',setPostnr:'postnr',setLand:'land'};
+      const field=map[id];const newVal=inp.value.trim();
+      if(['by','land','postnr'].includes(field)&&SETTINGS[field]!==newVal){SETTINGS.lat=null;SETTINGS.lon=null;}
+      SETTINGS[field]=newVal;await saveSettingsAuto();
+      if(['by','land','postnr'].includes(field)){await geocodeStore();renderAdminMalepunkter();}
+    });
+  });
+  app.querySelectorAll('[data-turistmonth]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const num=parseInt(btn.dataset.turistmonth,10);if(!Array.isArray(SETTINGS.turistMonths))SETTINGS.turistMonths=[6,7,8];
+      const idx=SETTINGS.turistMonths.indexOf(num);if(idx>=0)SETTINGS.turistMonths.splice(idx,1);else SETTINGS.turistMonths.push(num);
+      await saveSettingsAuto();renderAdminMalepunkter();
+    });
+  });
+  app.querySelectorAll('[data-mpfield]').forEach(inp=>{inp.addEventListener('change',async()=>{const mp=SETTINGS.malepunkter.find(m=>m.id===inp.dataset.mpid);if(mp){mp[inp.dataset.mpfield]=inp.value;await saveSettingsAuto();}});});
+  app.querySelectorAll('[data-mptoggle]').forEach(btn=>{btn.addEventListener('click',async()=>{const mp=SETTINGS.malepunkter.find(m=>m.id===btn.dataset.mptoggle);if(mp){mp.aktiv=!mp.aktiv;await saveSettingsAuto();renderAdminMalepunkter();}});});
+  app.querySelectorAll('[data-mpdel]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const id=btn.dataset.mpdel;if(['modtaget','kl13','luk'].includes(id)){alert('Standardmålepunkterne kan ikke slettes.');return;}
+      if(!confirm(`Slet "${id}"?`))return;SETTINGS.malepunkter=SETTINGS.malepunkter.filter(m=>m.id!==id);
+      if(SETTINGS.primaertMalepunkt===id)SETTINGS.primaertMalepunkt='kl13';await saveSettingsAuto();renderAdminMalepunkter();
+    });
+  });
+  app.querySelectorAll('input[name=primaert]').forEach(radio=>{radio.addEventListener('change',async()=>{SETTINGS.primaertMalepunkt=radio.value;await saveSettingsAuto();renderAdminMalepunkter();});});
+  $('#addMalepunkt').addEventListener('click',async()=>{
+    SETTINGS.malepunkter.push({id:'mp_'+Date.now(),label:'Nyt punkt',emoji:'⏱️',timeStr:'12:00',aktiv:true,isModtaget:false,isLuk:false});
+    await saveSettingsAuto();renderAdminMalepunkter();
+  });
+}
+
+function renderAdminSettings(){
+  const lastBackup=storageGet('lastbackup')||'Aldrig';
+  const pending=OfflineQueue.pendingCount();
+  let html=adminBackRow();
+  // Sync-status
+  html+=`<div class="card"><h3>☁️ Synkronisering</h3>
+    <table>
+      <tr><td>Sync-tilstand</td><td>${_syncEnabled?'✅ Cloud aktiv':'🏠 Demo-tilstand (lokal)'}</td></tr>
+      <tr><td>Enhed ID</td><td style="font-size:12px;">${_deviceId||'–'}</td></tr>
+      <tr><td>Online</td><td>${navigator.onLine?'✅ Ja':'⚠️ Offline'}</td></tr>
+      <tr><td>Offline-kø</td><td>${pending>0?'⚠️ '+pending+' afventer':'✅ Synkroniseret'}</td></tr>
+      <tr><td>Sidst synk.</td><td style="font-size:12px;">${_lastSyncAt?new Date(_lastSyncAt).toLocaleString('da-DK'):'Aldrig'}</td></tr>
+    </table>
+    ${pending>0?'<button class="btn-secondary" id="settingsForceSync" style="margin-top:8px;">🔄 Synkronisér nu</button>':''}
+  </div>`;
+  html+=`<div class="card"><h3>Skift PIN</h3>
+    <label>Nuværende PIN</label><input type="password" id="pinCurrent" inputmode="numeric" placeholder="••••">
+    <label>Ny PIN</label><input type="password" id="pinNew" inputmode="numeric" placeholder="••••">
+    <label>Gentag ny PIN</label><input type="password" id="pinConfirm" inputmode="numeric" placeholder="••••">
+    <button class="btn-secondary" id="adminChangePin" style="margin-top:10px;">Gem</button>
+    <div id="pinResult" class="small-muted" style="margin-top:6px;"></div>
+  </div>`;
+  html+=`<div class="card"><h3>Backup</h3>
+    <table><tr><td>Sidste backup</td><td>${lastBackup}</td></tr></table>
+    <button class="btn-secondary" id="adminExport" style="margin-top:8px;">⬇️ Eksporter backup</button>
+  </div>`;
+  html+=`<div class="card"><h3>Import</h3>
+    <div class="small-muted" style="margin-bottom:8px;">Inkluderer AI-læringsdata.</div>
+    <input type="file" id="adminImportFile" accept="application/json">
+  </div>`;
+  html+=`<div class="card"><h3>Slet historik</h3>
+    <div class="small-muted" style="margin-bottom:8px;">Sletter alle registreringer. Varer og AI-læringsdata bevares.</div>
+    <button class="btn-secondary" id="adminDeleteHistory" style="color:var(--red);">🗑️ Slet historik</button>
+  </div>`;
+  html+=`<div class="card"><h3>Slet AI-læringsdata</h3>
+    <div class="small-muted" style="margin-bottom:8px;">Nulstiller AI'ens hukommelse. Registreringer bevares.</div>
+    <button class="btn-secondary" id="adminDeleteAI" style="color:var(--red);">🧠 Slet AI-læringsdata</button>
+  </div>`;
+  html+=`<div class="card"><h3>Nulstil demo</h3>
+    <div class="small-muted" style="margin-bottom:8px;">Sletter ALT inkl. AI-læringsdata og genstarter med demo-varer.</div>
+    <button class="btn-secondary" id="adminResetDemo" style="color:var(--red);">⚠️ Nulstil demo</button>
+  </div>`;
+  app.innerHTML=html;wireAdminBackRow();
+  $('#adminChangePin').addEventListener('click',async()=>{
+    const cur=$('#pinCurrent').value.trim(),nw=$('#pinNew').value.trim(),conf=$('#pinConfirm').value.trim(),result=$('#pinResult');
+    if(!cur||!nw||!conf){result.textContent='❌ Udfyld alle felter.';return;}
+    if(cur!==getAdminPin()){result.textContent='❌ Nuværende PIN er forkert.';return;}
+    if(!/^\d{4,8}$/.test(nw)){result.textContent='❌ Ny PIN skal være 4-8 cifre.';return;}
+    if(nw!==conf){result.textContent='❌ Ny PIN og gentagelse stemmer ikke overens.';return;}
+    storageSet('adminpin',nw);result.textContent='✅ PIN ændret.';$('#pinCurrent').value='';$('#pinNew').value='';$('#pinConfirm').value='';
+  });
+  $('#adminExport').addEventListener('click',async()=>{
+    try{
+      const backup={version:'FreshScan AI v2.0',exportedAt:new Date().toISOString(),VARER,REGS,SETTINGS,EVENTS,AI_MEMORY:AI_MemoryEngine.getMemory()};
+      const json=safeStringify(backup);const blob=new Blob([json],{type:'application/json'});
+      const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`freshscan-ai-backup-${todayISO()}.json`;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+      storageSet('lastbackup',new Date().toLocaleString('da-DK'));renderAdminSettings();
+    }catch(e){alert('Backup fejlede: '+errMsg(e));}
+  });
+  $('#adminImportFile').addEventListener('change',async(e)=>{
+    const file=e.target.files[0];if(!file)return;
+    try{
+      const text=await file.text();const data=JSON.parse(text);
+      if(!confirm('Import overskriver al nuværende data med backuppen. Fortsæt?'))return;
+      if(data.VARER)VARER=data.VARER;if(data.REGS)REGS=data.REGS;
+      if(data.SETTINGS){const{kundeNavn,logo,accentColor,...rest}=data.SETTINGS;SETTINGS=Object.assign({...SETTINGS},rest);}
+      if(data.EVENTS)EVENTS=data.EVENTS;
+      if(data.AI_MEMORY){storageSet('ai_memory',JSON.stringify(data.AI_MEMORY));AI_MemoryEngine.load();}
+      await saveVarerAuto();await saveRegsAuto();await saveSettingsAuto();await saveEventsAuto();
+      alert('✅ Backup importeret (inkl. AI-læringsdata).');renderAdminSettings();
+    }catch(e){alert('Import fejlede: '+errMsg(e));}
+  });
+  $('#adminDeleteHistory').addEventListener('click',async()=>{
+    if(!confirm('Slet AL registreringshistorik? AI-læringsdata bevares.'))return;
+    REGS={};await saveRegsAuto();alert('Historik slettet.');renderAdminSettings();
+  });
+  const sfBtn=$('#settingsForceSync');
+  if(sfBtn) sfBtn.addEventListener('click',async()=>{ sfBtn.textContent='Synkroniserer...'; await OfflineQueue.flush(); renderAdminSettings(); });
+  $('#adminDeleteAI').addEventListener('click',async()=>{
+    if(!confirm('Nulstil AI-læringsdata? Dette sletter præcisionsmålinger og bias-korrektioner. Registreringer bevares.'))return;
+    AI_MemoryEngine.clear();alert('AI-læringsdata nulstillet.');renderAdminSettings();
+  });
+  $('#adminResetDemo').addEventListener('click',async()=>{
+    if(!confirm('Sletter ALT inkl. AI-læringsdata. Fortsæt?'))return;
+    if(!confirm('Sidste bekræftelse – kan ikke fortrydes.'))return;
+    const keepBrand={kundeNavn:SETTINGS.kundeNavn,logo:SETTINGS.logo,accentColor:SETTINGS.accentColor};
+    VARER=[];REGS={};EVENTS=[];AI_MemoryEngine.clear();
+    SETTINGS={...DEFAULT_SETTINGS,...keepBrand,malepunkter:DEFAULT_MALEPUNKTER.map(m=>({...m}))};
+    await saveVarerAuto();await saveRegsAuto();await saveSettingsAuto();await saveEventsAuto();
+    await loadAll();alert('Nulstillet.');currentTab='admin';render();
+  });
+}
+
+function renderAdminHjaelp(){
+  app.innerHTML=adminBackRow()+`
+  <div class="card">
+    <h2>📖 Sådan bruges FreshScan AI</h2>
+    <h3 style="margin:14px 0 6px;">Medarbejdere</h3>
+    <div class="small-muted">➕ Ny registrering → vare → billede (valgfrit) → antal → Gem. AI viser et forventet antal som hint. Registrér morgen, kl. 13 og luk.</div>
+    <h3 style="margin:14px 0 6px;">AI Performance (admin)</h3>
+    <div class="small-muted">Viser forecast-præcision, læringspunkter, vigtigste faktorer og systematiske fejl. Præcision stiger løbende. Mål efter 2-4 uger: dokumenteret forbedring.</div>
+    <h3 style="margin:14px 0 6px;">Forecast (admin)</h3>
+    <div class="small-muted">Smart Forecast + AI læringskorrektur + konfidensscore pr. vare. Tryk "Forklar AI" for fuld gennemsigtighed.</div>
+    <h3 style="margin:14px 0 6px;">Mønstre & Kalender</h3>
+    <div class="small-muted">AI-fundne mønstre (ugedag, vejr, ferie, ...). Handelskalender med manuel overstyring. Lokale arrangementer.</div>
+    <div style="margin-top:18px; padding:12px; background:var(--ai-light); border-radius:10px; text-align:center; color:var(--ai);">
+      <div style="font-size:16px; font-weight:700; margin-bottom:4px;">🧠 AI's mål</div>
+      <div class="small-muted">Optimér balancen: færrest udsolgte · mindst madspild · bedst servicegrad · bedst omsætning</div>
+    </div>
+  </div>`;
+  wireAdminBackRow();
+}
+
+const BUILD_NUMBER='2026.06.29-v2.0';
+function renderAdminSystem(){
+  const lc=AI_MemoryEngine.getLearningCount();const acc=AI_MemoryEngine.getOverallAccuracy();
+  let html=adminBackRow();
+  html+=`<div class="card"><h2>Om FreshScan AI</h2>
+    <table>
+      <tr><td>Version</td><td>FreshScan AI v2.0</td></tr>
+      <tr><td>Build</td><td>${BUILD_NUMBER}</td></tr>
+      <tr><td>Sync</td><td>${_syncEnabled?'☁️ Cloud aktiv':'🏠 Demo-tilstand (lokal)'}</td></tr>
+      <tr><td>Butik</td><td>${SETTINGS.kundeNavn||SETTINGS.butiksnavn||'–'}</td></tr>
+      <tr><td>Enhed ID</td><td style="font-size:11px;">${_deviceId||'–'}</td></tr>
+      <tr><td>Offline-kø</td><td>${OfflineQueue.pendingCount()>0?'⚠️ '+OfflineQueue.pendingCount()+' afventer':'✅ Synkroniseret'}</td></tr>
+      <tr><td>AI-moduler</td><td>MemoryEngine · LearningEngine · ConfidenceEngine · PatternEngine · AnalyticsEngine</td></tr>
+      <tr><td>Antal varer</td><td>${VARER.length}</td></tr>
+      <tr><td>AI læringspunkter</td><td>${lc}</td></tr>
+      <tr><td>Forecast-præcision</td><td>${acc!=null?acc+'%':'Ikke nok data'}</td></tr>
+    </table>
+    <div class="small-muted" style="margin-top:8px;">Bygget af Nordic Operations. FreshScan AI lærer af butikkens egne data og forbedrer anbefalingerne dag for dag.</div>
+  </div>`;
+  app.innerHTML=html;wireAdminBackRow();
+}
+
+/* =====================================================================
+   DEVELOPER MODE (fra v1.0)
+   ===================================================================== */
+let DEV_LOG=[];
+function devLog(msg){DEV_LOG.unshift(`[${new Date().toLocaleTimeString('da-DK')}] ${msg}`);if(DEV_LOG.length>50)DEV_LOG.length=50;}
+const _origConsoleError=console.error;
+console.error=function(...args){try{devLog('ERROR: '+args.map(a=>typeof a==='string'?a:JSON.stringify(a)).join(' '));}catch(e){}; _origConsoleError.apply(console,args);};
+function openDeveloperMode(){
+  if(!adminUnlocked){const pin=prompt('Udviklertilstand kræver Admin-PIN:');if(!pin)return;if(pin!==getAdminPin()){alert('Forkert PIN.');return;}adminUnlocked=true;}
+  DEV_MODE=true;storageSet('devmode','1');currentTab='dev-mode';render();
+}
+function storageSizeKB(){try{let t=0;for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.indexOf('freshscan_')===0)t+=(k.length+(localStorage.getItem(k)||'').length);}return Math.round(t/1024*10)/10;}catch(e){return null;}}
+function renderDeveloperMode(){
+  const lc=AI_MemoryEngine.getLearningCount();const acc=AI_MemoryEngine.getOverallAccuracy();
+  let html=`<div class="back-row" id="devBackRow"><span class="ico">←</span><span class="lbl">Forlad udviklertilstand</span></div>`;
+  html+=`<div class="admin-badge" style="background:#2a2a2a; color:#0f0;">🛠️ DEVELOPER MODE</div>`;
+  html+=`<div class="card"><h3 style="margin-top:0;">System</h3><table>
+    <tr><td>currentTab</td><td>${currentTab}</td></tr>
+    <tr><td>currentDate</td><td>${currentDate}</td></tr>
+    <tr><td>VARER</td><td>${VARER.length}</td></tr>
+    <tr><td>REGS dage</td><td>${Object.keys(REGS).length}</td></tr>
+    <tr><td>AI læringspunkter</td><td>${lc}</td></tr>
+    <tr><td>AI præcision</td><td>${acc!=null?acc+'%':'–'}</td></tr>
+    <tr><td>localStorage KB</td><td>${storageSizeKB()??'–'}</td></tr>
+    <tr><td>API status</td><td>${WEATHER_DEBUG.apiStatus||'–'}</td></tr>
+  </table></div>`;
+  html+=`<div class="card"><h3 style="margin-top:0;">AI Memory (seneste 5 outcomes)</h3>`;
+  const allOut=AI_MemoryEngine.getAllOutcomes().slice(0,5);
+  if(!allOut.length)html+=`<div class="small-muted">Ingen outcomes endnu.</div>`;
+  else{
+    html+=`<table><tr><th>Dato</th><th>Vare</th><th>Forecast</th><th>Faktisk</th><th>Afvigelse</th></tr>`;
+    allOut.forEach(o=>{const v=VARER.find(x=>x.ean===o.ean);html+=`<tr><td>${o.date}</td><td>${v?v.navn:o.ean}</td><td>${o.forecast}</td><td>${o.actual}</td><td>${o.pctDeviation!=null?o.pctDeviation+'%':'–'}</td></tr>`;});
+    html+=`</table>`;
+  }
+  html+=`</div>`;
+  html+=`<div class="card"><h3 style="margin-top:0;">Vejr debug</h3><table>
+    <tr><td>API status</td><td>${WEATHER_DEBUG.apiStatus||'–'}</td></tr>
+    <tr><td>HTTP</td><td>${WEATHER_DEBUG.httpStatus??'–'}</td></tr>
+    <tr><td>Temp</td><td>${WEATHER_DEBUG.temp??'–'}</td></tr>
+    <tr><td>Fejl</td><td style="font-size:11px;">${WEATHER_DEBUG.errorMessage||'–'}</td></tr>
+    <tr><td>URL</td><td style="font-size:10px; word-break:break-all;">${WEATHER_DEBUG.apiUrl||'–'}</td></tr>
+  </table>
+  <button class="btn-secondary" id="devTestWeatherApi" style="margin-top:8px;">Test vejr-API</button>
+  <div id="devApiResult" class="small-muted" style="margin-top:6px;"></div>
+  </div>`;
+  html+=`<div class="card"><h3 style="margin-top:0;">Log</h3>
+    <button class="btn-secondary" id="devClearLog">Ryd log</button>
+    <div class="small-muted" style="margin-top:8px; white-space:pre-wrap; max-height:200px; overflow-y:auto; font-family:monospace; font-size:11px;">${DEV_LOG.length?DEV_LOG.join('\n'):'Ingen fejl logget.'}</div>
+  </div>`;
+  html+=`<button class="btn-secondary" id="devTurnOff" style="color:var(--red);">Slå udviklertilstand fra</button>`;
+  app.innerHTML=html;
+  $('#devBackRow').addEventListener('click',()=>{currentTab='admin';render();});
+  $('#devTestWeatherApi').addEventListener('click',async()=>{$('#devApiResult').textContent='Tester...';const ok=await fetchAutoWeather(tomorrowISO());$('#devApiResult').textContent='Vejr-API: '+(ok?'OK':'FEJL')+'\nTemp: '+WEATHER_DEBUG.temp+' HTTP: '+WEATHER_DEBUG.httpStatus;});
+  $('#devClearLog').addEventListener('click',()=>{DEV_LOG=[];renderDeveloperMode();});
+  $('#devTurnOff').addEventListener('click',()=>{DEV_MODE=false;storageSet('devmode','0');currentTab='admin';render();});
+}
+
+
+/* =====================================================================
+   AUTH LAYER  (nyt i v2.1)
+   ===================================================================== */
+
+
+/* =====================================================================
+   ADMIN: ENHEDER & SYNC  (v2.0)
+   ===================================================================== */
+async function renderAdminEnheder(){
+  let html=adminBackRow();
+  html+=`<div class="ai-badge">📱 Enheder & Synkronisering</div>`;
+  const pending=OfflineQueue.pendingCount();
+  const queue=OfflineQueue.getQueue();
+  html+=`<div class="card"><h2>☁️ Synkroniseringsstatus</h2>
+    <div class="topcards">
+      <div class="topcard"><div class="num">${_syncEnabled?'☁️':'🏠'}</div><div class="lbl">${_syncEnabled?'Cloud aktiv':'Demo-tilstand'}</div></div>
+      <div class="topcard"><div class="num">⏳ ${pending}</div><div class="lbl">Offline-kø</div></div>
+    </div>
+    <table>
+      <tr><td>Online</td><td>${navigator.onLine?'✅ Ja':'⚠️ Offline'}</td></tr>
+      <tr><td>Enhed</td><td style="font-size:11px;">${_deviceId||'–'}</td></tr>
+      <tr><td>Sidst synk.</td><td>${_lastSyncAt?new Date(_lastSyncAt).toLocaleString('da-DK',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Aldrig'}</td></tr>
+      <tr><td>Butik</td><td>${SETTINGS.kundeNavn||SETTINGS.butiksnavn||'–'}</td></tr>
+    </table>
+    ${pending>0?`<button class="btn-primary" id="enhForceSync" style="margin-top:10px;">🔄 Synkronisér nu (${pending} afventer)</button>`:'<div class="small-muted" style="margin-top:8px;text-align:center;">✅ Alle registreringer er synkroniseret</div>'}
+  </div>`;
+  if(queue.length>0){
+    html+=`<div class="card"><h2>⏳ Afventende operationer</h2>
+      <table><tr><th>Type</th><th>Dato</th><th>Tidspunkt</th></tr>`;
+    queue.slice(0,20).forEach(op=>{
+      const t=op.queued?new Date(op.queued).toLocaleString('da-DK',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'–';
+      html+=`<tr><td>${op.type||'–'}</td><td>${op.date||'–'}</td><td style="font-size:12px;">${t}</td></tr>`;
+    });
+    if(queue.length>20)html+=`<tr><td colspan="3" class="small-muted">...og ${queue.length-20} mere</td></tr>`;
+    html+=`</table></div>`;
+  }
+  const aktive=VARER.filter(v=>v.aktiv);
+  const mps=getMalepunkter(true);
+  const todayRegs=REGS[todayISO()]||{};
+  let daek=0,mulige=aktive.length*mps.length;
+  aktive.forEach(v=>{const r=todayRegs[v.ean];mps.forEach(mp=>{const key=mpFieldKey(mp);if(r&&r[key]!=null)daek++;});});
+  const daekPct=mulige>0?Math.round((daek/mulige)*100):0;
+  html+=`<div class="card"><h2>📊 Datakvalitet i dag</h2>
+    <div class="topcards">
+      <div class="topcard"><div class="num">${daekPct}%</div><div class="lbl">Dækning</div></div>
+      <div class="topcard"><div class="num">${daek}/${mulige}</div><div class="lbl">Målepunkter udfyldt</div></div>
+    </div>
+    <table><tr><th>Vare</th>${mps.map(mp=>`<th>${mp.emoji} ${mp.label}</th>`).join('')}</tr>`;
+  aktive.forEach(v=>{
+    const r=todayRegs[v.ean];
+    html+=`<tr><td>${v.navn}</td>${mps.map(mp=>{const key=mpFieldKey(mp);const val=r?r[key]:null;return`<td>${val!=null?'✅':'–'}</td>`;}).join('')}</tr>`;
+  });
+  html+=`</table></div>`;
+  html+=`<div class="card"><h2>📱 Aktive enheder</h2>
+    <div class="small-muted" id="enhLoading">Henter...</div><div id="enhList"></div>
+  </div>`;
+  app.innerHTML=html; wireAdminBackRow();
+  const fsBtn=$('#enhForceSync');
+  if(fsBtn)fsBtn.addEventListener('click',async()=>{fsBtn.textContent='Synkroniserer...';fsBtn.disabled=true;await OfflineQueue.flush();renderAdminEnheder();});
+  (async()=>{
+    const loadEl=$('#enhLoading'),listEl=$('#enhList');if(!loadEl||!listEl)return;
+    const devices=await DeviceSync.getDeviceActivity();
+    if(!devices||!devices.length){loadEl.textContent=_syncEnabled?'Ingen enhedsdata tilgængelig':'Cloud-sync ikke konfigureret.';return;}
+    loadEl.style.display='none';
+    let devHtml=`<table><tr><th>Enhed</th><th>Sidst aktiv</th><th>Reg.</th></tr>`;
+    devices.forEach(d=>{
+      const t=d.last_seen?new Date(d.last_seen).toLocaleString('da-DK',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'–';
+      const isThis=d.device_id===_deviceId;
+      devHtml+=`<tr ${isThis?'style="font-weight:700;"':''}><td style="font-size:11px;">${d.device_id?d.device_id.slice(0,12)+'…':'–'}${isThis?' ◀':''}</td><td style="font-size:12px;">${t}</td><td>${d.reg_count||0}</td></tr>`;
+    });
+    devHtml+=`</table>`;listEl.innerHTML=devHtml;
+  })();
+}
+
+/* =====================================================================
+   ADMIN: TEST SCANNER  (nyt)
+   ===================================================================== */
+function renderAdminScanner(){
+  let html=adminBackRow();
+  html+='<div class="ai-badge">📷 Test scanner</div>';
+
+  let status={lastScanned:null,lastScannedAt:null,lastError:null,cameraFound:false,scannerReady:false,supportLevel:'none'};
+  try{ status=FreshScanScanner.getStatus(); }catch(e){}
+
+  const supportLabel={native:'✅ Indbygget scanner (BarcodeDetector)',fallback:'✅ Fallback-scanner (ZXing)',none:'❌ Ikke understøttet på denne enhed'}[status.supportLevel]||'Ukendt';
+
+  html+='<div class="card"><h2>Status</h2><table>'
+    +'<tr><td>Understøttelse</td><td>'+supportLabel+'</td></tr>'
+    +'<tr><td>Kamera fundet</td><td>'+(status.cameraFound?'✅ Ja':'– Endnu ikke testet')+'</td></tr>'
+    +'<tr><td>Scanner klar</td><td>'+(status.scannerReady?'✅ Klar':'– Endnu ikke testet')+'</td></tr>'
+    +'<tr><td>Sidste scannede EAN</td><td>'+(status.lastScanned||'–')+'</td></tr>'
+    +'<tr><td>Tidspunkt</td><td style="font-size:12px;">'+(status.lastScannedAt?new Date(status.lastScannedAt).toLocaleString('da-DK'):'–')+'</td></tr>'
+    +'<tr><td>Sidste fejl</td><td style="font-size:12px;color:var(--red);">'+(status.lastError||'Ingen')+'</td></tr>'
+    +'</table>'
+    +'<button class="btn-primary" id="__testScanBtn" style="margin-top:12px;">📷 Start testscanning</button>'
+    +'<div id="__testScanResult" class="small-muted" style="margin-top:8px;min-height:18px;"></div>'
+    +'</div>';
+
+  html+='<div class="card"><h3 style="margin-top:0;">Sådan fungerer det</h3>'
+    +'<div class="small-muted">Tryk på knappen og hold en stregkode op mod kameraet. Resultatet vises straks herover. Hvis enheden ikke understøtter scanning, vises det tydeligt — medarbejderne bruger altid manuel indtastning som backup, ingen funktion kræver scanning.</div>'
+    +'</div>';
+
+  app.innerHTML=html;
+  wireAdminBackRow();
+
+  var testBtn=document.getElementById('__testScanBtn');
+  if(testBtn){
+    testBtn.addEventListener('click',function(){
+      var resultEl=document.getElementById('__testScanResult');
+      if(__scanSupportLevel()==='none'){
+        resultEl.textContent='❌ Scanning understøttes ikke på denne enhed.';
+        resultEl.style.color='var(--red)';
+        return;
+      }
+      resultEl.textContent='📷 Kamera åbner...';
+      resultEl.style.color='var(--muted)';
+      FreshScanScanner.start(function(ean){
+        resultEl.style.color='var(--green-d)';
+        resultEl.textContent='✅ Scannet: '+ean;
+        renderAdminScanner();
+      });
+    });
+  }
+}
+
+const FreshScanScanner=(function(){
+  let stream=null,detectInterval=null,zxingReader=null,active=false;
+  let _lastScanned=null,_lastScannedAt=null,_lastError=null,_cameraFound=false,_scannerReady=false;
+  function getEls(){return{modal:document.getElementById('scanModal'),video:document.getElementById('scanVideo'),status:document.getElementById('scanStatus')};}
+  function stop(){
+    active=false;_scannerReady=false;
+    if(detectInterval){clearInterval(detectInterval);detectInterval=null;}
+    if(zxingReader){try{zxingReader.reset();}catch(e){}zxingReader=null;}
+    if(stream){try{stream.getTracks().forEach(t=>t.stop());}catch(e){}stream=null;}
+    const{modal,video}=getEls();
+    if(video){try{video.pause();}catch(e){}video.srcObject=null;}
+    if(modal)modal.style.display='none';
+  }
+  function supportLevel(){const hasCamera=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia);if(!hasCamera)return'none';if('BarcodeDetector' in window)return'native';return'fallback';}
+  function getStatus(){return{lastScanned:_lastScanned,lastScannedAt:_lastScannedAt,lastError:_lastError,cameraFound:_cameraFound,scannerReady:_scannerReady,supportLevel:supportLevel()};}
+  async function start(onDetected){
+    if(active)stop();active=true;_lastError=null;_cameraFound=false;_scannerReady=false;
+    const{modal,video,status}=getEls();
+    if(!modal||!video||!status){alert('Scanneren kunne ikke åbnes.');active=false;_lastError='DOM-elementer mangler';return;}
+    modal.style.display='flex';status.textContent='📷 Åbner kamera...';
+    const support=supportLevel();
+    if(support==='none'){status.textContent='❌ Scanner understøttes ikke på denne enhed. Indtast EAN manuelt.';_lastError='Ingen kamera/getUserMedia';active=false;return;}
+
+    if(support==='native'){
+      try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}});}
+      catch(e){status.textContent='❌ Kamera ikke tilgængeligt: '+errMsg(e)+'. Indtast EAN manuelt.';_lastError=errMsg(e);active=false;return;}
+      if(!active)return;
+      _cameraFound=true;
+      video.srcObject=stream;try{await video.play();}catch(e){}
+      status.textContent='✅ Kamera fundet · Scanner klar – hold stregkoden i rammen';
+      _scannerReady=true;
+      const detector=new window.BarcodeDetector({formats:['ean_13','ean_8','code_128','upc_a','upc_e']});
+      detectInterval=setInterval(async()=>{
+        if(!active)return;
+        try{
+          const codes=await detector.detect(video);
+          if(codes&&codes.length){
+            const raw=codes[0].rawValue;
+            _lastScanned=raw;_lastScannedAt=new Date().toISOString();
+            stop();onDetected(raw);
+          }
+        }catch(e){_lastError=errMsg(e);}
+      },250);
+      return;
+    }
+
+    // Fallback-scanner (ZXing): lad ZXing styre kameraet ALENE fra start til slut.
+    // Vi må IKKE selv åbne getUserMedia her også — to samtidige kamera-streams til
+    // samme fysiske kamera er ustabilt på mobil/tablet og fik tidligere kameraet
+    // til at fryse/lukke uden varsel. ZXing overtager derfor hele kamera-livscyklussen,
+    // og "kamera fundet"-status afledes af dens egne frames i stedet.
+    status.textContent='📥 Indlæser scanner...';
+    try{await new Promise((res,rej)=>{if(window.ZXing){res();return;}const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.21.3/umd/index.min.js';s.onload=res;s.onerror=()=>rej(new Error('Kunne ikke indlæse scanner-bibliotek'));document.head.appendChild(s);});}
+    catch(e){status.textContent='❌ '+errMsg(e)+'. Indtast EAN manuelt.';_lastError=errMsg(e);stop();return;}
+    if(!active)return;
+    status.textContent='📷 Åbner kamera...';
+    try{
+      zxingReader=new window.ZXing.BrowserMultiFormatReader();
+      const decodePromise=zxingReader.decodeFromVideoDevice(null,'scanVideo',(result,err)=>{
+        if(!active)return;
+        if(result){
+          const text=result.getText();
+          _lastScanned=text;_lastScannedAt=new Date().toISOString();
+          stop();onDetected(text);
+          return;
+        }
+        // ZXing kalder callbacken løbende med en "ikke fundet endnu"-fejl for hvert billede —
+        // det er normal drift og skal IKKE stoppe scanneren.
+        if(!_cameraFound && video.readyState>=2){
+          _cameraFound=true;_scannerReady=true;
+          status.textContent='✅ Kamera fundet · Scanner klar – hold stregkoden i rammen';
+        }
+      });
+      if(decodePromise&&typeof decodePromise.catch==='function'){
+        decodePromise.catch(e=>{
+          if(!active)return;
+          status.textContent='❌ Kamera ikke tilgængeligt: '+errMsg(e)+'. Indtast EAN manuelt.';_lastError=errMsg(e);stop();
+        });
+      }
+    }catch(e){status.textContent='❌ Kamera ikke tilgængeligt: '+errMsg(e)+'. Indtast EAN manuelt.';_lastError=errMsg(e);stop();}
+  }
+  return{start,stop,supportLevel,getStatus};
+})();
+window.startBarcodeScanner=function(callback){FreshScanScanner.start(function(ean){if(callback)callback(ean);});};
+
+/* =====================================================================
+   STREGKODESCANNING TIL REGISTRERING  (nyt)
+   ---------------------------------------------------------------------
+   Hurtig vej: Forside -> Scan stregkode -> kamera aabner -> EAN laeses.
+   - Kendt EAN: vare vaelges automatisk, hop direkte til antal-registrering.
+   - Ukendt EAN: "Ny vare fundet"-modal, brugeren skriver kun varenavn.
+   - Manuel indtastning er altid muligt og er ikke et krav.
+   ===================================================================== */
+function __scanSupportLevel(){
+  try{ return FreshScanScanner.supportLevel(); }catch(e){ return 'none'; }
+}
+
+function __startQuickScan(){
+  if(__scanSupportLevel()==='none'){
+    newRegState=null; currentTab='newreg'; render();
+    return;
+  }
+  FreshScanScanner.start(function(ean){
+    __handleScannedEAN(ean);
+  });
+}
+
+function __handleScannedEAN(ean){
+  ean=(ean||'').trim();
+  if(!ean){ return; }
+  var v=VARER.find(function(x){return x.ean===ean;});
+  if(v){
+    if(!v.aktiv){
+      alert('Varen "'+v.navn+'" findes, men er markeret som inaktiv. Aktivér den under Admin -> Varer for at registrere.');
+      currentTab='home'; render();
+      return;
+    }
+    var mp=activeRegMP();
+    newRegState={mp:mp,queue:[ean],idx:0,photo:null,kommentar:''};
+    currentTab='newreg';
+    render();
+  } else {
+    __showNewVareFromScan(ean);
+  }
+}
+
+function __showNewVareFromScan(ean){
+  var overlay=document.createElement('div');
+  overlay.className='sheet-overlay';
+  overlay.style.display='block';
+  overlay.id='__newVareScanOverlay';
+  overlay.innerHTML=
+    '<div class="sheet">'
+    +'<div class="sheet-handle"></div>'
+    +'<div style="text-align:center;margin-bottom:14px;">'
+    +'<div style="font-size:36px;margin-bottom:6px;">📷✨</div>'
+    +'<h2 style="margin:0;">Ny vare fundet</h2>'
+    +'<div class="small-muted" style="margin-top:4px;">EAN '+ean+' findes ikke i varekartoteket endnu.</div>'
+    +'</div>'
+    +'<label>EAN-nummer</label>'
+    +'<input type="text" id="__scanNewEan" value="'+ean+'" readonly style="background:#eef2ef;">'
+    +'<label>Varenavn</label>'
+    +'<input type="text" id="__scanNewNavn" placeholder="f.eks. Solsikkerugbrød" autofocus>'
+    +'<div id="__scanNewErr" class="small-muted" style="color:var(--red);min-height:18px;margin-bottom:6px;"></div>'
+    +'<button class="btn-primary" id="__scanNewSave">Gem som ny vare</button>'
+    +'<button class="btn-secondary" id="__scanNewCancel">Annuller</button>'
+    +'</div>';
+  document.body.appendChild(overlay);
+
+  function closeOverlay(){
+    var el=document.getElementById('__newVareScanOverlay');
+    if(el) el.remove();
+  }
+
+  overlay.addEventListener('click',function(e){ if(e.target===overlay) closeOverlay(); });
+  document.getElementById('__scanNewCancel').addEventListener('click',function(){ closeOverlay(); });
+  document.getElementById('__scanNewSave').addEventListener('click',async function(){
+    var navn=document.getElementById('__scanNewNavn').value.trim();
+    var errEl=document.getElementById('__scanNewErr');
+    errEl.textContent='';
+    if(!navn){ errEl.textContent='Indtast varenavn.'; return; }
+    if(VARER.some(function(x){return x.ean===ean;})){ errEl.textContent='Varen findes allerede.'; return; }
+    VARER.push({ean:ean,navn:navn,leverandor:'Ukendt',aktiv:true,omraade:''});
+    await saveVarerAuto();
+    closeOverlay();
+    var mp=activeRegMP();
+    newRegState={mp:mp,queue:[ean],idx:0,photo:null,kommentar:''};
+    currentTab='newreg';
+    render();
+  });
+}
+
+
+/* =====================================================================
+   INIT
+   ===================================================================== */
+
+(async()=>{
+  try{ await initApp(); }catch(e){
+    console.error('[FreshScan] initApp() crashed:', errMsg(e));
+    try{
+      if(!Array.isArray(VARER)||!VARER.length)VARER=[{ean:"5701234500011",navn:"Solsikkerugbrød",leverandor:"Kohberg",aktiv:true},{ean:"5701234500028",navn:"Kernerugbrød",leverandor:"Schulstad",aktiv:true},{ean:"5701234500035",navn:"Fuldkorn",leverandor:"Kohberg",aktiv:true}];
+      if(!REGS||typeof REGS!=='object')REGS={};
+      if(!SETTINGS||typeof SETTINGS!=='object')SETTINGS={...DEFAULT_SETTINGS,malepunkter:DEFAULT_MALEPUNKTER.map(m=>({...m}))};
+      if(!Array.isArray(EVENTS))EVENTS=[];
+      try{AI_MemoryEngine.load();}catch(ae){}
+      currentTab='home';render();
+      // Demo-tilstand: ingen synlig tekst på forsiden
+    }catch(e2){const appEl=document.getElementById('app');if(appEl)appEl.innerHTML='<div class="card empty" style="margin:20px;">FreshScan AI kunne ikke indlæses. Genindlæs siden.</div>';}
+  }
+  setTimeout(()=>{
+    try{ensureWeatherAuto(todayISO(),()=>currentTab==='home');}catch(e){}
+    try{ensureWeatherAuto(tomorrowISO(),()=>currentTab==='home');}catch(e){}
+  },2000);
+})();
+
+</script>
+</body>
+</html>
